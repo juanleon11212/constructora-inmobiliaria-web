@@ -1,0 +1,348 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+datasource db {
+  provider = "sqlserver"
+}
+
+model almacen {
+  id_almacen      Int               @id(map: "PK__almacen__098D5D13FA0049C8") @default(autoincrement())
+  nombre_almacen  String            @db.VarChar(100)
+  ubicacion       String?           @db.VarChar(200)
+  descripcion     String?           @db.VarChar(150)
+  compra_material compra_material[]
+  inventario      inventario[]
+}
+
+model asignacion_obra {
+  id_asignacion        Int       @id(map: "PK__asignaci__C3F7F96636332C29") @default(autoincrement())
+  fecha_asignacion     DateTime  @db.Date
+  fecha_fin_asignacion DateTime? @db.Date
+  funcion_en_obra      String?   @db.VarChar(80)
+  id_empleado          Int
+  id_proyecto          Int
+  empleado             empleado  @relation(fields: [id_empleado], references: [id_empleado], onUpdate: NoAction, map: "fk_asignacion_empleado")
+  proyecto             proyecto  @relation(fields: [id_proyecto], references: [id_proyecto], onUpdate: NoAction, map: "fk_asignacion_proyecto")
+
+  @@index([id_proyecto], map: "idx_asignacion_proyecto")
+}
+
+model cargo {
+  id_cargo     Int        @id(map: "PK__cargo__D3C09EC5402EF061") @default(autoincrement())
+  nombre_cargo String     @unique(map: "UQ__cargo__322347A0EB193BD7") @db.VarChar(60)
+  descripcion  String?    @db.VarChar(150)
+  empleado     empleado[]
+}
+
+model categoria_material {
+  id_categoria_material Int        @id(map: "PK__categori__6401D8365C384882") @default(autoincrement())
+  nombre_categoria      String     @unique(map: "UQ__categori__4EBF6259F0C5B623") @db.VarChar(60)
+  descripcion           String?    @db.VarChar(150)
+  material              material[]
+}
+
+model cliente {
+  id_cliente         Int                  @id(map: "PK__cliente__677F38F54EEEB274") @default(autoincrement())
+  nombres            String?              @db.VarChar(80)
+  apellidos          String?              @db.VarChar(80)
+  razon_social       String?              @db.VarChar(120)
+  ci_nit             String               @unique(map: "UQ__cliente__7B397B6012FDD876") @db.VarChar(30)
+  telefono           String?              @db.VarChar(20)
+  correo             String?              @db.VarChar(100)
+  direccion          String?              @db.VarChar(200)
+  contrato           contrato[]
+  cotizacion_cliente cotizacion_cliente[]
+  pago               pago[]
+  proyecto           proyecto[]
+}
+
+model compra_material {
+  id_compra               Int                       @id(map: "PK__compra_m__C4BAA60466D39EDF") @default(autoincrement())
+  numero_factura          String                    @unique(map: "UQ__compra_m__3DC4B2417605F8D2") @db.VarChar(30)
+  fecha_compra            DateTime                  @db.Date
+  total_compra            Decimal                   @default(0, map: "DF__compra_ma__total__31B762FC") @db.Decimal(12, 2)
+  estado_pago             String                    @default("pendiente", map: "DF__compra_ma__estad__32AB8735") @db.VarChar(30)
+  observacion             String?                   @db.VarChar(200)
+  id_proveedor            Int
+  id_proyecto             Int
+  id_almacen              Int
+  id_usuario_registro     Int?
+  almacen                 almacen                   @relation(fields: [id_almacen], references: [id_almacen], onUpdate: NoAction, map: "fk_compra_almacen")
+  proveedor               proveedor                 @relation(fields: [id_proveedor], references: [id_proveedor], onUpdate: NoAction, map: "fk_compra_proveedor")
+  proyecto                proyecto                  @relation(fields: [id_proyecto], references: [id_proyecto], onUpdate: NoAction, map: "fk_compra_proyecto")
+  usuario                 usuario?                  @relation(fields: [id_usuario_registro], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_compra_usuario")
+  detalle_compra_material detalle_compra_material[]
+
+  @@index([fecha_compra, id_proyecto], map: "idx_compra_fecha_proyecto")
+}
+
+model consumo_material_obra {
+  id_consumo     Int      @id(map: "PK__consumo___91751BB34C954632") @default(autoincrement())
+  cantidad_usada Decimal  @db.Decimal(10, 2)
+  fecha_consumo  DateTime @db.Date
+  observacion    String?  @db.VarChar(200)
+  id_material    Int
+  id_proyecto    Int
+  material       material @relation(fields: [id_material], references: [id_material], onUpdate: NoAction, map: "fk_consumo_material")
+  proyecto       proyecto @relation(fields: [id_proyecto], references: [id_proyecto], onUpdate: NoAction, map: "fk_consumo_proyecto")
+}
+
+model contrato {
+  id_contrato     Int       @id(map: "PK__contrato__FF5F2A5635AF4A73") @default(autoincrement())
+  numero_contrato String    @unique(map: "UQ__contrato__79CE842A2DE5487B") @db.VarChar(30)
+  fecha_contrato  DateTime  @db.Date
+  fecha_inicio    DateTime  @db.Date
+  fecha_fin       DateTime? @db.Date
+  monto_contrato  Decimal   @db.Decimal(12, 2)
+  descripcion     String?   @db.VarChar(250)
+  estado          String    @default("vigente", map: "DF__contrato__estado__7B5B524B") @db.VarChar(30)
+  id_cliente      Int
+  id_proyecto     Int
+  cliente         cliente   @relation(fields: [id_cliente], references: [id_cliente], onUpdate: NoAction, map: "fk_contrato_cliente")
+  proyecto        proyecto  @relation(fields: [id_proyecto], references: [id_proyecto], onUpdate: NoAction, map: "fk_contrato_proyecto")
+}
+
+model control_diario_trabajo {
+  id_control_diario Int       @id(map: "PK__control___5A34C657CC79BEC2") @default(autoincrement())
+  fecha_trabajo     DateTime  @db.Date
+  hora_entrada      DateTime? @db.Time
+  hora_salida       DateTime? @db.Time
+  horas_normales    Decimal   @default(0, map: "DF__control_d__horas__17036CC0") @db.Decimal(5, 2)
+  horas_extra       Decimal   @default(0, map: "DF__control_d__horas__17F790F9") @db.Decimal(5, 2)
+  pago_por_hora     Decimal   @db.Decimal(10, 2)
+  total_horas       Decimal?  @db.Decimal(6, 2)
+  total_pago_dia    Decimal?  @db.Decimal(20, 5)
+  estado_jornada    String    @default("trabajado", map: "DF__control_d__estad__18EBB532") @db.VarChar(30)
+  observacion       String?   @db.VarChar(200)
+  id_empleado       Int
+  id_proyecto       Int
+  empleado          empleado  @relation(fields: [id_empleado], references: [id_empleado], onUpdate: NoAction, map: "fk_control_empleado")
+  proyecto          proyecto  @relation(fields: [id_proyecto], references: [id_proyecto], onUpdate: NoAction, map: "fk_control_proyecto")
+
+  @@unique([fecha_trabajo, id_empleado, id_proyecto], map: "uq_control_diario")
+  @@index([fecha_trabajo, id_proyecto], map: "idx_control_fecha_proyecto")
+}
+
+model cotizacion_cliente {
+  id_cotizacion              Int                          @id(map: "PK__cotizaci__9713D17414A2A456") @default(autoincrement())
+  numero_cotizacion          String                       @unique(map: "UQ__cotizaci__9FB24E0F5BD69E33") @db.VarChar(30)
+  fecha_cotizacion           DateTime                     @db.Date
+  vigencia_hasta             DateTime                     @db.Date
+  estado                     String                       @default("borrador", map: "DF__cotizacio__estad__04E4BC85") @db.VarChar(30)
+  subtotal                   Decimal                      @default(0, map: "DF__cotizacio__subto__06CD04F7") @db.Decimal(12, 2)
+  descuento                  Decimal                      @default(0, map: "DF__cotizacio__descu__07C12930") @db.Decimal(12, 2)
+  total                      Decimal                      @default(0, map: "DF__cotizacio__total__08B54D69") @db.Decimal(12, 2)
+  observacion                String?                      @db.VarChar(250)
+  id_cliente                 Int
+  id_proyecto                Int
+  id_usuario_registro        Int?
+  cliente                    cliente                      @relation(fields: [id_cliente], references: [id_cliente], onUpdate: NoAction, map: "fk_cotizacion_cliente")
+  proyecto                   proyecto                     @relation(fields: [id_proyecto], references: [id_proyecto], onUpdate: NoAction, map: "fk_cotizacion_proyecto")
+  usuario                    usuario?                     @relation(fields: [id_usuario_registro], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_cotizacion_usuario")
+  detalle_cotizacion_cliente detalle_cotizacion_cliente[]
+}
+
+model detalle_compra_material {
+  id_detalle_compra Int             @id(map: "PK__detalle___BD16E2791619551C") @default(autoincrement())
+  cantidad          Decimal         @db.Decimal(10, 2)
+  precio_unitario   Decimal         @db.Decimal(10, 2)
+  subtotal          Decimal         @db.Decimal(12, 2)
+  id_compra         Int
+  id_material       Int
+  compra_material   compra_material @relation(fields: [id_compra], references: [id_compra], onUpdate: NoAction, map: "fk_detalle_compra")
+  material          material        @relation(fields: [id_material], references: [id_material], onUpdate: NoAction, map: "fk_detalle_material")
+
+  @@index([id_material], map: "idx_detalle_compra_material")
+}
+
+model detalle_cotizacion_cliente {
+  id_detalle_cotizacion Int                @id(map: "PK__detalle___F3679436AC8F9C8D") @default(autoincrement())
+  id_cotizacion         Int
+  tipo_item             String             @db.VarChar(30)
+  item                  String             @db.VarChar(120)
+  descripcion           String?            @db.VarChar(250)
+  cantidad              Decimal            @db.Decimal(10, 2)
+  unidad                String             @db.VarChar(20)
+  precio_unitario       Decimal            @db.Decimal(12, 2)
+  subtotal              Decimal            @db.Decimal(12, 2)
+  cotizacion_cliente    cotizacion_cliente @relation(fields: [id_cotizacion], references: [id_cotizacion], onUpdate: NoAction, map: "fk_detalle_cotizacion")
+}
+
+model empleado {
+  id_empleado            Int                      @id(map: "PK__empleado__88B513942AA87E11") @default(autoincrement())
+  nombres                String                   @db.VarChar(80)
+  apellidos              String                   @db.VarChar(80)
+  ci                     String                   @unique(map: "UQ__empleado__321366629CE1036C") @db.VarChar(30)
+  telefono               String?                  @db.VarChar(20)
+  direccion              String?                  @db.VarChar(200)
+  fecha_nacimiento       DateTime?                @db.Date
+  fecha_ingreso          DateTime                 @db.Date
+  estado                 String                   @default("activo", map: "DF__empleado__estado__5441852A") @db.VarChar(30)
+  id_cargo               Int
+  asignacion_obra        asignacion_obra[]
+  control_diario_trabajo control_diario_trabajo[]
+  cargo                  cargo                    @relation(fields: [id_cargo], references: [id_cargo], onUpdate: NoAction, map: "fk_empleado_cargo")
+  historial_pago_hora    historial_pago_hora[]
+  pago                   pago[]
+  usuario                usuario?
+}
+
+model historial_pago_hora {
+  id_historial_pago_hora Int       @id(map: "PK__historia__8E5532CFA84D142F") @default(autoincrement())
+  id_empleado            Int
+  fecha_inicio           DateTime  @db.Date
+  fecha_fin              DateTime? @db.Date
+  pago_por_hora          Decimal   @db.Decimal(10, 2)
+  observacion            String?   @db.VarChar(200)
+  empleado               empleado  @relation(fields: [id_empleado], references: [id_empleado], onUpdate: NoAction, map: "fk_historial_pago_hora_empleado")
+}
+
+model inventario {
+  id_inventario       Int      @id(map: "PK__inventar__013AEB51726809C3") @default(autoincrement())
+  cantidad_disponible Decimal  @default(0, map: "DF__inventari__canti__2B0A656D") @db.Decimal(10, 2)
+  fecha_actualizacion DateTime @default(now(), map: "DF__inventari__fecha__2BFE89A6") @db.DateTime
+  id_material         Int
+  id_almacen          Int
+  almacen             almacen  @relation(fields: [id_almacen], references: [id_almacen], onUpdate: NoAction, map: "fk_inventario_almacen")
+  material            material @relation(fields: [id_material], references: [id_material], onUpdate: NoAction, map: "fk_inventario_material")
+
+  @@unique([id_material, id_almacen], map: "uq_inventario")
+}
+
+model material {
+  id_material             Int                       @id(map: "PK__material__81E99B83268E18E8") @default(autoincrement())
+  nombre_material         String                    @db.VarChar(100)
+  descripcion             String?                   @db.VarChar(200)
+  unidad_medida           String                    @db.VarChar(20)
+  precio_unitario         Decimal                   @db.Decimal(10, 2)
+  stock_minimo            Decimal                   @default(0, map: "DF__material__stock___245D67DE") @db.Decimal(10, 2)
+  id_categoria_material   Int
+  consumo_material_obra   consumo_material_obra[]
+  detalle_compra_material detalle_compra_material[]
+  inventario              inventario[]
+  categoria_material      categoria_material        @relation(fields: [id_categoria_material], references: [id_categoria_material], onUpdate: NoAction, map: "fk_material_categoria")
+}
+
+model modulo {
+  id_modulo     Int          @id(map: "PK__modulo__B2584DFC5CDCAAF0") @default(autoincrement())
+  nombre_modulo String       @unique(map: "UQ__modulo__2B406B73E1A5FC50") @db.VarChar(60)
+  descripcion   String?      @db.VarChar(150)
+  rol_modulo    rol_modulo[]
+}
+
+model pago {
+  id_pago             Int        @id(map: "PK__pago__0941B074A80AE75C") @default(autoincrement())
+  tipo_pago           String     @db.VarChar(30)
+  fecha_pago          DateTime   @db.Date
+  monto               Decimal    @db.Decimal(12, 2)
+  metodo_pago         String     @db.VarChar(30)
+  descripcion         String?    @db.VarChar(200)
+  id_empleado         Int?
+  id_proveedor        Int?
+  id_cliente          Int?
+  id_proyecto         Int?
+  id_usuario_registro Int?
+  cliente             cliente?   @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_pago_cliente")
+  empleado            empleado?  @relation(fields: [id_empleado], references: [id_empleado], onDelete: NoAction, onUpdate: NoAction, map: "fk_pago_empleado")
+  proveedor           proveedor? @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_pago_proveedor")
+  proyecto            proyecto?  @relation(fields: [id_proyecto], references: [id_proyecto], onDelete: NoAction, onUpdate: NoAction, map: "fk_pago_proyecto")
+  usuario             usuario?   @relation(fields: [id_usuario_registro], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_pago_usuario")
+
+  @@index([tipo_pago, fecha_pago], map: "idx_pago_tipo_fecha")
+}
+
+model permiso {
+  id_permiso     Int           @id(map: "PK__permiso__228F224F0BC2A595") @default(autoincrement())
+  nombre_permiso String        @unique(map: "UQ__permiso__4FC6D0AC6B93E857") @db.VarChar(60)
+  descripcion    String?       @db.VarChar(150)
+  rol_permiso    rol_permiso[]
+}
+
+model presupuesto {
+  id_presupuesto    Int      @id(map: "PK__presupue__3E94B4E5BFB34AE7") @default(autoincrement())
+  fecha_presupuesto DateTime @db.Date
+  monto_estimado    Decimal  @db.Decimal(12, 2)
+  observacion       String?  @db.VarChar(250)
+  id_proyecto       Int
+  proyecto          proyecto @relation(fields: [id_proyecto], references: [id_proyecto], onUpdate: NoAction, map: "fk_presupuesto_proyecto")
+}
+
+model proveedor {
+  id_proveedor     Int               @id(map: "PK__proveedo__8D3DFE28D6AFD427") @default(autoincrement())
+  nombre_proveedor String            @db.VarChar(120)
+  nit              String            @unique(map: "UQ__proveedo__DF97D0E4D8D62952") @db.VarChar(30)
+  telefono         String?           @db.VarChar(20)
+  correo           String?           @db.VarChar(100)
+  direccion        String?           @db.VarChar(200)
+  compra_material  compra_material[]
+  pago             pago[]
+}
+
+model proyecto {
+  id_proyecto            Int                      @id(map: "PK__proyecto__F38AD81D481948A4") @default(autoincrement())
+  nombre_proyecto        String                   @db.VarChar(120)
+  descripcion            String?                  @db.VarChar(Max)
+  ubicacion              String                   @db.VarChar(200)
+  fecha_inicio           DateTime                 @db.Date
+  fecha_fin_estimada     DateTime?                @db.Date
+  fecha_fin_real         DateTime?                @db.Date
+  estado                 String                   @default("pendiente", map: "DF__proyecto__estado__74AE54BC") @db.VarChar(30)
+  id_cliente             Int
+  id_usuario_registro    Int?
+  asignacion_obra        asignacion_obra[]
+  compra_material        compra_material[]
+  consumo_material_obra  consumo_material_obra[]
+  contrato               contrato[]
+  control_diario_trabajo control_diario_trabajo[]
+  cotizacion_cliente     cotizacion_cliente[]
+  pago                   pago[]
+  presupuesto            presupuesto[]
+  cliente                cliente                  @relation(fields: [id_cliente], references: [id_cliente], onUpdate: NoAction, map: "fk_proyecto_cliente")
+  usuario                usuario?                 @relation(fields: [id_usuario_registro], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_usuario")
+}
+
+model rol {
+  id_rol      Int           @id(map: "PK__rol__6ABCB5E09F33D4AF") @default(autoincrement())
+  nombre_rol  String        @unique(map: "UQ__rol__673CB435B89AD571") @db.VarChar(50)
+  descripcion String?       @db.VarChar(150)
+  rol_modulo  rol_modulo[]
+  rol_permiso rol_permiso[]
+  usuario     usuario[]
+}
+
+model rol_modulo {
+  id_rol    Int
+  id_modulo Int
+  acceso    String @default("lectura", map: "DF__rol_modul__acces__6C190EBB") @db.VarChar(30)
+  modulo    modulo @relation(fields: [id_modulo], references: [id_modulo], onUpdate: NoAction, map: "fk_rol_modulo_modulo")
+  rol       rol    @relation(fields: [id_rol], references: [id_rol], onUpdate: NoAction, map: "fk_rol_modulo_rol")
+
+  @@id([id_rol, id_modulo], map: "PK__rol_modu__B199313F1EF1EB42")
+}
+
+model rol_permiso {
+  id_rol     Int
+  id_permiso Int
+  permiso    permiso @relation(fields: [id_permiso], references: [id_permiso], onUpdate: NoAction, map: "fk_rol_permiso_permiso")
+  rol        rol     @relation(fields: [id_rol], references: [id_rol], onUpdate: NoAction, map: "fk_rol_permiso_rol")
+
+  @@id([id_rol, id_permiso], map: "PK__rol_perm__889447C45FFAD620")
+}
+
+model usuario {
+  id_usuario         Int                  @id(map: "PK__usuario__4E3E04AD0DD60693") @default(autoincrement())
+  nombre_usuario     String               @unique(map: "UQ__usuario__D4D22D7405C21F84") @db.VarChar(50)
+  correo             String               @unique(map: "UQ__usuario__2A586E0BF87072AA") @db.VarChar(100)
+  contrasena         String               @db.VarChar(255)
+  estado             String               @default("activo", map: "DF__usuario__estado__5BE2A6F2") @db.VarChar(30)
+  fecha_creacion     DateTime             @default(now(), map: "DF__usuario__fecha_c__5DCAEF64") @db.DateTime
+  id_rol             Int
+  id_empleado        Int?                 @unique(map: "UQ__usuario__88B51395CFD505A4")
+  compra_material    compra_material[]
+  cotizacion_cliente cotizacion_cliente[]
+  pago               pago[]
+  proyecto           proyecto[]
+  empleado           empleado?            @relation(fields: [id_empleado], references: [id_empleado], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_empleado")
+  rol                rol                  @relation(fields: [id_rol], references: [id_rol], onUpdate: NoAction, map: "fk_usuario_rol")
+}
