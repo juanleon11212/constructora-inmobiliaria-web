@@ -2,16 +2,22 @@ import crypto from "crypto";
 import { cookies } from "next/headers";
 
 export type AuthSession = {
-  id_usuario: number;
+  tipo_cuenta: "empresa" | "cliente";
+  id_usuario?: number;
+  id_cliente?: number;
   nombre_usuario: string;
-  correo: string;
+  correo?: string | null;
   id_rol: number;
   rol: string;
-  empleado?: string | null;
+  nombre_mostrar: string;
+};
+
+type SessionPayload = AuthSession & {
+  createdAt: number;
 };
 
 const SESSION_COOKIE = "constructora_session";
-const SESSION_MAX_AGE = 60 * 60 * 8;
+const SERVER_STARTED_AT = Date.now();
 
 function getSecret() {
   return process.env.AUTH_SECRET ?? "dev-secret";
@@ -25,7 +31,12 @@ function sign(value: string) {
 }
 
 export function createSessionToken(payload: AuthSession) {
-  const data = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const sessionPayload: SessionPayload = {
+    ...payload,
+    createdAt: Date.now(),
+  };
+
+  const data = Buffer.from(JSON.stringify(sessionPayload)).toString("base64url");
   const signature = sign(data);
 
   return `${data}.${signature}`;
@@ -41,7 +52,26 @@ export function verifySessionToken(token?: string): AuthSession | null {
   if (signature !== expectedSignature) return null;
 
   try {
-    return JSON.parse(Buffer.from(data, "base64url").toString("utf8"));
+    const payload = JSON.parse(
+      Buffer.from(data, "base64url").toString("utf8")
+    ) as SessionPayload;
+
+    if (!payload.createdAt) return null;
+
+    if (payload.createdAt < SERVER_STARTED_AT) {
+      return null;
+    }
+
+    return {
+      tipo_cuenta: payload.tipo_cuenta,
+      id_usuario: payload.id_usuario,
+      id_cliente: payload.id_cliente,
+      nombre_usuario: payload.nombre_usuario,
+      correo: payload.correo,
+      id_rol: payload.id_rol,
+      rol: payload.rol,
+      nombre_mostrar: payload.nombre_mostrar,
+    };
   } catch {
     return null;
   }
@@ -56,7 +86,6 @@ export async function setSessionCookie(payload: AuthSession) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: SESSION_MAX_AGE,
   });
 }
 

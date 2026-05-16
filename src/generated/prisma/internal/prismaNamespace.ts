@@ -2233,7 +2233,11 @@ export const ClienteScalarFieldEnum = {
   ci_nit: 'ci_nit',
   telefono: 'telefono',
   correo: 'correo',
-  direccion: 'direccion'
+  direccion: 'direccion',
+  nombre_usuario: 'nombre_usuario',
+  contrasena: 'contrasena',
+  estado_cuenta: 'estado_cuenta',
+  id_rol: 'id_rol'
 } as const
 
 export type ClienteScalarFieldEnum = (typeof ClienteScalarFieldEnum)[keyof typeof ClienteScalarFieldEnum]

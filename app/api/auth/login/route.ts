@@ -10,15 +10,16 @@ export async function POST(request: Request) {
 
   if (!identifier || !password) {
     return NextResponse.json(
-      { message: "Ingresa usuario/correo y contraseña." },
+      { message: "Ingresa usuario y contraseña." },
       { status: 400 }
     );
   }
 
-  const user = await prisma.usuario.findFirst({
+  const empresaUser = await prisma.usuario.findFirst({
     where: {
       estado: "activo",
-      OR: [{ nombre_usuario: identifier }, { correo: identifier }],
+      nombre_usuario: identifier,
+      contrasena: password,
     },
     include: {
       rol: true,
@@ -26,32 +27,59 @@ export async function POST(request: Request) {
     },
   });
 
-  if (!user || user.contrasena !== password) {
-    return NextResponse.json(
-      { message: "Usuario o contraseña incorrectos." },
-      { status: 401 }
-    );
+  if (empresaUser) {
+    await setSessionCookie({
+      tipo_cuenta: "empresa",
+      id_usuario: empresaUser.id_usuario,
+      nombre_usuario: empresaUser.nombre_usuario,
+      correo: empresaUser.correo,
+      id_rol: empresaUser.id_rol,
+      rol: empresaUser.rol.nombre_rol,
+      nombre_mostrar: empresaUser.empleado
+        ? `${empresaUser.empleado.nombres} ${empresaUser.empleado.apellidos}`
+        : empresaUser.nombre_usuario,
+    });
+
+    return NextResponse.json({
+      ok: true,
+      redirectTo: "/admin",
+      tipo_cuenta: "empresa",
+    });
   }
 
-  await setSessionCookie({
-    id_usuario: user.id_usuario,
-    nombre_usuario: user.nombre_usuario,
-    correo: user.correo,
-    id_rol: user.id_rol,
-    rol: user.rol.nombre_rol,
-    empleado: user.empleado
-      ? `${user.empleado.nombres} ${user.empleado.apellidos}`
-      : null,
-  });
-
-  return NextResponse.json({
-    ok: true,
-    redirectTo: "/admin",
-    user: {
-      id_usuario: user.id_usuario,
-      nombre_usuario: user.nombre_usuario,
-      correo: user.correo,
-      rol: user.rol.nombre_rol,
+  const cliente = await prisma.cliente.findFirst({
+    where: {
+      estado_cuenta: "activo",
+      nombre_usuario: identifier,
+      contrasena: password,
+    },
+    include: {
+      rol: true,
     },
   });
+
+  if (cliente && cliente.id_rol) {
+    await setSessionCookie({
+      tipo_cuenta: "cliente",
+      id_cliente: cliente.id_cliente,
+      nombre_usuario: cliente.nombre_usuario ?? "",
+      correo: cliente.correo,
+      id_rol: cliente.id_rol,
+      rol: cliente.rol?.nombre_rol ?? "Cliente",
+      nombre_mostrar:
+        cliente.razon_social ??
+        `${cliente.nombres ?? ""} ${cliente.apellidos ?? ""}`.trim(),
+    });
+
+    return NextResponse.json({
+      ok: true,
+      redirectTo: "/admin",
+      tipo_cuenta: "cliente",
+    });
+  }
+
+  return NextResponse.json(
+    { message: "Usuario o contraseña incorrectos." },
+    { status: 401 }
+  );
 }

@@ -1,7 +1,9 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
+
 datasource db {
   provider = "sqlserver"
 }
@@ -51,6 +53,11 @@ model cliente {
   telefono           String?              @db.VarChar(20)
   correo             String?              @db.VarChar(100)
   direccion          String?              @db.VarChar(200)
+  nombre_usuario     String?              @unique(map: "uq_cliente_nombre_usuario", where: raw("([nombre_usuario] IS NOT NULL)")) @db.VarChar(60)
+  contrasena         String?              @db.VarChar(100)
+  estado_cuenta      String               @default("activo", map: "df_cliente_estado_cuenta") @db.VarChar(20)
+  id_rol             Int?
+  rol                rol?                 @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_rol")
   contrato           contrato[]
   cotizacion_cliente cotizacion_cliente[]
   pago               pago[]
@@ -306,6 +313,7 @@ model rol {
   id_rol      Int           @id(map: "PK__rol__6ABCB5E09F33D4AF") @default(autoincrement())
   nombre_rol  String        @unique(map: "UQ__rol__673CB435B89AD571") @db.VarChar(50)
   descripcion String?       @db.VarChar(150)
+  cliente     cliente[]
   rol_modulo  rol_modulo[]
   rol_permiso rol_permiso[]
   usuario     usuario[]

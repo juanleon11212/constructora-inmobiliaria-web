@@ -200,6 +200,7 @@ export type rolWhereInput = {
   id_rol?: Prisma.IntFilter<"rol"> | number
   nombre_rol?: Prisma.StringFilter<"rol"> | string
   descripcion?: Prisma.StringNullableFilter<"rol"> | string | null
+  cliente?: Prisma.ClienteListRelationFilter
   rol_modulo?: Prisma.Rol_moduloListRelationFilter
   rol_permiso?: Prisma.Rol_permisoListRelationFilter
   usuario?: Prisma.UsuarioListRelationFilter
@@ -209,6 +210,7 @@ export type rolOrderByWithRelationInput = {
   id_rol?: Prisma.SortOrder
   nombre_rol?: Prisma.SortOrder
   descripcion?: Prisma.SortOrderInput | Prisma.SortOrder
+  cliente?: Prisma.clienteOrderByRelationAggregateInput
   rol_modulo?: Prisma.rol_moduloOrderByRelationAggregateInput
   rol_permiso?: Prisma.rol_permisoOrderByRelationAggregateInput
   usuario?: Prisma.usuarioOrderByRelationAggregateInput
@@ -221,6 +223,7 @@ export type rolWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.rolWhereInput[]
   NOT?: Prisma.rolWhereInput | Prisma.rolWhereInput[]
   descripcion?: Prisma.StringNullableFilter<"rol"> | string | null
+  cliente?: Prisma.ClienteListRelationFilter
   rol_modulo?: Prisma.Rol_moduloListRelationFilter
   rol_permiso?: Prisma.Rol_permisoListRelationFilter
   usuario?: Prisma.UsuarioListRelationFilter
@@ -249,6 +252,7 @@ export type rolScalarWhereWithAggregatesInput = {
 export type rolCreateInput = {
   nombre_rol: string
   descripcion?: string | null
+  cliente?: Prisma.clienteCreateNestedManyWithoutRolInput
   rol_modulo?: Prisma.rol_moduloCreateNestedManyWithoutRolInput
   rol_permiso?: Prisma.rol_permisoCreateNestedManyWithoutRolInput
   usuario?: Prisma.usuarioCreateNestedManyWithoutRolInput
@@ -258,6 +262,7 @@ export type rolUncheckedCreateInput = {
   id_rol?: number
   nombre_rol: string
   descripcion?: string | null
+  cliente?: Prisma.clienteUncheckedCreateNestedManyWithoutRolInput
   rol_modulo?: Prisma.rol_moduloUncheckedCreateNestedManyWithoutRolInput
   rol_permiso?: Prisma.rol_permisoUncheckedCreateNestedManyWithoutRolInput
   usuario?: Prisma.usuarioUncheckedCreateNestedManyWithoutRolInput
@@ -266,6 +271,7 @@ export type rolUncheckedCreateInput = {
 export type rolUpdateInput = {
   nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cliente?: Prisma.clienteUpdateManyWithoutRolNestedInput
   rol_modulo?: Prisma.rol_moduloUpdateManyWithoutRolNestedInput
   rol_permiso?: Prisma.rol_permisoUpdateManyWithoutRolNestedInput
   usuario?: Prisma.usuarioUpdateManyWithoutRolNestedInput
@@ -275,6 +281,7 @@ export type rolUncheckedUpdateInput = {
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cliente?: Prisma.clienteUncheckedUpdateManyWithoutRolNestedInput
   rol_modulo?: Prisma.rol_moduloUncheckedUpdateManyWithoutRolNestedInput
   rol_permiso?: Prisma.rol_permisoUncheckedUpdateManyWithoutRolNestedInput
   usuario?: Prisma.usuarioUncheckedUpdateManyWithoutRolNestedInput
@@ -294,6 +301,11 @@ export type rolUncheckedUpdateManyInput = {
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type RolNullableScalarRelationFilter = {
+  is?: Prisma.rolWhereInput | null
+  isNot?: Prisma.rolWhereInput | null
 }
 
 export type rolCountOrderByAggregateInput = {
@@ -325,6 +337,22 @@ export type rolSumOrderByAggregateInput = {
 export type RolScalarRelationFilter = {
   is?: Prisma.rolWhereInput
   isNot?: Prisma.rolWhereInput
+}
+
+export type rolCreateNestedOneWithoutClienteInput = {
+  create?: Prisma.XOR<Prisma.rolCreateWithoutClienteInput, Prisma.rolUncheckedCreateWithoutClienteInput>
+  connectOrCreate?: Prisma.rolCreateOrConnectWithoutClienteInput
+  connect?: Prisma.rolWhereUniqueInput
+}
+
+export type rolUpdateOneWithoutClienteNestedInput = {
+  create?: Prisma.XOR<Prisma.rolCreateWithoutClienteInput, Prisma.rolUncheckedCreateWithoutClienteInput>
+  connectOrCreate?: Prisma.rolCreateOrConnectWithoutClienteInput
+  upsert?: Prisma.rolUpsertWithoutClienteInput
+  disconnect?: Prisma.rolWhereInput | boolean
+  delete?: Prisma.rolWhereInput | boolean
+  connect?: Prisma.rolWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.rolUpdateToOneWithWhereWithoutClienteInput, Prisma.rolUpdateWithoutClienteInput>, Prisma.rolUncheckedUpdateWithoutClienteInput>
 }
 
 export type rolCreateNestedOneWithoutRol_moduloInput = {
@@ -369,9 +397,60 @@ export type rolUpdateOneRequiredWithoutUsuarioNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.rolUpdateToOneWithWhereWithoutUsuarioInput, Prisma.rolUpdateWithoutUsuarioInput>, Prisma.rolUncheckedUpdateWithoutUsuarioInput>
 }
 
+export type rolCreateWithoutClienteInput = {
+  nombre_rol: string
+  descripcion?: string | null
+  rol_modulo?: Prisma.rol_moduloCreateNestedManyWithoutRolInput
+  rol_permiso?: Prisma.rol_permisoCreateNestedManyWithoutRolInput
+  usuario?: Prisma.usuarioCreateNestedManyWithoutRolInput
+}
+
+export type rolUncheckedCreateWithoutClienteInput = {
+  id_rol?: number
+  nombre_rol: string
+  descripcion?: string | null
+  rol_modulo?: Prisma.rol_moduloUncheckedCreateNestedManyWithoutRolInput
+  rol_permiso?: Prisma.rol_permisoUncheckedCreateNestedManyWithoutRolInput
+  usuario?: Prisma.usuarioUncheckedCreateNestedManyWithoutRolInput
+}
+
+export type rolCreateOrConnectWithoutClienteInput = {
+  where: Prisma.rolWhereUniqueInput
+  create: Prisma.XOR<Prisma.rolCreateWithoutClienteInput, Prisma.rolUncheckedCreateWithoutClienteInput>
+}
+
+export type rolUpsertWithoutClienteInput = {
+  update: Prisma.XOR<Prisma.rolUpdateWithoutClienteInput, Prisma.rolUncheckedUpdateWithoutClienteInput>
+  create: Prisma.XOR<Prisma.rolCreateWithoutClienteInput, Prisma.rolUncheckedCreateWithoutClienteInput>
+  where?: Prisma.rolWhereInput
+}
+
+export type rolUpdateToOneWithWhereWithoutClienteInput = {
+  where?: Prisma.rolWhereInput
+  data: Prisma.XOR<Prisma.rolUpdateWithoutClienteInput, Prisma.rolUncheckedUpdateWithoutClienteInput>
+}
+
+export type rolUpdateWithoutClienteInput = {
+  nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
+  descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rol_modulo?: Prisma.rol_moduloUpdateManyWithoutRolNestedInput
+  rol_permiso?: Prisma.rol_permisoUpdateManyWithoutRolNestedInput
+  usuario?: Prisma.usuarioUpdateManyWithoutRolNestedInput
+}
+
+export type rolUncheckedUpdateWithoutClienteInput = {
+  id_rol?: Prisma.IntFieldUpdateOperationsInput | number
+  nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
+  descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rol_modulo?: Prisma.rol_moduloUncheckedUpdateManyWithoutRolNestedInput
+  rol_permiso?: Prisma.rol_permisoUncheckedUpdateManyWithoutRolNestedInput
+  usuario?: Prisma.usuarioUncheckedUpdateManyWithoutRolNestedInput
+}
+
 export type rolCreateWithoutRol_moduloInput = {
   nombre_rol: string
   descripcion?: string | null
+  cliente?: Prisma.clienteCreateNestedManyWithoutRolInput
   rol_permiso?: Prisma.rol_permisoCreateNestedManyWithoutRolInput
   usuario?: Prisma.usuarioCreateNestedManyWithoutRolInput
 }
@@ -380,6 +459,7 @@ export type rolUncheckedCreateWithoutRol_moduloInput = {
   id_rol?: number
   nombre_rol: string
   descripcion?: string | null
+  cliente?: Prisma.clienteUncheckedCreateNestedManyWithoutRolInput
   rol_permiso?: Prisma.rol_permisoUncheckedCreateNestedManyWithoutRolInput
   usuario?: Prisma.usuarioUncheckedCreateNestedManyWithoutRolInput
 }
@@ -403,6 +483,7 @@ export type rolUpdateToOneWithWhereWithoutRol_moduloInput = {
 export type rolUpdateWithoutRol_moduloInput = {
   nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cliente?: Prisma.clienteUpdateManyWithoutRolNestedInput
   rol_permiso?: Prisma.rol_permisoUpdateManyWithoutRolNestedInput
   usuario?: Prisma.usuarioUpdateManyWithoutRolNestedInput
 }
@@ -411,6 +492,7 @@ export type rolUncheckedUpdateWithoutRol_moduloInput = {
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cliente?: Prisma.clienteUncheckedUpdateManyWithoutRolNestedInput
   rol_permiso?: Prisma.rol_permisoUncheckedUpdateManyWithoutRolNestedInput
   usuario?: Prisma.usuarioUncheckedUpdateManyWithoutRolNestedInput
 }
@@ -418,6 +500,7 @@ export type rolUncheckedUpdateWithoutRol_moduloInput = {
 export type rolCreateWithoutRol_permisoInput = {
   nombre_rol: string
   descripcion?: string | null
+  cliente?: Prisma.clienteCreateNestedManyWithoutRolInput
   rol_modulo?: Prisma.rol_moduloCreateNestedManyWithoutRolInput
   usuario?: Prisma.usuarioCreateNestedManyWithoutRolInput
 }
@@ -426,6 +509,7 @@ export type rolUncheckedCreateWithoutRol_permisoInput = {
   id_rol?: number
   nombre_rol: string
   descripcion?: string | null
+  cliente?: Prisma.clienteUncheckedCreateNestedManyWithoutRolInput
   rol_modulo?: Prisma.rol_moduloUncheckedCreateNestedManyWithoutRolInput
   usuario?: Prisma.usuarioUncheckedCreateNestedManyWithoutRolInput
 }
@@ -449,6 +533,7 @@ export type rolUpdateToOneWithWhereWithoutRol_permisoInput = {
 export type rolUpdateWithoutRol_permisoInput = {
   nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cliente?: Prisma.clienteUpdateManyWithoutRolNestedInput
   rol_modulo?: Prisma.rol_moduloUpdateManyWithoutRolNestedInput
   usuario?: Prisma.usuarioUpdateManyWithoutRolNestedInput
 }
@@ -457,6 +542,7 @@ export type rolUncheckedUpdateWithoutRol_permisoInput = {
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cliente?: Prisma.clienteUncheckedUpdateManyWithoutRolNestedInput
   rol_modulo?: Prisma.rol_moduloUncheckedUpdateManyWithoutRolNestedInput
   usuario?: Prisma.usuarioUncheckedUpdateManyWithoutRolNestedInput
 }
@@ -464,6 +550,7 @@ export type rolUncheckedUpdateWithoutRol_permisoInput = {
 export type rolCreateWithoutUsuarioInput = {
   nombre_rol: string
   descripcion?: string | null
+  cliente?: Prisma.clienteCreateNestedManyWithoutRolInput
   rol_modulo?: Prisma.rol_moduloCreateNestedManyWithoutRolInput
   rol_permiso?: Prisma.rol_permisoCreateNestedManyWithoutRolInput
 }
@@ -472,6 +559,7 @@ export type rolUncheckedCreateWithoutUsuarioInput = {
   id_rol?: number
   nombre_rol: string
   descripcion?: string | null
+  cliente?: Prisma.clienteUncheckedCreateNestedManyWithoutRolInput
   rol_modulo?: Prisma.rol_moduloUncheckedCreateNestedManyWithoutRolInput
   rol_permiso?: Prisma.rol_permisoUncheckedCreateNestedManyWithoutRolInput
 }
@@ -495,6 +583,7 @@ export type rolUpdateToOneWithWhereWithoutUsuarioInput = {
 export type rolUpdateWithoutUsuarioInput = {
   nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cliente?: Prisma.clienteUpdateManyWithoutRolNestedInput
   rol_modulo?: Prisma.rol_moduloUpdateManyWithoutRolNestedInput
   rol_permiso?: Prisma.rol_permisoUpdateManyWithoutRolNestedInput
 }
@@ -503,6 +592,7 @@ export type rolUncheckedUpdateWithoutUsuarioInput = {
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   nombre_rol?: Prisma.StringFieldUpdateOperationsInput | string
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cliente?: Prisma.clienteUncheckedUpdateManyWithoutRolNestedInput
   rol_modulo?: Prisma.rol_moduloUncheckedUpdateManyWithoutRolNestedInput
   rol_permiso?: Prisma.rol_permisoUncheckedUpdateManyWithoutRolNestedInput
 }
@@ -513,12 +603,14 @@ export type rolUncheckedUpdateWithoutUsuarioInput = {
  */
 
 export type RolCountOutputType = {
+  cliente: number
   rol_modulo: number
   rol_permiso: number
   usuario: number
 }
 
 export type RolCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  cliente?: boolean | RolCountOutputTypeCountClienteArgs
   rol_modulo?: boolean | RolCountOutputTypeCountRol_moduloArgs
   rol_permiso?: boolean | RolCountOutputTypeCountRol_permisoArgs
   usuario?: boolean | RolCountOutputTypeCountUsuarioArgs
@@ -532,6 +624,13 @@ export type RolCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensio
    * Select specific fields to fetch from the RolCountOutputType
    */
   select?: Prisma.RolCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * RolCountOutputType without action
+ */
+export type RolCountOutputTypeCountClienteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.clienteWhereInput
 }
 
 /**
@@ -560,6 +659,7 @@ export type rolSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   id_rol?: boolean
   nombre_rol?: boolean
   descripcion?: boolean
+  cliente?: boolean | Prisma.rol$clienteArgs<ExtArgs>
   rol_modulo?: boolean | Prisma.rol$rol_moduloArgs<ExtArgs>
   rol_permiso?: boolean | Prisma.rol$rol_permisoArgs<ExtArgs>
   usuario?: boolean | Prisma.rol$usuarioArgs<ExtArgs>
@@ -576,6 +676,7 @@ export type rolSelectScalar = {
 
 export type rolOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_rol" | "nombre_rol" | "descripcion", ExtArgs["result"]["rol"]>
 export type rolInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  cliente?: boolean | Prisma.rol$clienteArgs<ExtArgs>
   rol_modulo?: boolean | Prisma.rol$rol_moduloArgs<ExtArgs>
   rol_permiso?: boolean | Prisma.rol$rol_permisoArgs<ExtArgs>
   usuario?: boolean | Prisma.rol$usuarioArgs<ExtArgs>
@@ -585,6 +686,7 @@ export type rolInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type $rolPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "rol"
   objects: {
+    cliente: Prisma.$clientePayload<ExtArgs>[]
     rol_modulo: Prisma.$rol_moduloPayload<ExtArgs>[]
     rol_permiso: Prisma.$rol_permisoPayload<ExtArgs>[]
     usuario: Prisma.$usuarioPayload<ExtArgs>[]
@@ -933,6 +1035,7 @@ readonly fields: rolFieldRefs;
  */
 export interface Prisma__rolClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  cliente<T extends Prisma.rol$clienteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.rol$clienteArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$clientePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   rol_modulo<T extends Prisma.rol$rol_moduloArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.rol$rol_moduloArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$rol_moduloPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   rol_permiso<T extends Prisma.rol$rol_permisoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.rol$rol_permisoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$rol_permisoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   usuario<T extends Prisma.rol$usuarioArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.rol$usuarioArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$usuarioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1312,6 +1415,30 @@ export type rolDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Limit how many rols to delete.
    */
   limit?: number
+}
+
+/**
+ * rol.cliente
+ */
+export type rol$clienteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the cliente
+   */
+  select?: Prisma.clienteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the cliente
+   */
+  omit?: Prisma.clienteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.clienteInclude<ExtArgs> | null
+  where?: Prisma.clienteWhereInput
+  orderBy?: Prisma.clienteOrderByWithRelationInput | Prisma.clienteOrderByWithRelationInput[]
+  cursor?: Prisma.clienteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClienteScalarFieldEnum | Prisma.ClienteScalarFieldEnum[]
 }
 
 /**

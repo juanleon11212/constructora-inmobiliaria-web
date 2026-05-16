@@ -28,10 +28,12 @@ export type AggregateCliente = {
 
 export type ClienteAvgAggregateOutputType = {
   id_cliente: number | null
+  id_rol: number | null
 }
 
 export type ClienteSumAggregateOutputType = {
   id_cliente: number | null
+  id_rol: number | null
 }
 
 export type ClienteMinAggregateOutputType = {
@@ -43,6 +45,10 @@ export type ClienteMinAggregateOutputType = {
   telefono: string | null
   correo: string | null
   direccion: string | null
+  nombre_usuario: string | null
+  contrasena: string | null
+  estado_cuenta: string | null
+  id_rol: number | null
 }
 
 export type ClienteMaxAggregateOutputType = {
@@ -54,6 +60,10 @@ export type ClienteMaxAggregateOutputType = {
   telefono: string | null
   correo: string | null
   direccion: string | null
+  nombre_usuario: string | null
+  contrasena: string | null
+  estado_cuenta: string | null
+  id_rol: number | null
 }
 
 export type ClienteCountAggregateOutputType = {
@@ -65,16 +75,22 @@ export type ClienteCountAggregateOutputType = {
   telefono: number
   correo: number
   direccion: number
+  nombre_usuario: number
+  contrasena: number
+  estado_cuenta: number
+  id_rol: number
   _all: number
 }
 
 
 export type ClienteAvgAggregateInputType = {
   id_cliente?: true
+  id_rol?: true
 }
 
 export type ClienteSumAggregateInputType = {
   id_cliente?: true
+  id_rol?: true
 }
 
 export type ClienteMinAggregateInputType = {
@@ -86,6 +102,10 @@ export type ClienteMinAggregateInputType = {
   telefono?: true
   correo?: true
   direccion?: true
+  nombre_usuario?: true
+  contrasena?: true
+  estado_cuenta?: true
+  id_rol?: true
 }
 
 export type ClienteMaxAggregateInputType = {
@@ -97,6 +117,10 @@ export type ClienteMaxAggregateInputType = {
   telefono?: true
   correo?: true
   direccion?: true
+  nombre_usuario?: true
+  contrasena?: true
+  estado_cuenta?: true
+  id_rol?: true
 }
 
 export type ClienteCountAggregateInputType = {
@@ -108,6 +132,10 @@ export type ClienteCountAggregateInputType = {
   telefono?: true
   correo?: true
   direccion?: true
+  nombre_usuario?: true
+  contrasena?: true
+  estado_cuenta?: true
+  id_rol?: true
   _all?: true
 }
 
@@ -206,6 +234,10 @@ export type ClienteGroupByOutputType = {
   telefono: string | null
   correo: string | null
   direccion: string | null
+  nombre_usuario: string | null
+  contrasena: string | null
+  estado_cuenta: string
+  id_rol: number | null
   _count: ClienteCountAggregateOutputType | null
   _avg: ClienteAvgAggregateOutputType | null
   _sum: ClienteSumAggregateOutputType | null
@@ -240,6 +272,11 @@ export type clienteWhereInput = {
   telefono?: Prisma.StringNullableFilter<"cliente"> | string | null
   correo?: Prisma.StringNullableFilter<"cliente"> | string | null
   direccion?: Prisma.StringNullableFilter<"cliente"> | string | null
+  nombre_usuario?: Prisma.StringNullableFilter<"cliente"> | string | null
+  contrasena?: Prisma.StringNullableFilter<"cliente"> | string | null
+  estado_cuenta?: Prisma.StringFilter<"cliente"> | string
+  id_rol?: Prisma.IntNullableFilter<"cliente"> | number | null
+  rol?: Prisma.XOR<Prisma.RolNullableScalarRelationFilter, Prisma.rolWhereInput> | null
   contrato?: Prisma.ContratoListRelationFilter
   cotizacion_cliente?: Prisma.Cotizacion_clienteListRelationFilter
   pago?: Prisma.PagoListRelationFilter
@@ -255,6 +292,11 @@ export type clienteOrderByWithRelationInput = {
   telefono?: Prisma.SortOrderInput | Prisma.SortOrder
   correo?: Prisma.SortOrderInput | Prisma.SortOrder
   direccion?: Prisma.SortOrderInput | Prisma.SortOrder
+  nombre_usuario?: Prisma.SortOrderInput | Prisma.SortOrder
+  contrasena?: Prisma.SortOrderInput | Prisma.SortOrder
+  estado_cuenta?: Prisma.SortOrder
+  id_rol?: Prisma.SortOrderInput | Prisma.SortOrder
+  rol?: Prisma.rolOrderByWithRelationInput
   contrato?: Prisma.contratoOrderByRelationAggregateInput
   cotizacion_cliente?: Prisma.cotizacion_clienteOrderByRelationAggregateInput
   pago?: Prisma.pagoOrderByRelationAggregateInput
@@ -264,6 +306,7 @@ export type clienteOrderByWithRelationInput = {
 export type clienteWhereUniqueInput = Prisma.AtLeast<{
   id_cliente?: number
   ci_nit?: string
+  nombre_usuario?: string
   AND?: Prisma.clienteWhereInput | Prisma.clienteWhereInput[]
   OR?: Prisma.clienteWhereInput[]
   NOT?: Prisma.clienteWhereInput | Prisma.clienteWhereInput[]
@@ -273,11 +316,15 @@ export type clienteWhereUniqueInput = Prisma.AtLeast<{
   telefono?: Prisma.StringNullableFilter<"cliente"> | string | null
   correo?: Prisma.StringNullableFilter<"cliente"> | string | null
   direccion?: Prisma.StringNullableFilter<"cliente"> | string | null
+  contrasena?: Prisma.StringNullableFilter<"cliente"> | string | null
+  estado_cuenta?: Prisma.StringFilter<"cliente"> | string
+  id_rol?: Prisma.IntNullableFilter<"cliente"> | number | null
+  rol?: Prisma.XOR<Prisma.RolNullableScalarRelationFilter, Prisma.rolWhereInput> | null
   contrato?: Prisma.ContratoListRelationFilter
   cotizacion_cliente?: Prisma.Cotizacion_clienteListRelationFilter
   pago?: Prisma.PagoListRelationFilter
   proyecto?: Prisma.ProyectoListRelationFilter
-}, "id_cliente" | "ci_nit">
+}, "id_cliente" | "ci_nit" | "nombre_usuario">
 
 export type clienteOrderByWithAggregationInput = {
   id_cliente?: Prisma.SortOrder
@@ -288,6 +335,10 @@ export type clienteOrderByWithAggregationInput = {
   telefono?: Prisma.SortOrderInput | Prisma.SortOrder
   correo?: Prisma.SortOrderInput | Prisma.SortOrder
   direccion?: Prisma.SortOrderInput | Prisma.SortOrder
+  nombre_usuario?: Prisma.SortOrderInput | Prisma.SortOrder
+  contrasena?: Prisma.SortOrderInput | Prisma.SortOrder
+  estado_cuenta?: Prisma.SortOrder
+  id_rol?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.clienteCountOrderByAggregateInput
   _avg?: Prisma.clienteAvgOrderByAggregateInput
   _max?: Prisma.clienteMaxOrderByAggregateInput
@@ -307,6 +358,10 @@ export type clienteScalarWhereWithAggregatesInput = {
   telefono?: Prisma.StringNullableWithAggregatesFilter<"cliente"> | string | null
   correo?: Prisma.StringNullableWithAggregatesFilter<"cliente"> | string | null
   direccion?: Prisma.StringNullableWithAggregatesFilter<"cliente"> | string | null
+  nombre_usuario?: Prisma.StringNullableWithAggregatesFilter<"cliente"> | string | null
+  contrasena?: Prisma.StringNullableWithAggregatesFilter<"cliente"> | string | null
+  estado_cuenta?: Prisma.StringWithAggregatesFilter<"cliente"> | string
+  id_rol?: Prisma.IntNullableWithAggregatesFilter<"cliente"> | number | null
 }
 
 export type clienteCreateInput = {
@@ -317,6 +372,10 @@ export type clienteCreateInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  rol?: Prisma.rolCreateNestedOneWithoutClienteInput
   contrato?: Prisma.contratoCreateNestedManyWithoutClienteInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutClienteInput
   pago?: Prisma.pagoCreateNestedManyWithoutClienteInput
@@ -332,6 +391,10 @@ export type clienteUncheckedCreateInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  id_rol?: number | null
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutClienteInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutClienteInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutClienteInput
@@ -346,6 +409,10 @@ export type clienteUpdateInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.rolUpdateOneWithoutClienteNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutClienteNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutClienteNestedInput
   pago?: Prisma.pagoUpdateManyWithoutClienteNestedInput
@@ -361,6 +428,10 @@ export type clienteUncheckedUpdateInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_rol?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutClienteNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutClienteNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutClienteNestedInput
@@ -375,6 +446,10 @@ export type clienteCreateManyInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  id_rol?: number | null
 }
 
 export type clienteUpdateManyMutationInput = {
@@ -385,6 +460,9 @@ export type clienteUpdateManyMutationInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type clienteUncheckedUpdateManyInput = {
@@ -396,6 +474,10 @@ export type clienteUncheckedUpdateManyInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_rol?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type clienteCountOrderByAggregateInput = {
@@ -407,10 +489,15 @@ export type clienteCountOrderByAggregateInput = {
   telefono?: Prisma.SortOrder
   correo?: Prisma.SortOrder
   direccion?: Prisma.SortOrder
+  nombre_usuario?: Prisma.SortOrder
+  contrasena?: Prisma.SortOrder
+  estado_cuenta?: Prisma.SortOrder
+  id_rol?: Prisma.SortOrder
 }
 
 export type clienteAvgOrderByAggregateInput = {
   id_cliente?: Prisma.SortOrder
+  id_rol?: Prisma.SortOrder
 }
 
 export type clienteMaxOrderByAggregateInput = {
@@ -422,6 +509,10 @@ export type clienteMaxOrderByAggregateInput = {
   telefono?: Prisma.SortOrder
   correo?: Prisma.SortOrder
   direccion?: Prisma.SortOrder
+  nombre_usuario?: Prisma.SortOrder
+  contrasena?: Prisma.SortOrder
+  estado_cuenta?: Prisma.SortOrder
+  id_rol?: Prisma.SortOrder
 }
 
 export type clienteMinOrderByAggregateInput = {
@@ -433,10 +524,15 @@ export type clienteMinOrderByAggregateInput = {
   telefono?: Prisma.SortOrder
   correo?: Prisma.SortOrder
   direccion?: Prisma.SortOrder
+  nombre_usuario?: Prisma.SortOrder
+  contrasena?: Prisma.SortOrder
+  estado_cuenta?: Prisma.SortOrder
+  id_rol?: Prisma.SortOrder
 }
 
 export type clienteSumOrderByAggregateInput = {
   id_cliente?: Prisma.SortOrder
+  id_rol?: Prisma.SortOrder
 }
 
 export type ClienteScalarRelationFilter = {
@@ -447,6 +543,24 @@ export type ClienteScalarRelationFilter = {
 export type ClienteNullableScalarRelationFilter = {
   is?: Prisma.clienteWhereInput | null
   isNot?: Prisma.clienteWhereInput | null
+}
+
+export type ClienteListRelationFilter = {
+  every?: Prisma.clienteWhereInput
+  some?: Prisma.clienteWhereInput
+  none?: Prisma.clienteWhereInput
+}
+
+export type clienteOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type clienteCreateNestedOneWithoutContratoInput = {
@@ -507,6 +621,48 @@ export type clienteUpdateOneRequiredWithoutProyectoNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.clienteUpdateToOneWithWhereWithoutProyectoInput, Prisma.clienteUpdateWithoutProyectoInput>, Prisma.clienteUncheckedUpdateWithoutProyectoInput>
 }
 
+export type clienteCreateNestedManyWithoutRolInput = {
+  create?: Prisma.XOR<Prisma.clienteCreateWithoutRolInput, Prisma.clienteUncheckedCreateWithoutRolInput> | Prisma.clienteCreateWithoutRolInput[] | Prisma.clienteUncheckedCreateWithoutRolInput[]
+  connectOrCreate?: Prisma.clienteCreateOrConnectWithoutRolInput | Prisma.clienteCreateOrConnectWithoutRolInput[]
+  createMany?: Prisma.clienteCreateManyRolInputEnvelope
+  connect?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+}
+
+export type clienteUncheckedCreateNestedManyWithoutRolInput = {
+  create?: Prisma.XOR<Prisma.clienteCreateWithoutRolInput, Prisma.clienteUncheckedCreateWithoutRolInput> | Prisma.clienteCreateWithoutRolInput[] | Prisma.clienteUncheckedCreateWithoutRolInput[]
+  connectOrCreate?: Prisma.clienteCreateOrConnectWithoutRolInput | Prisma.clienteCreateOrConnectWithoutRolInput[]
+  createMany?: Prisma.clienteCreateManyRolInputEnvelope
+  connect?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+}
+
+export type clienteUpdateManyWithoutRolNestedInput = {
+  create?: Prisma.XOR<Prisma.clienteCreateWithoutRolInput, Prisma.clienteUncheckedCreateWithoutRolInput> | Prisma.clienteCreateWithoutRolInput[] | Prisma.clienteUncheckedCreateWithoutRolInput[]
+  connectOrCreate?: Prisma.clienteCreateOrConnectWithoutRolInput | Prisma.clienteCreateOrConnectWithoutRolInput[]
+  upsert?: Prisma.clienteUpsertWithWhereUniqueWithoutRolInput | Prisma.clienteUpsertWithWhereUniqueWithoutRolInput[]
+  createMany?: Prisma.clienteCreateManyRolInputEnvelope
+  set?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+  disconnect?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+  delete?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+  connect?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+  update?: Prisma.clienteUpdateWithWhereUniqueWithoutRolInput | Prisma.clienteUpdateWithWhereUniqueWithoutRolInput[]
+  updateMany?: Prisma.clienteUpdateManyWithWhereWithoutRolInput | Prisma.clienteUpdateManyWithWhereWithoutRolInput[]
+  deleteMany?: Prisma.clienteScalarWhereInput | Prisma.clienteScalarWhereInput[]
+}
+
+export type clienteUncheckedUpdateManyWithoutRolNestedInput = {
+  create?: Prisma.XOR<Prisma.clienteCreateWithoutRolInput, Prisma.clienteUncheckedCreateWithoutRolInput> | Prisma.clienteCreateWithoutRolInput[] | Prisma.clienteUncheckedCreateWithoutRolInput[]
+  connectOrCreate?: Prisma.clienteCreateOrConnectWithoutRolInput | Prisma.clienteCreateOrConnectWithoutRolInput[]
+  upsert?: Prisma.clienteUpsertWithWhereUniqueWithoutRolInput | Prisma.clienteUpsertWithWhereUniqueWithoutRolInput[]
+  createMany?: Prisma.clienteCreateManyRolInputEnvelope
+  set?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+  disconnect?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+  delete?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+  connect?: Prisma.clienteWhereUniqueInput | Prisma.clienteWhereUniqueInput[]
+  update?: Prisma.clienteUpdateWithWhereUniqueWithoutRolInput | Prisma.clienteUpdateWithWhereUniqueWithoutRolInput[]
+  updateMany?: Prisma.clienteUpdateManyWithWhereWithoutRolInput | Prisma.clienteUpdateManyWithWhereWithoutRolInput[]
+  deleteMany?: Prisma.clienteScalarWhereInput | Prisma.clienteScalarWhereInput[]
+}
+
 export type clienteCreateWithoutContratoInput = {
   nombres?: string | null
   apellidos?: string | null
@@ -515,6 +671,10 @@ export type clienteCreateWithoutContratoInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  rol?: Prisma.rolCreateNestedOneWithoutClienteInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutClienteInput
   pago?: Prisma.pagoCreateNestedManyWithoutClienteInput
   proyecto?: Prisma.proyectoCreateNestedManyWithoutClienteInput
@@ -529,6 +689,10 @@ export type clienteUncheckedCreateWithoutContratoInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  id_rol?: number | null
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutClienteInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutClienteInput
   proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutClienteInput
@@ -558,6 +722,10 @@ export type clienteUpdateWithoutContratoInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.rolUpdateOneWithoutClienteNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutClienteNestedInput
   pago?: Prisma.pagoUpdateManyWithoutClienteNestedInput
   proyecto?: Prisma.proyectoUpdateManyWithoutClienteNestedInput
@@ -572,6 +740,10 @@ export type clienteUncheckedUpdateWithoutContratoInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_rol?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutClienteNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutClienteNestedInput
   proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutClienteNestedInput
@@ -585,6 +757,10 @@ export type clienteCreateWithoutCotizacion_clienteInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  rol?: Prisma.rolCreateNestedOneWithoutClienteInput
   contrato?: Prisma.contratoCreateNestedManyWithoutClienteInput
   pago?: Prisma.pagoCreateNestedManyWithoutClienteInput
   proyecto?: Prisma.proyectoCreateNestedManyWithoutClienteInput
@@ -599,6 +775,10 @@ export type clienteUncheckedCreateWithoutCotizacion_clienteInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  id_rol?: number | null
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutClienteInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutClienteInput
   proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutClienteInput
@@ -628,6 +808,10 @@ export type clienteUpdateWithoutCotizacion_clienteInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.rolUpdateOneWithoutClienteNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutClienteNestedInput
   pago?: Prisma.pagoUpdateManyWithoutClienteNestedInput
   proyecto?: Prisma.proyectoUpdateManyWithoutClienteNestedInput
@@ -642,6 +826,10 @@ export type clienteUncheckedUpdateWithoutCotizacion_clienteInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_rol?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutClienteNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutClienteNestedInput
   proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutClienteNestedInput
@@ -655,6 +843,10 @@ export type clienteCreateWithoutPagoInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  rol?: Prisma.rolCreateNestedOneWithoutClienteInput
   contrato?: Prisma.contratoCreateNestedManyWithoutClienteInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutClienteInput
   proyecto?: Prisma.proyectoCreateNestedManyWithoutClienteInput
@@ -669,6 +861,10 @@ export type clienteUncheckedCreateWithoutPagoInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  id_rol?: number | null
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutClienteInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutClienteInput
   proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutClienteInput
@@ -698,6 +894,10 @@ export type clienteUpdateWithoutPagoInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.rolUpdateOneWithoutClienteNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutClienteNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutClienteNestedInput
   proyecto?: Prisma.proyectoUpdateManyWithoutClienteNestedInput
@@ -712,6 +912,10 @@ export type clienteUncheckedUpdateWithoutPagoInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_rol?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutClienteNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutClienteNestedInput
   proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutClienteNestedInput
@@ -725,6 +929,10 @@ export type clienteCreateWithoutProyectoInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  rol?: Prisma.rolCreateNestedOneWithoutClienteInput
   contrato?: Prisma.contratoCreateNestedManyWithoutClienteInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutClienteInput
   pago?: Prisma.pagoCreateNestedManyWithoutClienteInput
@@ -739,6 +947,10 @@ export type clienteUncheckedCreateWithoutProyectoInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  id_rol?: number | null
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutClienteInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutClienteInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutClienteInput
@@ -768,6 +980,10 @@ export type clienteUpdateWithoutProyectoInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.rolUpdateOneWithoutClienteNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutClienteNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutClienteNestedInput
   pago?: Prisma.pagoUpdateManyWithoutClienteNestedInput
@@ -782,9 +998,153 @@ export type clienteUncheckedUpdateWithoutProyectoInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_rol?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutClienteNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutClienteNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutClienteNestedInput
+}
+
+export type clienteCreateWithoutRolInput = {
+  nombres?: string | null
+  apellidos?: string | null
+  razon_social?: string | null
+  ci_nit: string
+  telefono?: string | null
+  correo?: string | null
+  direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  contrato?: Prisma.contratoCreateNestedManyWithoutClienteInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutClienteInput
+  pago?: Prisma.pagoCreateNestedManyWithoutClienteInput
+  proyecto?: Prisma.proyectoCreateNestedManyWithoutClienteInput
+}
+
+export type clienteUncheckedCreateWithoutRolInput = {
+  id_cliente?: number
+  nombres?: string | null
+  apellidos?: string | null
+  razon_social?: string | null
+  ci_nit: string
+  telefono?: string | null
+  correo?: string | null
+  direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+  contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutClienteInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutClienteInput
+  pago?: Prisma.pagoUncheckedCreateNestedManyWithoutClienteInput
+  proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutClienteInput
+}
+
+export type clienteCreateOrConnectWithoutRolInput = {
+  where: Prisma.clienteWhereUniqueInput
+  create: Prisma.XOR<Prisma.clienteCreateWithoutRolInput, Prisma.clienteUncheckedCreateWithoutRolInput>
+}
+
+export type clienteCreateManyRolInputEnvelope = {
+  data: Prisma.clienteCreateManyRolInput | Prisma.clienteCreateManyRolInput[]
+}
+
+export type clienteUpsertWithWhereUniqueWithoutRolInput = {
+  where: Prisma.clienteWhereUniqueInput
+  update: Prisma.XOR<Prisma.clienteUpdateWithoutRolInput, Prisma.clienteUncheckedUpdateWithoutRolInput>
+  create: Prisma.XOR<Prisma.clienteCreateWithoutRolInput, Prisma.clienteUncheckedCreateWithoutRolInput>
+}
+
+export type clienteUpdateWithWhereUniqueWithoutRolInput = {
+  where: Prisma.clienteWhereUniqueInput
+  data: Prisma.XOR<Prisma.clienteUpdateWithoutRolInput, Prisma.clienteUncheckedUpdateWithoutRolInput>
+}
+
+export type clienteUpdateManyWithWhereWithoutRolInput = {
+  where: Prisma.clienteScalarWhereInput
+  data: Prisma.XOR<Prisma.clienteUpdateManyMutationInput, Prisma.clienteUncheckedUpdateManyWithoutRolInput>
+}
+
+export type clienteScalarWhereInput = {
+  AND?: Prisma.clienteScalarWhereInput | Prisma.clienteScalarWhereInput[]
+  OR?: Prisma.clienteScalarWhereInput[]
+  NOT?: Prisma.clienteScalarWhereInput | Prisma.clienteScalarWhereInput[]
+  id_cliente?: Prisma.IntFilter<"cliente"> | number
+  nombres?: Prisma.StringNullableFilter<"cliente"> | string | null
+  apellidos?: Prisma.StringNullableFilter<"cliente"> | string | null
+  razon_social?: Prisma.StringNullableFilter<"cliente"> | string | null
+  ci_nit?: Prisma.StringFilter<"cliente"> | string
+  telefono?: Prisma.StringNullableFilter<"cliente"> | string | null
+  correo?: Prisma.StringNullableFilter<"cliente"> | string | null
+  direccion?: Prisma.StringNullableFilter<"cliente"> | string | null
+  nombre_usuario?: Prisma.StringNullableFilter<"cliente"> | string | null
+  contrasena?: Prisma.StringNullableFilter<"cliente"> | string | null
+  estado_cuenta?: Prisma.StringFilter<"cliente"> | string
+  id_rol?: Prisma.IntNullableFilter<"cliente"> | number | null
+}
+
+export type clienteCreateManyRolInput = {
+  nombres?: string | null
+  apellidos?: string | null
+  razon_social?: string | null
+  ci_nit: string
+  telefono?: string | null
+  correo?: string | null
+  direccion?: string | null
+  nombre_usuario?: string | null
+  contrasena?: string | null
+  estado_cuenta?: string
+}
+
+export type clienteUpdateWithoutRolInput = {
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razon_social?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ci_nit?: Prisma.StringFieldUpdateOperationsInput | string
+  telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  contrato?: Prisma.contratoUpdateManyWithoutClienteNestedInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutClienteNestedInput
+  pago?: Prisma.pagoUpdateManyWithoutClienteNestedInput
+  proyecto?: Prisma.proyectoUpdateManyWithoutClienteNestedInput
+}
+
+export type clienteUncheckedUpdateWithoutRolInput = {
+  id_cliente?: Prisma.IntFieldUpdateOperationsInput | number
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razon_social?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ci_nit?: Prisma.StringFieldUpdateOperationsInput | string
+  telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
+  contrato?: Prisma.contratoUncheckedUpdateManyWithoutClienteNestedInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutClienteNestedInput
+  pago?: Prisma.pagoUncheckedUpdateManyWithoutClienteNestedInput
+  proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutClienteNestedInput
+}
+
+export type clienteUncheckedUpdateManyWithoutRolInput = {
+  id_cliente?: Prisma.IntFieldUpdateOperationsInput | number
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razon_social?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ci_nit?: Prisma.StringFieldUpdateOperationsInput | string
+  telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombre_usuario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contrasena?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado_cuenta?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -854,6 +1214,11 @@ export type clienteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   telefono?: boolean
   correo?: boolean
   direccion?: boolean
+  nombre_usuario?: boolean
+  contrasena?: boolean
+  estado_cuenta?: boolean
+  id_rol?: boolean
+  rol?: boolean | Prisma.cliente$rolArgs<ExtArgs>
   contrato?: boolean | Prisma.cliente$contratoArgs<ExtArgs>
   cotizacion_cliente?: boolean | Prisma.cliente$cotizacion_clienteArgs<ExtArgs>
   pago?: boolean | Prisma.cliente$pagoArgs<ExtArgs>
@@ -872,10 +1237,15 @@ export type clienteSelectScalar = {
   telefono?: boolean
   correo?: boolean
   direccion?: boolean
+  nombre_usuario?: boolean
+  contrasena?: boolean
+  estado_cuenta?: boolean
+  id_rol?: boolean
 }
 
-export type clienteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_cliente" | "nombres" | "apellidos" | "razon_social" | "ci_nit" | "telefono" | "correo" | "direccion", ExtArgs["result"]["cliente"]>
+export type clienteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_cliente" | "nombres" | "apellidos" | "razon_social" | "ci_nit" | "telefono" | "correo" | "direccion" | "nombre_usuario" | "contrasena" | "estado_cuenta" | "id_rol", ExtArgs["result"]["cliente"]>
 export type clienteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  rol?: boolean | Prisma.cliente$rolArgs<ExtArgs>
   contrato?: boolean | Prisma.cliente$contratoArgs<ExtArgs>
   cotizacion_cliente?: boolean | Prisma.cliente$cotizacion_clienteArgs<ExtArgs>
   pago?: boolean | Prisma.cliente$pagoArgs<ExtArgs>
@@ -886,6 +1256,7 @@ export type clienteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type $clientePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "cliente"
   objects: {
+    rol: Prisma.$rolPayload<ExtArgs> | null
     contrato: Prisma.$contratoPayload<ExtArgs>[]
     cotizacion_cliente: Prisma.$cotizacion_clientePayload<ExtArgs>[]
     pago: Prisma.$pagoPayload<ExtArgs>[]
@@ -900,6 +1271,10 @@ export type $clientePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     telefono: string | null
     correo: string | null
     direccion: string | null
+    nombre_usuario: string | null
+    contrasena: string | null
+    estado_cuenta: string
+    id_rol: number | null
   }, ExtArgs["result"]["cliente"]>
   composites: {}
 }
@@ -1240,6 +1615,7 @@ readonly fields: clienteFieldRefs;
  */
 export interface Prisma__clienteClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  rol<T extends Prisma.cliente$rolArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cliente$rolArgs<ExtArgs>>): Prisma.Prisma__rolClient<runtime.Types.Result.GetResult<Prisma.$rolPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   contrato<T extends Prisma.cliente$contratoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cliente$contratoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$contratoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cotizacion_cliente<T extends Prisma.cliente$cotizacion_clienteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cliente$cotizacion_clienteArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$cotizacion_clientePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pago<T extends Prisma.cliente$pagoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cliente$pagoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$pagoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1281,6 +1657,10 @@ export interface clienteFieldRefs {
   readonly telefono: Prisma.FieldRef<"cliente", 'String'>
   readonly correo: Prisma.FieldRef<"cliente", 'String'>
   readonly direccion: Prisma.FieldRef<"cliente", 'String'>
+  readonly nombre_usuario: Prisma.FieldRef<"cliente", 'String'>
+  readonly contrasena: Prisma.FieldRef<"cliente", 'String'>
+  readonly estado_cuenta: Prisma.FieldRef<"cliente", 'String'>
+  readonly id_rol: Prisma.FieldRef<"cliente", 'Int'>
 }
     
 
@@ -1625,6 +2005,25 @@ export type clienteDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many clientes to delete.
    */
   limit?: number
+}
+
+/**
+ * cliente.rol
+ */
+export type cliente$rolArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the rol
+   */
+  select?: Prisma.rolSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the rol
+   */
+  omit?: Prisma.rolOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.rolInclude<ExtArgs> | null
+  where?: Prisma.rolWhereInput
 }
 
 /**

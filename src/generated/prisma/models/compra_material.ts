@@ -565,14 +565,6 @@ export type DecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type compra_materialCreateNestedOneWithoutDetalle_compra_materialInput = {
   create?: Prisma.XOR<Prisma.compra_materialCreateWithoutDetalle_compra_materialInput, Prisma.compra_materialUncheckedCreateWithoutDetalle_compra_materialInput>
   connectOrCreate?: Prisma.compra_materialCreateOrConnectWithoutDetalle_compra_materialInput
