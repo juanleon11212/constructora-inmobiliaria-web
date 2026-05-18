@@ -4,35 +4,35 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
 import { canDo } from "../../../lib/auth/permissions";
+
 /*
   MÓDULO PAGOS
 
   Ruta:
   /admin/pagos
 
-  Qué hace:
-  - Administrador puede ver todos los pagos.
-  - Administrador puede registrar pagos.
-  - Cliente solo ve pagos relacionados con su id_cliente.
+  Permisos:
+  - Administrador: puede ver, crear y editar pagos.
+  - Contabilidad: puede ver, crear y editar pagos.
+  - Compras: solo ve pagos a proveedores.
+  - Cliente: solo ve sus propios pagos.
 
-  Regla importante:
-  En un pago solo se debe llenar uno de estos:
+  Importante:
+  En un pago solo debe llenarse una relación principal:
   - id_cliente
   - id_empleado
   - id_proveedor
 
-  id_proyecto es opcional y puede acompañar a cualquiera.
+  El id_proyecto es opcional.
 */
 
 type PageProps = {
   searchParams?: Promise<{
+    editar?: string;
     error?: string;
   }>;
 };
 
-/*
-  Lee texto limpio desde FormData.
-*/
 function getText(formData: FormData, field: string) {
   return String(formData.get(field) ?? "").trim();
 }
@@ -59,9 +59,43 @@ function getRoleName(user: { rol: unknown }) {
 }
 
 /*
+  Valida que el proyecto exista.
+  Si el pago es de cliente, valida que el proyecto sea de ese mismo cliente.
+*/
+async function validarProyectoPago(
+  tipo_pago: string,
+  id_cliente: number | null,
+  id_proyecto: number | null,
+  redirectUrl: string
+) {
+  if (!id_proyecto) return;
+
+  const proyecto = await prisma.proyecto.findUnique({
+    where: {
+      id_proyecto,
+    },
+    select: {
+      id_cliente: true,
+    },
+  });
+
+  if (!proyecto) {
+    redirect(`${redirectUrl}&error=proyecto-invalido`);
+  }
+
+  if (tipo_pago === "cliente" && id_cliente) {
+    if (proyecto.id_cliente !== id_cliente) {
+      redirect(`${redirectUrl}&error=proyecto-no-corresponde`);
+    }
+  }
+}
+
+/*
   CREAR PAGO
 
-  Solo el administrador puede registrar pagos.
+  Lo pueden hacer:
+  - Administrador
+  - Contabilidad
 */
 async function crearPago(formData: FormData) {
   "use server";
@@ -69,7 +103,7 @@ async function crearPago(formData: FormData) {
   const user = await requireModule("pagos");
   const roleName = getRoleName(user);
 
-  if (roleName !== "Administrador") {
+  if (!canDo(roleName, "pagos", "create")) {
     redirect("/admin/pagos");
   }
 
@@ -92,12 +126,6 @@ async function crearPago(formData: FormData) {
     redirect("/admin/pagos?error=monto-invalido");
   }
 
-  /*
-    Validación lógica:
-    Si tipo_pago es cliente, debe seleccionar cliente.
-    Si tipo_pago es empleado, debe seleccionar empleado.
-    Si tipo_pago es proveedor, debe seleccionar proveedor.
-  */
   if (tipo_pago === "cliente" && !id_cliente) {
     redirect("/admin/pagos?error=cliente-requerido");
   }
@@ -110,10 +138,13 @@ async function crearPago(formData: FormData) {
     redirect("/admin/pagos?error=proveedor-requerido");
   }
 
-  /*
-    Solo se guarda una relación principal según el tipo de pago.
-    Esto evita llenar cliente, empleado y proveedor al mismo tiempo.
-  */
+  await validarProyectoPago(
+    tipo_pago,
+    id_cliente,
+    id_proyecto,
+    "/admin/pagos?"
+  );
+
   await prisma.pago.create({
     data: {
       tipo_pago,
@@ -135,40 +166,133 @@ async function crearPago(formData: FormData) {
   redirect("/admin/pagos");
 }
 
+/*
+  EDITAR PAGO
+
+  Lo pueden hacer:
+  - Administrador
+  - Contabilidad
+
+  No elimina pagos, solo actualiza.
+*/
+async function editarPago(formData: FormData) {
+  "use server";
+
+  const user = await requireModule("pagos");
+  const roleName = getRoleName(user);
+
+  if (!canDo(roleName, "pagos", "edit")) {
+    redirect("/admin/pagos");
+  }
+
+  const id_pago = Number(formData.get("id_pago"));
+
+  if (!id_pago) {
+    redirect("/admin/pagos?error=id-invalido");
+  }
+
+  const tipo_pago = getText(formData, "tipo_pago");
+  const fecha_pago = getText(formData, "fecha_pago");
+  const monto = Number(formData.get("monto"));
+  const metodo_pago = getText(formData, "metodo_pago");
+  const descripcion = getText(formData, "descripcion");
+
+  const id_cliente = Number(formData.get("id_cliente")) || null;
+  const id_empleado = Number(formData.get("id_empleado")) || null;
+  const id_proveedor = Number(formData.get("id_proveedor")) || null;
+  const id_proyecto = Number(formData.get("id_proyecto")) || null;
+
+  if (!tipo_pago || !fecha_pago || !monto || !metodo_pago) {
+    redirect(`/admin/pagos?editar=${id_pago}&error=datos-obligatorios`);
+  }
+
+  if (monto <= 0) {
+    redirect(`/admin/pagos?editar=${id_pago}&error=monto-invalido`);
+  }
+
+  if (tipo_pago === "cliente" && !id_cliente) {
+    redirect(`/admin/pagos?editar=${id_pago}&error=cliente-requerido`);
+  }
+
+  if (tipo_pago === "empleado" && !id_empleado) {
+    redirect(`/admin/pagos?editar=${id_pago}&error=empleado-requerido`);
+  }
+
+  if (tipo_pago === "proveedor" && !id_proveedor) {
+    redirect(`/admin/pagos?editar=${id_pago}&error=proveedor-requerido`);
+  }
+
+  await validarProyectoPago(
+    tipo_pago,
+    id_cliente,
+    id_proyecto,
+    `/admin/pagos?editar=${id_pago}`
+  );
+
+  await prisma.pago.update({
+    where: {
+      id_pago,
+    },
+    data: {
+      tipo_pago,
+      fecha_pago: new Date(fecha_pago),
+      monto,
+      metodo_pago,
+      descripcion: descripcion || null,
+
+      id_cliente: tipo_pago === "cliente" ? id_cliente : null,
+      id_empleado: tipo_pago === "empleado" ? id_empleado : null,
+      id_proveedor: tipo_pago === "proveedor" ? id_proveedor : null,
+
+      id_proyecto,
+    },
+  });
+
+  revalidatePath("/admin/pagos");
+  redirect("/admin/pagos");
+}
+
 export default async function PagosPage({ searchParams }: PageProps) {
-  /*
-    Protege el módulo pagos.
-  */
   const user = await requireModule("pagos");
   const params = await searchParams;
 
   const roleName = getRoleName(user);
 
-  /*
-    Administrador:
-    - ve todos los pagos
-    - registra pagos
+  const isCliente = roleName === "Cliente";
+  const isCompras = roleName === "Compras";
+  const idClienteLogueado = user.id_cliente ?? 0;
 
-    Cliente:
-    - solo ve pagos donde id_cliente = user.id_cliente
-  */
- const isAdmin = roleName === "Administrador";
-const isCliente = roleName === "Cliente";
-const idClienteLogueado = user.id_cliente ?? 0;
-
-const canCreatePago = canDo(roleName, "pagos", "create");
   /*
-    Carga pagos y datos relacionados.
-    Si el usuario es cliente, se filtran pagos, clientes y proyectos.
+    Permisos reales.
+    Contabilidad debe tener:
+    pagos: ["view", "create", "edit"]
+    en lib/auth/permissions.ts
   */
+  const canCreatePago = canDo(roleName, "pagos", "create");
+  const canEditPago = canDo(roleName, "pagos", "edit");
+
+  const idEditar = Number(params?.editar);
+
+  /*
+    Filtros:
+    - Cliente: solo sus pagos.
+    - Compras: solo pagos a proveedores.
+    - Administrador y Contabilidad: todos los pagos.
+  */
+  const pagosWhere = isCliente
+    ? {
+        id_cliente: idClienteLogueado,
+      }
+    : isCompras
+    ? {
+        tipo_pago: "proveedor",
+      }
+    : undefined;
+
   const [pagos, clientes, empleados, proveedores, proyectos] =
     await Promise.all([
       prisma.pago.findMany({
-        where: isCliente
-          ? {
-              id_cliente: idClienteLogueado,
-            }
-          : undefined,
+        where: pagosWhere,
         orderBy: {
           id_pago: "desc",
         },
@@ -182,9 +306,17 @@ const canCreatePago = canDo(roleName, "pagos", "create");
           : undefined,
       }),
 
-      prisma.empleado.findMany(),
+      prisma.empleado.findMany({
+        orderBy: {
+          id_empleado: "asc",
+        },
+      }),
 
-      prisma.proveedor.findMany(),
+      prisma.proveedor.findMany({
+        orderBy: {
+          id_proveedor: "asc",
+        },
+      }),
 
       prisma.proyecto.findMany({
         where: isCliente
@@ -192,12 +324,21 @@ const canCreatePago = canDo(roleName, "pagos", "create");
               id_cliente: idClienteLogueado,
             }
           : undefined,
+        orderBy: {
+          id_proyecto: "asc",
+        },
       }),
     ]);
 
-  /*
-    Mapas para mostrar nombres en lugar de IDs.
-  */
+  const pagoEditar =
+    idEditar && canEditPago
+      ? await prisma.pago.findUnique({
+          where: {
+            id_pago: idEditar,
+          },
+        })
+      : null;
+
   const clienteMap = new Map(
     clientes.map((cliente) => [
       cliente.id_cliente,
@@ -245,7 +386,13 @@ const canCreatePago = canDo(roleName, "pagos", "create");
             <p className="mt-1 text-slate-600">
               {isCliente
                 ? "Consulta los pagos relacionados con tu cuenta."
-                : "Registro de pagos y cobros del sistema."}
+                : isCompras
+                ? "Consulta pagos relacionados a proveedores."
+                : "Registro y control de pagos del sistema."}
+            </p>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Rol actual: {roleName}
             </p>
           </div>
 
@@ -257,7 +404,7 @@ const canCreatePago = canDo(roleName, "pagos", "create");
           </Link>
         </div>
 
-        {/* Errores */}
+        {/* Mensajes de error */}
         {params?.error && (
           <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {params.error === "datos-obligatorios" &&
@@ -274,18 +421,27 @@ const canCreatePago = canDo(roleName, "pagos", "create");
 
             {params.error === "proveedor-requerido" &&
               "Para tipo de pago Proveedor, debes seleccionar un proveedor."}
+
+            {params.error === "proyecto-invalido" &&
+              "El proyecto seleccionado no existe."}
+
+            {params.error === "proyecto-no-corresponde" &&
+              "El proyecto seleccionado no pertenece al cliente elegido."}
+
+            {params.error === "id-invalido" &&
+              "El ID del pago no es válido."}
           </div>
         )}
 
         {/* Formulario crear pago */}
-        {canCreatePago && (
-           <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm"><h2 className="text-xl font-bold text-slate-900">
+        {canCreatePago && !pagoEditar && (
+          <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900">
               Registrar pago
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Selecciona el tipo de pago y relaciona solo una entidad principal:
-              cliente, empleado o proveedor.
+              Este formulario puede usarlo Administración o Contabilidad.
             </p>
 
             <form action={crearPago} className="mt-5 grid gap-4 md:grid-cols-2">
@@ -335,7 +491,6 @@ const canCreatePago = canDo(roleName, "pagos", "create");
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
                 <option value="">Cliente relacionado</option>
-
                 {clientes.map((cliente) => (
                   <option key={cliente.id_cliente} value={cliente.id_cliente}>
                     {clienteMap.get(cliente.id_cliente)}
@@ -348,7 +503,6 @@ const canCreatePago = canDo(roleName, "pagos", "create");
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
                 <option value="">Empleado relacionado</option>
-
                 {empleados.map((empleado) => (
                   <option
                     key={empleado.id_empleado}
@@ -364,7 +518,6 @@ const canCreatePago = canDo(roleName, "pagos", "create");
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
                 <option value="">Proveedor relacionado</option>
-
                 {proveedores.map((proveedor) => (
                   <option
                     key={proveedor.id_proveedor}
@@ -380,7 +533,6 @@ const canCreatePago = canDo(roleName, "pagos", "create");
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
                 <option value="">Proyecto relacionado opcional</option>
-
                 {proyectos.map((proyecto) => (
                   <option
                     key={proyecto.id_proyecto}
@@ -409,6 +561,160 @@ const canCreatePago = canDo(roleName, "pagos", "create");
           </section>
         )}
 
+        {/* Formulario editar pago */}
+        {canEditPago && pagoEditar && (
+          <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Editar pago
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Actualiza los datos del pago seleccionado.
+                </p>
+              </div>
+
+              <Link
+                href="/admin/pagos"
+                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
+              >
+                Cancelar
+              </Link>
+            </div>
+
+            <form action={editarPago} className="mt-5 grid gap-4 md:grid-cols-2">
+              <input
+                type="hidden"
+                name="id_pago"
+                defaultValue={pagoEditar.id_pago}
+              />
+
+              <select
+                name="tipo_pago"
+                defaultValue={pagoEditar.tipo_pago}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+              >
+                <option value="cliente">Cliente</option>
+                <option value="empleado">Empleado</option>
+                <option value="proveedor">Proveedor</option>
+              </select>
+
+              <select
+                name="metodo_pago"
+                defaultValue={pagoEditar.metodo_pago}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+              >
+                <option value="efectivo">Efectivo</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="deposito">Depósito</option>
+                <option value="cheque">Cheque</option>
+              </select>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Fecha de pago *
+                </label>
+
+                <input
+                  type="date"
+                  name="fecha_pago"
+                  defaultValue={new Date(pagoEditar.fecha_pago)
+                    .toISOString()
+                    .slice(0, 10)}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+              </div>
+
+              <input
+                type="number"
+                step="0.01"
+                name="monto"
+                placeholder="Monto *"
+                defaultValue={pagoEditar.monto.toString()}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+              />
+
+              <select
+                name="id_cliente"
+                defaultValue={pagoEditar.id_cliente ?? ""}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+              >
+                <option value="">Cliente relacionado</option>
+                {clientes.map((cliente) => (
+                  <option key={cliente.id_cliente} value={cliente.id_cliente}>
+                    {clienteMap.get(cliente.id_cliente)}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                name="id_empleado"
+                defaultValue={pagoEditar.id_empleado ?? ""}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+              >
+                <option value="">Empleado relacionado</option>
+                {empleados.map((empleado) => (
+                  <option
+                    key={empleado.id_empleado}
+                    value={empleado.id_empleado}
+                  >
+                    {empleado.nombres} {empleado.apellidos}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                name="id_proveedor"
+                defaultValue={pagoEditar.id_proveedor ?? ""}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+              >
+                <option value="">Proveedor relacionado</option>
+                {proveedores.map((proveedor) => (
+                  <option
+                    key={proveedor.id_proveedor}
+                    value={proveedor.id_proveedor}
+                  >
+                    {proveedor.nombre_proveedor}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                name="id_proyecto"
+                defaultValue={pagoEditar.id_proyecto ?? ""}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+              >
+                <option value="">Proyecto relacionado opcional</option>
+                {proyectos.map((proyecto) => (
+                  <option
+                    key={proyecto.id_proyecto}
+                    value={proyecto.id_proyecto}
+                  >
+                    {proyecto.nombre_proyecto}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                name="descripcion"
+                placeholder="Descripción"
+                defaultValue={pagoEditar.descripcion ?? ""}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+              />
+
+              <div className="md:col-span-2">
+                <button
+                  type="submit"
+                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                >
+                  Guardar cambios
+                </button>
+              </div>
+            </form>
+          </section>
+        )}
+
         {/* Tabla de pagos */}
         <section className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-sm">
           <table className="w-full border-collapse text-sm">
@@ -422,6 +728,10 @@ const canCreatePago = canDo(roleName, "pagos", "create");
                 <th className="border p-3 text-left">Relacionado</th>
                 <th className="border p-3 text-left">Proyecto</th>
                 <th className="border p-3 text-left">Descripción</th>
+
+                {canEditPago && (
+                  <th className="border p-3 text-left">Acciones</th>
+                )}
               </tr>
             </thead>
 
@@ -462,6 +772,17 @@ const canCreatePago = canDo(roleName, "pagos", "create");
                     <td className="border p-3">
                       {pago.descripcion ?? "-"}
                     </td>
+
+                    {canEditPago && (
+                      <td className="border p-3">
+                        <Link
+                          href={`/admin/pagos?editar=${pago.id_pago}`}
+                          className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white"
+                        >
+                          Editar
+                        </Link>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -469,7 +790,7 @@ const canCreatePago = canDo(roleName, "pagos", "create");
               {pagos.length === 0 && (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={canEditPago ? 9 : 8}
                     className="border p-6 text-center text-slate-500"
                   >
                     {isCliente

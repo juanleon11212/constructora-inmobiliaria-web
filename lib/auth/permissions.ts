@@ -185,7 +185,7 @@ export const roleActionPermissions: Record<
   Contabilidad: {
     clientes: ["view"],
     proyectos: ["view"],
-    pagos: ["view"],
+    pagos: ["view", "create", "edit"],
     reportes: ["view", "report"],
   },
 
@@ -434,14 +434,15 @@ export const roleModuleDetails: Record<
     pagos: {
       can: [
         "Ver pagos",
+        "Puede crear pagos",
+        "Puede editar pagos",
         "Consultar pagos de clientes",
         "Consultar pagos de empleados",
         "Consultar pagos de proveedores",
         "Consultar pagos relacionados a proyectos",
       ],
       cannot: [
-        "No puede crear pagos",
-        "No puede editar pagos",
+        
         "No puede eliminar pagos",
         "No puede registrar compras",
         "No puede modificar inventario",
