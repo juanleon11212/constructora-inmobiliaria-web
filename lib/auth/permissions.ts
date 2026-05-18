@@ -1,16 +1,3 @@
-/*
-  PERMISOS DEL SISTEMA
-
-  Aquí se define qué puede ver y qué puede hacer cada rol.
-
-  Importante:
-  Los permisos son por ROL, no por persona.
-
-  Ejemplo:
-  Todos los usuarios con rol "Contabilidad" tendrán los mismos permisos.
-  Todos los usuarios con rol "Almacen" tendrán los mismos permisos.
-*/
-
 export type AppModule =
   | "clientes"
   | "empleados"
@@ -60,13 +47,13 @@ export const allModules: ModuleItem[] = [
   {
     key: "materiales",
     title: "Materiales",
-    description: "Controlar materiales, inventario, almacenes y compras.",
+    description: "Controlar materiales, inventario, almacenes, proveedores y compras.",
     href: "/admin/materiales",
   },
   {
     key: "pagos",
     title: "Pagos",
-    description: "Consultar y registrar movimientos económicos.",
+    description: "Registrar y consultar pagos del sistema.",
     href: "/admin/pagos",
   },
   {
@@ -83,11 +70,6 @@ export const allModules: ModuleItem[] = [
   },
 ];
 
-/*
-  MÓDULOS VISIBLES POR ROL
-
-  Esto decide qué tarjetas aparecen en /admin.
-*/
 export const rolePermissions: Record<string, AppModule[]> = {
   Administrador: [
     "clientes",
@@ -99,59 +81,21 @@ export const rolePermissions: Record<string, AppModule[]> = {
     "usuarios",
   ],
 
-  "Encargado de Obra": [
-    "proyectos",
-    "materiales",
-    "reportes",
-  ],
+  "Encargado de Obra": ["proyectos", "materiales", "reportes"],
 
-  Almacen: [
-    "materiales",
-    "reportes",
-  ],
+  Almacen: ["materiales", "reportes"],
 
-  Almacén: [
-    "materiales",
-    "reportes",
-  ],
+  Almacén: ["materiales", "reportes"],
 
-  Contabilidad: [
-    "clientes",
-    "proyectos",
-    "pagos",
-    "reportes",
-  ],
+  Contabilidad: ["clientes", "proyectos", "pagos", "reportes"],
 
-  "Recursos Humanos": [
-    "empleados",
-    "reportes",
-  ],
+  "Recursos Humanos": ["empleados", "reportes"],
 
-  Compras: [
-    "materiales",
-    "pagos",
-    "reportes",
-  ],
+  Compras: ["materiales", "pagos", "reportes"],
 
-  Cliente: [
-    "proyectos",
-    "pagos",
-  ],
+  Cliente: ["proyectos", "pagos"],
 };
 
-/*
-  ACCIONES PERMITIDAS POR ROL
-
-  view      = ver
-  create    = crear
-  edit      = editar
-  delete    = eliminar o desactivar
-  manage    = administración completa
-  assign    = asignar
-  inventory = controlar inventario
-  purchase  = compras
-  report    = reportes
-*/
 export const roleActionPermissions: Record<
   string,
   Partial<Record<AppModule, AppAction[]>>
@@ -160,7 +104,15 @@ export const roleActionPermissions: Record<
     clientes: ["view", "create", "edit", "delete", "manage"],
     empleados: ["view", "create", "edit", "delete", "manage"],
     proyectos: ["view", "create", "edit", "delete", "assign", "manage"],
-    materiales: ["view", "create", "edit", "delete", "inventory", "purchase", "manage"],
+    materiales: [
+      "view",
+      "create",
+      "edit",
+      "delete",
+      "inventory",
+      "purchase",
+      "manage",
+    ],
     pagos: ["view", "create", "edit", "delete", "manage"],
     reportes: ["view", "report", "manage"],
     usuarios: ["view", "create", "edit", "delete", "manage"],
@@ -169,17 +121,17 @@ export const roleActionPermissions: Record<
   "Encargado de Obra": {
     proyectos: ["view", "edit", "assign"],
     materiales: ["view"],
-    reportes: ["view", "report"],
+    reportes: ["view"],
   },
 
   Almacen: {
     materiales: ["view", "create", "edit", "inventory"],
-    reportes: ["view", "report"],
+    reportes: ["view"],
   },
 
   Almacén: {
     materiales: ["view", "create", "edit", "inventory"],
-    reportes: ["view", "report"],
+    reportes: ["view"],
   },
 
   Contabilidad: {
@@ -191,13 +143,13 @@ export const roleActionPermissions: Record<
 
   "Recursos Humanos": {
     empleados: ["view", "create", "edit"],
-    reportes: ["view", "report"],
+    reportes: ["view"],
   },
 
   Compras: {
     materiales: ["view", "create", "edit", "purchase"],
     pagos: ["view"],
-    reportes: ["view", "report"],
+    reportes: ["view"],
   },
 
   Cliente: {
@@ -206,11 +158,6 @@ export const roleActionPermissions: Record<
   },
 };
 
-/*
-  TEXTO PARA MOSTRAR EN LA INTERFAZ
-
-  Esto aparece en /admin para explicar qué puede y qué no puede hacer cada rol.
-*/
 export const roleModuleDetails: Record<
   string,
   Partial<
@@ -224,121 +171,20 @@ export const roleModuleDetails: Record<
   >
 > = {
   Administrador: {
-    clientes: {
-      can: [
-        "Ver todos los clientes",
-        "Crear clientes",
-        "Editar clientes",
-        "Ver proyectos del cliente",
-        "Activar o desactivar clientes",
-      ],
-      cannot: [],
-    },
-    empleados: {
-      can: [
-        "Ver todos los empleados",
-        "Crear empleados",
-        "Editar empleados",
-        "Desactivar empleados",
-        "Relacionar empleados con cargos",
-      ],
-      cannot: [],
-    },
-    proyectos: {
-      can: [
-        "Ver todos los proyectos",
-        "Crear proyectos",
-        "Editar proyectos",
-        "Actualizar estado del proyecto",
-        "Eliminar proyectos de forma lógica",
-        "Asignar o controlar información de obra",
-      ],
-      cannot: [],
-    },
     materiales: {
       can: [
         "Ver materiales",
         "Crear materiales",
         "Editar materiales",
-        "Controlar inventario",
-        "Registrar información de compras",
-        "Consultar almacenes y proveedores",
+        "Controlar stock",
+        "Consultar inventario",
+        "Ver almacenes",
+        "Crear proveedores",
+        "Editar proveedores",
+        "Registrar compras de materiales",
+        "Ver compras realizadas",
       ],
       cannot: [],
-    },
-    pagos: {
-      can: [
-        "Ver todos los pagos",
-        "Registrar pagos",
-        "Relacionar pagos con clientes, empleados o proveedores",
-        "Relacionar pagos con proyectos",
-      ],
-      cannot: [],
-    },
-    reportes: {
-      can: [
-        "Ver reportes generales",
-        "Ver reportes de clientes",
-        "Ver reportes de empleados",
-        "Ver reportes de proyectos",
-        "Ver reportes de materiales",
-        "Ver reportes de pagos",
-      ],
-      cannot: [],
-    },
-    usuarios: {
-      can: [
-        "Ver usuarios internos",
-        "Crear usuarios para empleados",
-        "Editar usuarios",
-        "Asignar roles",
-        "Desactivar cuentas",
-      ],
-      cannot: [],
-    },
-  },
-
-  "Encargado de Obra": {
-    proyectos: {
-      can: [
-        "Ver proyectos",
-        "Gestionar información operativa de obra",
-        "Actualizar avances u observaciones de obra",
-        "Revisar estado del proyecto",
-        "Consultar empleados asignados a obra cuando se implemente esa parte",
-      ],
-      cannot: [
-        "No puede crear proyectos desde cero",
-        "No puede eliminar proyectos",
-        "No puede crear usuarios",
-        "No puede registrar pagos",
-        "No puede editar clientes",
-      ],
-    },
-    materiales: {
-      can: [
-        "Ver materiales disponibles",
-        "Consultar materiales usados en obra",
-        "Revisar disponibilidad de materiales",
-      ],
-      cannot: [
-        "No puede registrar compras",
-        "No puede modificar pagos",
-        "No puede administrar usuarios",
-        "No puede editar clientes",
-      ],
-    },
-    reportes: {
-      can: [
-        "Ver reportes de obra",
-        "Ver reportes de proyectos",
-        "Ver reportes de materiales relacionados a obra",
-      ],
-      cannot: [
-        "No puede ver reportes financieros completos",
-        "No puede ver reportes de usuarios",
-        "No puede cambiar roles",
-      ],
     },
   },
 
@@ -351,13 +197,16 @@ export const roleModuleDetails: Record<
         "Controlar stock",
         "Consultar inventario",
         "Ver almacenes",
+        "Actualizar cantidad disponible por material y almacén",
       ],
       cannot: [
-        "No puede crear usuarios",
-        "No puede editar clientes",
+        "No puede registrar compras",
+        "No puede gestionar proveedores",
         "No puede registrar pagos",
         "No puede crear proyectos",
+        "No puede editar clientes",
         "No puede editar empleados",
+        "No puede administrar usuarios",
       ],
     },
     reportes: {
@@ -382,13 +231,16 @@ export const roleModuleDetails: Record<
         "Controlar stock",
         "Consultar inventario",
         "Ver almacenes",
+        "Actualizar cantidad disponible por material y almacén",
       ],
       cannot: [
-        "No puede crear usuarios",
-        "No puede editar clientes",
+        "No puede registrar compras",
+        "No puede gestionar proveedores",
         "No puede registrar pagos",
         "No puede crear proyectos",
+        "No puede editar clientes",
         "No puede editar empleados",
+        "No puede administrar usuarios",
       ],
     },
     reportes: {
@@ -404,111 +256,33 @@ export const roleModuleDetails: Record<
     },
   },
 
-  Contabilidad: {
-    clientes: {
-      can: [
-        "Ver clientes",
-        "Consultar datos de clientes",
-        "Consultar pagos relacionados al cliente",
-      ],
-      cannot: [
-        "No puede crear clientes",
-        "No puede editar clientes",
-        "No puede eliminar clientes",
-        "No puede crear usuarios",
-      ],
-    },
-    proyectos: {
-      can: [
-        "Ver proyectos",
-        "Consultar datos del proyecto",
-        "Consultar pagos relacionados al proyecto",
-      ],
-      cannot: [
-        "No puede crear proyectos",
-        "No puede editar proyectos",
-        "No puede eliminar proyectos",
-        "No puede registrar avance de obra",
-      ],
-    },
-    pagos: {
-      can: [
-        "Ver pagos",
-        "Puede crear pagos",
-        "Puede editar pagos",
-        "Consultar pagos de clientes",
-        "Consultar pagos de empleados",
-        "Consultar pagos de proveedores",
-        "Consultar pagos relacionados a proyectos",
-      ],
-      cannot: [
-        
-        "No puede eliminar pagos",
-        "No puede registrar compras",
-        "No puede modificar inventario",
-      ],
-    },
-    reportes: {
-      can: [
-        "Ver reportes financieros",
-        "Ver resumen de pagos",
-        "Ver resumen de clientes",
-        "Ver resumen de proyectos",
-      ],
-      cannot: [
-        "No puede administrar usuarios",
-        "No puede modificar inventario",
-        "No puede crear compras",
-      ],
-    },
-  },
-
-  "Recursos Humanos": {
-    empleados: {
-      can: [
-        "Ver empleados",
-        "Crear empleados",
-        "Editar empleados",
-        "Cambiar estado del empleado",
-        "Consultar cargos",
-      ],
-      cannot: [
-        "No puede crear usuarios",
-        "No puede eliminar usuarios",
-        "No puede registrar pagos",
-        "No puede crear proyectos",
-        "No puede editar clientes",
-        "No puede modificar materiales",
-      ],
-    },
-    reportes: {
-      can: [
-        "Ver reportes de empleados",
-        "Consultar personal activo e inactivo",
-        "Consultar información laboral",
-      ],
-      cannot: [
-        "No puede ver reportes financieros completos",
-        "No puede cambiar roles",
-      ],
-    },
-  },
-
   Compras: {
     materiales: {
       can: [
         "Ver materiales",
-        "Registrar información relacionada a compras",
-        "Editar datos relacionados a materiales comprados",
-        "Consultar proveedores cuando se implemente la vista de proveedores",
-        "Consultar materiales necesarios para proyectos",
+        "Crear materiales",
+        "Editar materiales",
+        "Ver proveedores",
+        "Crear proveedores",
+        "Editar proveedores",
+        "Registrar compras de materiales",
+        "Seleccionar proveedor",
+        "Seleccionar proyecto relacionado",
+        "Seleccionar almacén destino",
+        "Registrar número de factura",
+        "Registrar estado de pago de la compra",
+        "Ver compras realizadas",
       ],
       cannot: [
+        "No puede controlar stock directamente",
+        "No puede modificar inventario manualmente",
         "No puede crear usuarios",
         "No puede editar empleados",
         "No puede editar clientes",
         "No puede crear proyectos",
         "No puede registrar pagos de clientes",
+        "No puede registrar pagos a empleados",
+        "No puede cambiar roles",
       ],
     },
     pagos: {
@@ -519,48 +293,110 @@ export const roleModuleDetails: Record<
       cannot: [
         "No puede registrar pagos de clientes",
         "No puede registrar pagos a empleados",
-        "No puede editar pagos",
+        "No puede editar pagos generales",
         "No puede eliminar pagos",
       ],
     },
     reportes: {
       can: [
         "Ver reportes de compras",
-        "Ver reportes de materiales",
-        "Ver resumen de proveedores",
-        "Ver pagos relacionados a proveedores",
+        "Ver reportes de proveedores",
+        "Ver materiales comprados",
       ],
       cannot: [
-        "No puede ver reportes de usuarios",
-        "No puede administrar roles",
-        "No puede ver reportes completos de empleados",
+        "No puede ver reportes completos de usuarios",
+        "No puede cambiar roles",
       ],
+    },
+  },
+
+  Contabilidad: {
+    clientes: {
+      can: ["Ver clientes", "Consultar datos de clientes"],
+      cannot: ["No puede crear clientes", "No puede editar clientes"],
+    },
+    proyectos: {
+      can: ["Ver proyectos", "Consultar información de proyectos"],
+      cannot: ["No puede crear proyectos", "No puede editar proyectos"],
+    },
+    pagos: {
+      can: [
+        "Ver pagos",
+        "Registrar pagos",
+        "Editar pagos",
+        "Consultar pagos de clientes",
+        "Consultar pagos de empleados",
+        "Consultar pagos de proveedores",
+      ],
+      cannot: [
+        "No puede eliminar pagos",
+        "No puede registrar compras",
+        "No puede modificar inventario",
+      ],
+    },
+    reportes: {
+      can: ["Ver reportes financieros", "Ver resumen de pagos"],
+      cannot: ["No puede administrar usuarios"],
+    },
+  },
+
+  "Encargado de Obra": {
+    proyectos: {
+      can: [
+        "Ver proyectos",
+        "Gestionar información operativa de obra",
+        "Actualizar avances u observaciones",
+      ],
+      cannot: [
+        "No puede registrar pagos",
+        "No puede crear usuarios",
+        "No puede editar clientes",
+      ],
+    },
+    materiales: {
+      can: [
+        "Ver materiales disponibles",
+        "Consultar materiales usados en obra",
+      ],
+      cannot: [
+        "No puede registrar compras",
+        "No puede controlar inventario",
+      ],
+    },
+    reportes: {
+      can: ["Ver reportes de obra"],
+      cannot: ["No puede ver reportes financieros completos"],
+    },
+  },
+
+  "Recursos Humanos": {
+    empleados: {
+      can: [
+        "Ver empleados",
+        "Crear empleados",
+        "Editar empleados",
+        "Cambiar estado de empleados",
+      ],
+      cannot: [
+        "No puede registrar pagos",
+        "No puede modificar materiales",
+        "No puede crear proyectos",
+      ],
+    },
+    reportes: {
+      can: ["Ver reportes de empleados"],
+      cannot: ["No puede ver reportes financieros completos"],
     },
   },
 
   Cliente: {
     proyectos: {
-      can: [
-        "Ver solo sus proyectos",
-        "Consultar estado de avance",
-        "Ver información relacionada con sus obras",
-      ],
-      cannot: [
-        "No puede ver proyectos de otros clientes",
-        "No puede crear proyectos",
-        "No puede editar proyectos",
-      ],
+      can: ["Ver solo sus proyectos", "Consultar estado de sus obras"],
+      cannot: ["No puede crear ni editar proyectos"],
     },
     pagos: {
-      can: [
-        "Ver solo sus pagos",
-        "Consultar pagos realizados o pendientes",
-      ],
-      cannot: [
-        "No puede ver pagos de otros clientes",
-        "No puede registrar pagos",
-        "No puede editar pagos",
-      ],
+      can: ["Ver solo sus pagos"],
+      cannot: ["No puede registrar ni editar pagos"],
     },
   },
 };
@@ -568,7 +404,8 @@ export const roleModuleDetails: Record<
 export function getModulesByRole(roleName?: string | null) {
   if (!roleName) return [];
 
-  const allowedModules = rolePermissions[roleName] ?? [];
+  const cleanRoleName = roleName.trim();
+  const allowedModules = rolePermissions[cleanRoleName] ?? [];
 
   return allModules.filter((module) => allowedModules.includes(module.key));
 }
@@ -579,7 +416,9 @@ export function canAccessModule(
 ) {
   if (!roleName) return false;
 
-  return rolePermissions[roleName]?.includes(module) ?? false;
+  const cleanRoleName = roleName.trim();
+
+  return rolePermissions[cleanRoleName]?.includes(module) ?? false;
 }
 
 export function canDo(
@@ -589,12 +428,18 @@ export function canDo(
 ) {
   if (!roleName) return false;
 
-  return roleActionPermissions[roleName]?.[module]?.includes(action) ?? false;
+  const cleanRoleName = roleName.trim();
+
+  return (
+    roleActionPermissions[cleanRoleName]?.[module]?.includes(action) ?? false
+  );
 }
 
 export function getModuleDetails(roleName: string, module: AppModule) {
+  const cleanRoleName = roleName.trim();
+
   return (
-    roleModuleDetails[roleName]?.[module] ?? {
+    roleModuleDetails[cleanRoleName]?.[module] ?? {
       can: ["Ver información permitida para este rol."],
       cannot: ["No puede acceder a funciones no asignadas a su rol."],
     }
@@ -608,18 +453,18 @@ export function getRoleSummary(roleName: string) {
     "Encargado de Obra":
       "Gestiona información operativa de proyectos, obra y materiales.",
     Almacen:
-      "Controla materiales, almacenes, inventario y reportes de stock.",
+      "Controla materiales, inventario, stock y almacenes.",
     Almacén:
-      "Controla materiales, almacenes, inventario y reportes de stock.",
+      "Controla materiales, inventario, stock y almacenes.",
     Contabilidad:
-      "Consulta clientes, proyectos, pagos y reportes financieros. No crea ni edita pagos.",
+      "Gestiona pagos, clientes, proyectos y reportes financieros.",
     "Recursos Humanos":
-      "Gestiona empleados, cargos y reportes relacionados al personal.",
+      "Gestiona empleados, cargos y reportes del personal.",
     Compras:
-      "Gestiona materiales, compras y reportes relacionados a proveedores.",
+      "Gestiona proveedores, compras de materiales y reportes de compras.",
     Cliente:
       "Consulta únicamente sus proyectos y sus pagos.",
   };
 
-  return summaries[roleName] ?? "Rol con permisos limitados.";
+  return summaries[roleName.trim()] ?? "Rol con permisos limitados.";
 }
