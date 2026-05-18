@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
-
+import { canDo } from "../../../lib/auth/permissions";
 /*
   MÓDULO PAGOS
 
@@ -11,9 +11,17 @@ import { requireModule } from "../../../lib/auth/require-permission";
   /admin/pagos
 
   Qué hace:
-  - Lista pagos.
-  - Crea pagos.
-  - Los pagos pueden ser de cliente, empleado o proveedor.
+  - Administrador puede ver todos los pagos.
+  - Administrador puede registrar pagos.
+  - Cliente solo ve pagos relacionados con su id_cliente.
+
+  Regla importante:
+  En un pago solo se debe llenar uno de estos:
+  - id_cliente
+  - id_empleado
+  - id_proveedor
+
+  id_proyecto es opcional y puede acompañar a cualquiera.
 */
 
 type PageProps = {
@@ -22,17 +30,44 @@ type PageProps = {
   }>;
 };
 
+/*
+  Lee texto limpio desde FormData.
+*/
 function getText(formData: FormData, field: string) {
   return String(formData.get(field) ?? "").trim();
 }
 
+/*
+  Obtiene el nombre del rol de forma segura.
+*/
+function getRoleName(user: { rol: unknown }) {
+  if (typeof user.rol === "string") {
+    return user.rol;
+  }
+
+  if (
+    user.rol &&
+    typeof user.rol === "object" &&
+    "nombre_rol" in user.rol
+  ) {
+    return String(
+      (user.rol as { nombre_rol?: string | null }).nombre_rol ?? ""
+    );
+  }
+
+  return "";
+}
+
+/*
+  CREAR PAGO
+
+  Solo el administrador puede registrar pagos.
+*/
 async function crearPago(formData: FormData) {
   "use server";
 
   const user = await requireModule("pagos");
-
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
   if (roleName !== "Administrador") {
     redirect("/admin/pagos");
@@ -57,6 +92,28 @@ async function crearPago(formData: FormData) {
     redirect("/admin/pagos?error=monto-invalido");
   }
 
+  /*
+    Validación lógica:
+    Si tipo_pago es cliente, debe seleccionar cliente.
+    Si tipo_pago es empleado, debe seleccionar empleado.
+    Si tipo_pago es proveedor, debe seleccionar proveedor.
+  */
+  if (tipo_pago === "cliente" && !id_cliente) {
+    redirect("/admin/pagos?error=cliente-requerido");
+  }
+
+  if (tipo_pago === "empleado" && !id_empleado) {
+    redirect("/admin/pagos?error=empleado-requerido");
+  }
+
+  if (tipo_pago === "proveedor" && !id_proveedor) {
+    redirect("/admin/pagos?error=proveedor-requerido");
+  }
+
+  /*
+    Solo se guarda una relación principal según el tipo de pago.
+    Esto evita llenar cliente, empleado y proveedor al mismo tiempo.
+  */
   await prisma.pago.create({
     data: {
       tipo_pago,
@@ -64,9 +121,11 @@ async function crearPago(formData: FormData) {
       monto,
       metodo_pago,
       descripcion: descripcion || null,
-      id_cliente,
-      id_empleado,
-      id_proveedor,
+
+      id_cliente: tipo_pago === "cliente" ? id_cliente : null,
+      id_empleado: tipo_pago === "empleado" ? id_empleado : null,
+      id_proveedor: tipo_pago === "proveedor" ? id_proveedor : null,
+
       id_proyecto,
       id_usuario_registro: user.id_usuario ?? null,
     },
@@ -77,27 +136,68 @@ async function crearPago(formData: FormData) {
 }
 
 export default async function PagosPage({ searchParams }: PageProps) {
+  /*
+    Protege el módulo pagos.
+  */
   const user = await requireModule("pagos");
   const params = await searchParams;
 
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
-  const isAdmin = roleName === "Administrador";
+  /*
+    Administrador:
+    - ve todos los pagos
+    - registra pagos
 
+    Cliente:
+    - solo ve pagos donde id_cliente = user.id_cliente
+  */
+ const isAdmin = roleName === "Administrador";
+const isCliente = roleName === "Cliente";
+const idClienteLogueado = user.id_cliente ?? 0;
+
+const canCreatePago = canDo(roleName, "pagos", "create");
+  /*
+    Carga pagos y datos relacionados.
+    Si el usuario es cliente, se filtran pagos, clientes y proyectos.
+  */
   const [pagos, clientes, empleados, proveedores, proyectos] =
     await Promise.all([
       prisma.pago.findMany({
+        where: isCliente
+          ? {
+              id_cliente: idClienteLogueado,
+            }
+          : undefined,
         orderBy: {
           id_pago: "desc",
         },
       }),
-      prisma.cliente.findMany(),
+
+      prisma.cliente.findMany({
+        where: isCliente
+          ? {
+              id_cliente: idClienteLogueado,
+            }
+          : undefined,
+      }),
+
       prisma.empleado.findMany(),
+
       prisma.proveedor.findMany(),
-      prisma.proyecto.findMany(),
+
+      prisma.proyecto.findMany({
+        where: isCliente
+          ? {
+              id_cliente: idClienteLogueado,
+            }
+          : undefined,
+      }),
     ]);
 
+  /*
+    Mapas para mostrar nombres en lugar de IDs.
+  */
   const clienteMap = new Map(
     clientes.map((cliente) => [
       cliente.id_cliente,
@@ -131,12 +231,21 @@ export default async function PagosPage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-7xl">
+        {/* Encabezado */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-blue-700">Módulo Pagos</p>
-            <h1 className="text-3xl font-bold text-slate-900">Pagos</h1>
+            <p className="text-sm font-medium text-blue-700">
+              Módulo Pagos
+            </p>
+
+            <h1 className="text-3xl font-bold text-slate-900">
+              {isCliente ? "Mis pagos" : "Pagos"}
+            </h1>
+
             <p className="mt-1 text-slate-600">
-              Registro de pagos y cobros del sistema.
+              {isCliente
+                ? "Consulta los pagos relacionados con tu cuenta."
+                : "Registro de pagos y cobros del sistema."}
             </p>
           </div>
 
@@ -148,21 +257,35 @@ export default async function PagosPage({ searchParams }: PageProps) {
           </Link>
         </div>
 
+        {/* Errores */}
         {params?.error && (
           <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {params.error === "datos-obligatorios" &&
               "Tipo de pago, fecha, monto y método son obligatorios."}
+
             {params.error === "monto-invalido" &&
               "El monto debe ser mayor a cero."}
+
+            {params.error === "cliente-requerido" &&
+              "Para tipo de pago Cliente, debes seleccionar un cliente."}
+
+            {params.error === "empleado-requerido" &&
+              "Para tipo de pago Empleado, debes seleccionar un empleado."}
+
+            {params.error === "proveedor-requerido" &&
+              "Para tipo de pago Proveedor, debes seleccionar un proveedor."}
           </div>
         )}
 
-        {isAdmin && (
-          <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900">Crear pago</h2>
+        {/* Formulario crear pago */}
+        {canCreatePago && (
+           <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm"><h2 className="text-xl font-bold text-slate-900">
+              Registrar pago
+            </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Este formulario guarda un movimiento en la tabla pago.
+              Selecciona el tipo de pago y relaciona solo una entidad principal:
+              cliente, empleado o proveedor.
             </p>
 
             <form action={crearPago} className="mt-5 grid gap-4 md:grid-cols-2">
@@ -187,11 +310,17 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 <option value="cheque">Cheque</option>
               </select>
 
-              <input
-                type="date"
-                name="fecha_pago"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              />
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Fecha de pago *
+                </label>
+
+                <input
+                  type="date"
+                  name="fecha_pago"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+              </div>
 
               <input
                 type="number"
@@ -206,6 +335,7 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
                 <option value="">Cliente relacionado</option>
+
                 {clientes.map((cliente) => (
                   <option key={cliente.id_cliente} value={cliente.id_cliente}>
                     {clienteMap.get(cliente.id_cliente)}
@@ -218,8 +348,12 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
                 <option value="">Empleado relacionado</option>
+
                 {empleados.map((empleado) => (
-                  <option key={empleado.id_empleado} value={empleado.id_empleado}>
+                  <option
+                    key={empleado.id_empleado}
+                    value={empleado.id_empleado}
+                  >
                     {empleado.nombres} {empleado.apellidos}
                   </option>
                 ))}
@@ -230,6 +364,7 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
                 <option value="">Proveedor relacionado</option>
+
                 {proveedores.map((proveedor) => (
                   <option
                     key={proveedor.id_proveedor}
@@ -244,9 +379,13 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 name="id_proyecto"
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
-                <option value="">Proyecto relacionado</option>
+                <option value="">Proyecto relacionado opcional</option>
+
                 {proyectos.map((proyecto) => (
-                  <option key={proyecto.id_proyecto} value={proyecto.id_proyecto}>
+                  <option
+                    key={proyecto.id_proyecto}
+                    value={proyecto.id_proyecto}
+                  >
                     {proyecto.nombre_proyecto}
                   </option>
                 ))}
@@ -270,6 +409,7 @@ export default async function PagosPage({ searchParams }: PageProps) {
           </section>
         )}
 
+        {/* Tabla de pagos */}
         <section className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-sm">
           <table className="w-full border-collapse text-sm">
             <thead className="bg-slate-200">
@@ -281,38 +421,63 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 <th className="border p-3 text-left">Método</th>
                 <th className="border p-3 text-left">Relacionado</th>
                 <th className="border p-3 text-left">Proyecto</th>
+                <th className="border p-3 text-left">Descripción</th>
               </tr>
             </thead>
 
             <tbody>
               {pagos.map((pago) => {
-                const relacionado =
-                  pago.id_cliente
-                    ? clienteMap.get(pago.id_cliente)
-                    : pago.id_empleado
-                    ? empleadoMap.get(pago.id_empleado)
-                    : pago.id_proveedor
-                    ? proveedorMap.get(pago.id_proveedor)
-                    : "-";
+                const relacionado = pago.id_cliente
+                  ? clienteMap.get(pago.id_cliente)
+                  : pago.id_empleado
+                  ? empleadoMap.get(pago.id_empleado)
+                  : pago.id_proveedor
+                  ? proveedorMap.get(pago.id_proveedor)
+                  : "-";
 
                 return (
                   <tr key={pago.id_pago} className="hover:bg-slate-50">
                     <td className="border p-3">{pago.id_pago}</td>
+
                     <td className="border p-3">{pago.tipo_pago}</td>
+
                     <td className="border p-3">
                       {new Date(pago.fecha_pago).toISOString().slice(0, 10)}
                     </td>
-                    <td className="border p-3">{pago.monto.toString()}</td>
+
+                    <td className="border p-3">
+                      Bs. {pago.monto.toString()}
+                    </td>
+
                     <td className="border p-3">{pago.metodo_pago}</td>
+
                     <td className="border p-3">{relacionado}</td>
+
                     <td className="border p-3">
                       {pago.id_proyecto
                         ? proyectoMap.get(pago.id_proyecto) ?? "-"
                         : "-"}
                     </td>
+
+                    <td className="border p-3">
+                      {pago.descripcion ?? "-"}
+                    </td>
                   </tr>
                 );
               })}
+
+              {pagos.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="border p-6 text-center text-slate-500"
+                  >
+                    {isCliente
+                      ? "No tienes pagos registrados."
+                      : "No hay pagos registrados."}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </section>

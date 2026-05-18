@@ -11,15 +11,15 @@ import { requireModule } from "../../../lib/auth/require-permission";
   /admin/proyectos
 
   Qué hace:
-  - Lista proyectos activos.
-  - Crea proyectos.
-  - Edita proyectos.
-  - Cambia el estado del proyecto.
-  - Elimina proyectos de forma lógica cambiando estado a "eliminado".
+  - Administrador puede ver todos los proyectos.
+  - Administrador puede crear proyectos.
+  - Administrador puede editar proyectos.
+  - Administrador puede eliminar proyectos de forma lógica.
+  - Cliente solo puede ver sus propios proyectos.
 
   Importante:
-  No se borra físicamente para no romper contratos, pagos,
-  presupuestos o controles relacionados.
+  - El cliente se filtra por user.id_cliente.
+  - El administrador no tiene filtro, ve todo.
 */
 
 type PageProps = {
@@ -29,22 +29,44 @@ type PageProps = {
   }>;
 };
 
+/*
+  Lee campos del formulario y los convierte a texto limpio.
+*/
 function getText(formData: FormData, field: string) {
   return String(formData.get(field) ?? "").trim();
 }
 
 /*
+  Obtiene el nombre del rol sin causar errores de TypeScript.
+*/
+function getRoleName(user: { rol: unknown }) {
+  if (typeof user.rol === "string") {
+    return user.rol;
+  }
+
+  if (
+    user.rol &&
+    typeof user.rol === "object" &&
+    "nombre_rol" in user.rol
+  ) {
+    return String(
+      (user.rol as { nombre_rol?: string | null }).nombre_rol ?? ""
+    );
+  }
+
+  return "";
+}
+
+/*
   CREAR PROYECTO
 
-  Guarda un nuevo proyecto relacionado con un cliente.
+  Solo el administrador puede crear proyectos.
 */
 async function crearProyecto(formData: FormData) {
   "use server";
 
   const user = await requireModule("proyectos");
-
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
   if (roleName !== "Administrador") {
     redirect("/admin/proyectos");
@@ -85,16 +107,19 @@ async function crearProyecto(formData: FormData) {
 /*
   EDITAR PROYECTO
 
-  Actualiza los datos principales del proyecto:
-  nombre, descripción, ubicación, fechas, cliente y estado.
+  Permite actualizar:
+  - Nombre
+  - Cliente
+  - Ubicación
+  - Descripción
+  - Fechas
+  - Estado
 */
 async function editarProyecto(formData: FormData) {
   "use server";
 
   const user = await requireModule("proyectos");
-
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
   if (roleName !== "Administrador") {
     redirect("/admin/proyectos");
@@ -144,16 +169,15 @@ async function editarProyecto(formData: FormData) {
 /*
   ELIMINAR PROYECTO
 
-  No elimina físicamente.
-  Cambia el estado a "eliminado" para ocultarlo de la lista principal.
+  No borra físicamente de la base.
+  Cambia el estado a "eliminado".
+  Luego la lista oculta proyectos con estado eliminado.
 */
 async function eliminarProyecto(formData: FormData) {
   "use server";
 
   const user = await requireModule("proyectos");
-
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
   if (roleName !== "Administrador") {
     redirect("/admin/proyectos");
@@ -179,44 +203,82 @@ async function eliminarProyecto(formData: FormData) {
 }
 
 export default async function ProyectosPage({ searchParams }: PageProps) {
+  /*
+    Protege el módulo.
+    Solo usuarios con permiso de proyectos pueden entrar.
+  */
   const user = await requireModule("proyectos");
+
   const params = await searchParams;
 
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
+  /*
+    Administrador:
+    - ve todo
+    - crea
+    - edita
+    - elimina
+
+    Cliente:
+    - solo ve sus proyectos
+  */
   const isAdmin = roleName === "Administrador";
+  const isCliente = roleName === "Cliente";
+  const idClienteLogueado = user.id_cliente ?? 0;
 
   const idEditar = Number(params?.editar);
 
+  /*
+    Si entra cliente, solo cargamos su propio cliente.
+    Si entra administrador, cargamos todos.
+  */
   const clientes = await prisma.cliente.findMany({
+    where: isCliente
+      ? {
+          id_cliente: idClienteLogueado,
+        }
+      : undefined,
     orderBy: {
       id_cliente: "asc",
     },
   });
 
   /*
-    Lista proyectos menos los eliminados.
+    Si entra cliente, solo trae proyectos de ese cliente.
+    Si entra administrador, trae todos los proyectos no eliminados.
   */
   const proyectos = await prisma.proyecto.findMany({
     where: {
       estado: {
         not: "eliminado",
       },
+      ...(isCliente
+        ? {
+            id_cliente: idClienteLogueado,
+          }
+        : {}),
     },
     orderBy: {
       id_proyecto: "desc",
     },
   });
 
-  const proyectoEditar = idEditar
-    ? await prisma.proyecto.findUnique({
-        where: {
-          id_proyecto: idEditar,
-        },
-      })
-    : null;
+  /*
+    Proyecto seleccionado para editar.
+  */
+  const proyectoEditar =
+    idEditar && isAdmin
+      ? await prisma.proyecto.findUnique({
+          where: {
+            id_proyecto: idEditar,
+          },
+        })
+      : null;
 
+  /*
+    Mapa para mostrar el nombre del cliente en la tabla.
+  */
   const clienteMap = new Map(
     clientes.map((cliente) => [
       cliente.id_cliente,
@@ -229,6 +291,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-7xl">
+        {/* Encabezado */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-medium text-blue-700">
@@ -236,11 +299,13 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
             </p>
 
             <h1 className="text-3xl font-bold text-slate-900">
-              Proyectos
+              {isCliente ? "Mis proyectos" : "Proyectos"}
             </h1>
 
             <p className="mt-1 text-slate-600">
-              Administración de obras y proyectos.
+              {isCliente
+                ? "Consulta los proyectos asociados a tu cuenta."
+                : "Administración de obras y proyectos."}
             </p>
           </div>
 
@@ -252,6 +317,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
           </Link>
         </div>
 
+        {/* Errores */}
         {params?.error && (
           <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {params.error === "datos-obligatorios" &&
@@ -262,6 +328,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
           </div>
         )}
 
+        {/* Formulario crear proyecto */}
         {isAdmin && !proyectoEditar && (
           <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900">
@@ -287,6 +354,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
                 <option value="">Selecciona cliente *</option>
+
                 {clientes.map((cliente) => (
                   <option key={cliente.id_cliente} value={cliente.id_cliente}>
                     {clienteMap.get(cliente.id_cliente)}
@@ -310,6 +378,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Fecha inicio *
                 </label>
+
                 <input
                   type="date"
                   name="fecha_inicio"
@@ -321,6 +390,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Fecha fin estimada
                 </label>
+
                 <input
                   type="date"
                   name="fecha_fin_estimada"
@@ -351,6 +421,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
           </section>
         )}
 
+        {/* Formulario editar proyecto */}
         {isAdmin && proyectoEditar && (
           <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-4">
@@ -360,7 +431,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Actualiza datos y estado del proyecto.
+                  Actualiza datos, fechas y estado del proyecto.
                 </p>
               </div>
 
@@ -419,6 +490,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Fecha inicio *
                 </label>
+
                 <input
                   type="date"
                   name="fecha_inicio"
@@ -433,6 +505,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Fecha fin estimada
                 </label>
+
                 <input
                   type="date"
                   name="fecha_fin_estimada"
@@ -451,6 +524,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Fecha fin real
                 </label>
+
                 <input
                   type="date"
                   name="fecha_fin_real"
@@ -488,6 +562,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
           </section>
         )}
 
+        {/* Tabla de proyectos */}
         <section className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-sm">
           <table className="w-full border-collapse text-sm">
             <thead className="bg-slate-200">
@@ -498,7 +573,9 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 <th className="border p-3 text-left">Ubicación</th>
                 <th className="border p-3 text-left">Inicio</th>
                 <th className="border p-3 text-left">Estado</th>
-                <th className="border p-3 text-left">Acciones</th>
+                {isAdmin && (
+                  <th className="border p-3 text-left">Acciones</th>
+                )}
               </tr>
             </thead>
 
@@ -525,8 +602,8 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
 
                   <td className="border p-3">{proyecto.estado}</td>
 
-                  <td className="border p-3">
-                    {isAdmin && (
+                  {isAdmin && (
+                    <td className="border p-3">
                       <div className="flex gap-2">
                         <Link
                           href={`/admin/proyectos?editar=${proyecto.id_proyecto}`}
@@ -550,18 +627,20 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                           </button>
                         </form>
                       </div>
-                    )}
-                  </td>
+                    </td>
+                  )}
                 </tr>
               ))}
 
               {proyectos.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={isAdmin ? 7 : 6}
                     className="border p-6 text-center text-slate-500"
                   >
-                    No hay proyectos registrados.
+                    {isCliente
+                      ? "No tienes proyectos registrados."
+                      : "No hay proyectos registrados."}
                   </td>
                 </tr>
               )}
