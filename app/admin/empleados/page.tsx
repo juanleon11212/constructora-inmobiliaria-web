@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
-
+import RoleCargoSelect from "../../../components/froms/RoleCargoSelect";
 /*
   MÓDULO EMPLEADOS
 
@@ -245,6 +245,16 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
       nombre_cargo: "asc",
     },
   });
+  const rolesLaborales = await prisma.rol.findMany({
+  where: {
+    nombre_rol: {
+      notIn: ["Administrador", "Cliente"],
+    },
+  },
+  orderBy: {
+    id_rol: "asc",
+  },
+});
 
   /*
     Lista de empleados registrados.
@@ -272,6 +282,15 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
   const cargoMap = new Map(
     cargos.map((cargo) => [cargo.id_cargo, cargo.nombre_cargo])
   );
+  const rolesParaCargo = rolesLaborales.map((rol) => ({
+  id_rol: rol.id_rol,
+  nombre_rol: rol.nombre_rol,
+}));
+
+const cargosParaSelector = cargos.map((cargo) => ({
+  id_cargo: cargo.id_cargo,
+  nombre_cargo: cargo.nombre_cargo,
+}));
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -383,18 +402,10 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                 />
               </div>
 
-              <select
-                name="id_cargo"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
-                <option value="">Selecciona cargo *</option>
-
-                {cargos.map((cargo) => (
-                  <option key={cargo.id_cargo} value={cargo.id_cargo}>
-                    {cargo.nombre_cargo}
-                  </option>
-                ))}
-              </select>
+              <RoleCargoSelect
+                roles={rolesParaCargo}
+                cargos={cargosParaSelector}
+              />
 
               <select
                 name="estado"
@@ -522,19 +533,11 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                 />
               </div>
 
-              <select
-                name="id_cargo"
-                defaultValue={empleadoEditar.id_cargo}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
-                <option value="">Selecciona cargo *</option>
-
-                {cargos.map((cargo) => (
-                  <option key={cargo.id_cargo} value={cargo.id_cargo}>
-                    {cargo.nombre_cargo}
-                  </option>
-                ))}
-              </select>
+                <RoleCargoSelect
+                roles={rolesParaCargo}
+                cargos={cargosParaSelector}
+                defaultCargoId={empleadoEditar.id_cargo}
+              />
 
               <select
                 name="estado"

@@ -122,9 +122,9 @@ async function crearPago(formData: FormData) {
     redirect("/admin/pagos?error=datos-obligatorios");
   }
 
-  if (monto <= 0) {
-    redirect("/admin/pagos?error=monto-invalido");
-  }
+ if (Number.isNaN(monto) || monto <= 0) {
+  redirect("/admin/pagos?error=monto-invalido");
+}
 
   if (tipo_pago === "cliente" && !id_cliente) {
     redirect("/admin/pagos?error=cliente-requerido");
@@ -206,9 +206,9 @@ async function editarPago(formData: FormData) {
     redirect(`/admin/pagos?editar=${id_pago}&error=datos-obligatorios`);
   }
 
-  if (monto <= 0) {
-    redirect(`/admin/pagos?editar=${id_pago}&error=monto-invalido`);
-  }
+  if (Number.isNaN(monto) || monto <= 0) {
+  redirect(`/admin/pagos?editar=${id_pago}&error=monto-invalido`);
+}
 
   if (tipo_pago === "cliente" && !id_cliente) {
     redirect(`/admin/pagos?editar=${id_pago}&error=cliente-requerido`);
