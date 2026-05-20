@@ -1,14 +1,16 @@
 /*
-  DEMO PRISMA
+  BASE DE DATOS DEMO
 
-  Este archivo simula la base de datos usando arreglos en memoria.
+  Este archivo permite usar el sistema sin SQL Server.
 
-  Sirve para que tus amigos puedan ejecutar el frontend sin instalar SQL Server.
-
-  IMPORTANTE:
-  - No guarda datos reales.
-  - Si reinicias el servidor, los datos vuelven al estado inicial.
-  - Solo sirve para pruebas de interfaz.
+  Usuarios demo:
+  admin_demo / 123456
+  obra_demo / 123456
+  almacen_demo / 123456
+  contabilidad_demo / 123456
+  rrhh_demo / 123456
+  compras_demo / 123456
+  cliente_demo / 123456
 */
 
 export function isDemoMode() {
@@ -17,21 +19,21 @@ export function isDemoMode() {
 
 const roles = [
   { id_rol: 1, nombre_rol: "Administrador", descripcion: "Control total del sistema" },
-  { id_rol: 2, nombre_rol: "Encargado de Obra", descripcion: "Gestiona proyectos y avances de obra" },
+  { id_rol: 2, nombre_rol: "Encargado de Obra", descripcion: "Gestiona proyectos y obra" },
   { id_rol: 3, nombre_rol: "Almacen", descripcion: "Controla materiales e inventario" },
-  { id_rol: 4, nombre_rol: "Contabilidad", descripcion: "Consulta pagos, clientes y proyectos" },
-  { id_rol: 5, nombre_rol: "Recursos Humanos", descripcion: "Gestiona empleados y cargos" },
-  { id_rol: 6, nombre_rol: "Compras", descripcion: "Gestiona compras y proveedores" },
-  { id_rol: 7, nombre_rol: "Cliente", descripcion: "Consulta sus proyectos y pagos" },
+  { id_rol: 4, nombre_rol: "Contabilidad", descripcion: "Gestiona pagos y reportes financieros" },
+  { id_rol: 5, nombre_rol: "Recursos Humanos", descripcion: "Gestiona empleados" },
+  { id_rol: 6, nombre_rol: "Compras", descripcion: "Gestiona proveedores y compras" },
+  { id_rol: 7, nombre_rol: "Cliente", descripcion: "Consulta proyectos y pagos" },
 ];
 
 const cargos = [
-  { id_cargo: 1, nombre_cargo: "Administrador", descripcion: "Gestión general" },
-  { id_cargo: 2, nombre_cargo: "Ingeniero Civil", descripcion: "Obra" },
-  { id_cargo: 3, nombre_cargo: "Almacenero", descripcion: "Almacén" },
-  { id_cargo: 4, nombre_cargo: "Contador", descripcion: "Contabilidad" },
-  { id_cargo: 5, nombre_cargo: "Auxiliar Administrativo", descripcion: "RRHH" },
-  { id_cargo: 6, nombre_cargo: "Jefe de Compras", descripcion: "Compras" },
+  { id_cargo: 1, nombre_cargo: "Administrador General", descripcion: "Gestión general" },
+  { id_cargo: 2, nombre_cargo: "Encargado de Obra", descripcion: "Supervisión de obra" },
+  { id_cargo: 3, nombre_cargo: "Almacenero", descripcion: "Control de almacén" },
+  { id_cargo: 4, nombre_cargo: "Contador", descripcion: "Área contable" },
+  { id_cargo: 5, nombre_cargo: "Recursos Humanos", descripcion: "Gestión de personal" },
+  { id_cargo: 6, nombre_cargo: "Jefe de Compras", descripcion: "Área de compras" },
 ];
 
 const empleados = [
@@ -49,8 +51,8 @@ const empleados = [
   },
   {
     id_empleado: 2,
-    nombres: "Encargado",
-    apellidos: "Obra Demo",
+    nombres: "Obra",
+    apellidos: "Demo",
     ci: "900002",
     telefono: "70000002",
     direccion: "Cuenta demo",
@@ -86,7 +88,7 @@ const empleados = [
   {
     id_empleado: 5,
     nombres: "Recursos",
-    apellidos: "Humanos Demo",
+    apellidos: "Humanos",
     ci: "900005",
     telefono: "70000005",
     direccion: "Cuenta demo",
@@ -195,8 +197,8 @@ const clientes = [
   },
   {
     id_cliente: 2,
-    nombres: "Constructora",
-    apellidos: null,
+    nombres: "Empresa",
+    apellidos: "Tunari",
     razon_social: "Grupo Empresarial Tunari",
     ci_nit: "990002",
     telefono: "70001002",
@@ -210,9 +212,21 @@ const clientes = [
 ];
 
 const categorias = [
-  { id_categoria_material: 1, nombre_categoria: "Cemento", descripcion: "Materiales cementantes" },
-  { id_categoria_material: 2, nombre_categoria: "Acero", descripcion: "Fierro y estructuras" },
-  { id_categoria_material: 3, nombre_categoria: "Herramientas", descripcion: "Herramientas de trabajo" },
+  {
+    id_categoria_material: 1,
+    nombre_categoria: "Cemento",
+    descripcion: "Materiales cementantes",
+  },
+  {
+    id_categoria_material: 2,
+    nombre_categoria: "Acero",
+    descripcion: "Fierro y estructuras",
+  },
+  {
+    id_categoria_material: 3,
+    nombre_categoria: "Herramientas",
+    descripcion: "Herramientas de trabajo",
+  },
 ];
 
 const materiales = [
@@ -288,6 +302,7 @@ const proveedores = [
   {
     id_proveedor: 1,
     nombre_proveedor: "Proveedor Cementos Bolivia",
+    nit: "100001",
     telefono: "70002001",
     correo: "cementos@proveedor.com",
     direccion: "Av. Industrial",
@@ -295,6 +310,7 @@ const proveedores = [
   {
     id_proveedor: 2,
     nombre_proveedor: "Aceros Cochabamba",
+    nit: "100002",
     telefono: "70002002",
     correo: "aceros@proveedor.com",
     direccion: "Av. Blanco Galindo",
@@ -326,18 +342,6 @@ const proyectos = [
     id_cliente: 2,
     id_usuario_registro: 1,
   },
-  {
-    id_proyecto: 3,
-    nombre_proyecto: "Remodelación Cliente Demo",
-    descripcion: "Remodelación de ambientes interiores",
-    ubicacion: "Sacaba",
-    fecha_inicio: new Date("2026-04-05"),
-    fecha_fin_estimada: new Date("2026-07-20"),
-    fecha_fin_real: null,
-    estado: "en_ejecucion",
-    id_cliente: 1,
-    id_usuario_registro: 1,
-  },
 ];
 
 const pagos = [
@@ -367,31 +371,31 @@ const pagos = [
     id_proyecto: 1,
     id_usuario_registro: 1,
   },
+];
+
+const compras = [
   {
-    id_pago: 3,
-    tipo_pago: "empleado",
-    fecha_pago: new Date("2026-05-05"),
-    monto: 1200,
-    metodo_pago: "transferencia",
-    descripcion: "Pago semanal",
-    id_cliente: null,
-    id_empleado: 2,
-    id_proveedor: null,
+    id_compra: 1,
+    numero_factura: "FC-001",
+    fecha_compra: new Date("2026-05-03"),
+    total_compra: 2500,
+    estado_pago: "pagado",
+    observacion: "Compra inicial de cemento",
+    id_proveedor: 1,
     id_proyecto: 1,
+    id_almacen: 1,
     id_usuario_registro: 1,
   },
+];
+
+const detalleCompras = [
   {
-    id_pago: 4,
-    tipo_pago: "cliente",
-    fecha_pago: new Date("2026-05-07"),
-    monto: 8000,
-    metodo_pago: "deposito",
-    descripcion: "Pago inicial edificio",
-    id_cliente: 2,
-    id_empleado: null,
-    id_proveedor: null,
-    id_proyecto: 2,
-    id_usuario_registro: 1,
+    id_detalle_compra: 1,
+    id_compra: 1,
+    id_material: 1,
+    cantidad: 50,
+    precio_unitario: 50,
+    subtotal: 2500,
   },
 ];
 
@@ -409,6 +413,8 @@ function getIdField(modelName: string) {
     proveedor: "id_proveedor",
     proyecto: "id_proyecto",
     pago: "id_pago",
+    compra_material: "id_compra",
+    detalle_compra_material: "id_detalle_compra",
   };
 
   return ids[modelName];
@@ -420,6 +426,10 @@ function matchesWhere(item: any, where?: any): boolean {
   return Object.entries(where).every(([key, condition]) => {
     if (key === "OR" && Array.isArray(condition)) {
       return condition.some((subWhere) => matchesWhere(item, subWhere));
+    }
+
+    if (key === "AND" && Array.isArray(condition)) {
+      return condition.every((subWhere) => matchesWhere(item, subWhere));
     }
 
     if (condition === undefined) return true;
@@ -440,6 +450,12 @@ function matchesWhere(item: any, where?: any): boolean {
 
       if ("notIn" in condition && Array.isArray(condition.notIn)) {
         return !condition.notIn.includes(item[key]);
+      }
+
+      if ("contains" in condition) {
+        return String(item[key] ?? "")
+          .toLowerCase()
+          .includes(String(condition.contains).toLowerCase());
       }
     }
 
@@ -462,7 +478,7 @@ function orderRows(rows: any[], orderBy?: any) {
 function includeRelations(modelName: string, item: any, args?: any) {
   if (!item) return null;
 
-  let result = { ...item };
+  const result = { ...item };
 
   if (args?.include?.rol) {
     result.rol = roles.find((rol) => rol.id_rol === item.id_rol) ?? null;
@@ -472,6 +488,16 @@ function includeRelations(modelName: string, item: any, args?: any) {
     result.empleado =
       empleados.find((empleado) => empleado.id_empleado === item.id_empleado) ??
       null;
+  }
+
+  if (modelName === "usuario" && args?.include?.cliente) {
+    result.cliente =
+      clientes.find((cliente) => cliente.id_cliente === item.id_cliente) ??
+      null;
+  }
+
+  if (modelName === "cliente" && args?.include?.rol) {
+    result.rol = roles.find((rol) => rol.id_rol === item.id_rol) ?? null;
   }
 
   if (args?.select) {
@@ -511,6 +537,7 @@ function createModel(modelName: string, rows: any[]) {
 
     async findUnique(args?: any) {
       const where = args?.where ?? {};
+
       const result = rows.find((item) =>
         Object.entries(where).every(([key, value]) => item[key] === value)
       );
@@ -536,6 +563,7 @@ function createModel(modelName: string, rows: any[]) {
 
     async update(args: any) {
       const where = args?.where ?? {};
+
       const index = rows.findIndex((item) =>
         Object.entries(where).every(([key, value]) => item[key] === value)
       );
@@ -606,4 +634,21 @@ export const demoPrisma = {
   proveedor: createModel("proveedor", proveedores),
   proyecto: createModel("proyecto", proyectos),
   pago: createModel("pago", pagos),
+  compra_material: createModel("compra_material", compras),
+  detalle_compra_material: createModel(
+    "detalle_compra_material",
+    detalleCompras
+  ),
+
+  async $transaction(callback: any) {
+    if (typeof callback === "function") {
+      return callback(this);
+    }
+
+    if (Array.isArray(callback)) {
+      return Promise.all(callback);
+    }
+
+    return callback;
+  },
 };

@@ -3,14 +3,16 @@ import { PrismaMssql } from "@prisma/adapter-mssql";
 import { demoPrisma, isDemoMode } from "./demo-prisma";
 
 /*
-  CONEXIÓN A PRISMA
+  CONEXIÓN DE PRISMA
 
   Si DEMO_MODE=true:
-  - No conecta a SQL Server.
-  - Usa datos falsos de lib/demo-prisma.ts.
+  - Usa datos demo.
+  - No necesita SQL Server.
+  - Sirve para tus amigos.
 
-  Si DEMO_MODE no está activo:
-  - Conecta normalmente a SQL Server.
+  Si DEMO_MODE=false:
+  - Usa SQL Server real.
+  - Sirve para tu computadora.
 */
 
 const globalForPrisma = globalThis as unknown as {
