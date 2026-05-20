@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
+import RoleEmployeeSelect from "../../../components/froms/RoleEmployeeSelect";
 
 /*
   MÓDULO USUARIOS
@@ -11,17 +12,24 @@ import { requireModule } from "../../../lib/auth/require-permission";
   /admin/usuarios
 
   Qué hace:
-  - Muestra los usuarios internos de la empresa.
+  - Muestra usuarios internos de la empresa.
   - Permite crear usuario para un empleado.
   - Permite asignar rol.
-  - Permite cambiar estado del usuario.
-  - Permite cambiar contraseña.
-  - Solo el Administrador puede crear o editar usuarios.
+  - Permite editar usuario.
+  - Permite desactivar usuario.
+  - Filtra empleados según el rol elegido y el cargo del empleado.
 
   Importante:
-  - Los clientes NO se crean aquí.
-  - Los clientes están en la tabla cliente.
-  - Esta pantalla usa la tabla usuario.
+  - Cargo pertenece a empleado.
+  - Rol pertenece a usuario.
+  - La relación correcta es:
+    cargo -> empleado -> usuario -> rol
+
+  Ejemplo:
+  Cargo: Contador
+  Empleado: Carlos Pinto
+  Usuario: cpinto
+  Rol: Contabilidad
 */
 
 type PageProps = {
@@ -31,30 +39,39 @@ type PageProps = {
   }>;
 };
 
-/*
-  Función auxiliar para leer campos del formulario.
-*/
 function getText(formData: FormData, field: string) {
   return String(formData.get(field) ?? "").trim();
+}
+
+function getRoleName(user: { rol: unknown }) {
+  if (typeof user.rol === "string") {
+    return user.rol;
+  }
+
+  if (
+    user.rol &&
+    typeof user.rol === "object" &&
+    "nombre_rol" in user.rol
+  ) {
+    return String(
+      (user.rol as { nombre_rol?: string | null }).nombre_rol ?? ""
+    );
+  }
+
+  return "";
 }
 
 /*
   CREAR USUARIO
 
-  Crea un usuario interno en la tabla usuario.
-  Debe estar relacionado con un empleado mediante id_empleado.
+  Crea un usuario interno relacionado con un empleado.
 */
 async function crearUsuario(formData: FormData) {
   "use server";
 
   const user = await requireModule("usuarios");
+  const roleName = getRoleName(user);
 
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
-
-  /*
-    Solo el administrador puede crear usuarios.
-  */
   if (roleName !== "Administrador") {
     redirect("/admin/usuarios");
   }
@@ -67,16 +84,10 @@ async function crearUsuario(formData: FormData) {
   const id_rol = Number(formData.get("id_rol"));
   const id_empleado = Number(formData.get("id_empleado"));
 
-  /*
-    Validación de campos obligatorios.
-  */
   if (!nombre_usuario || !correo || !contrasena || !id_rol || !id_empleado) {
     redirect("/admin/usuarios?error=datos-obligatorios");
   }
 
-  /*
-    Validamos que el rol exista.
-  */
   const rol = await prisma.rol.findUnique({
     where: {
       id_rol,
@@ -88,16 +99,13 @@ async function crearUsuario(formData: FormData) {
   }
 
   /*
-    Como los clientes se manejan en tabla cliente,
-    no permitimos crear usuarios con rol Cliente aquí.
+    Cliente no se crea aquí.
+    Cliente se maneja desde la tabla cliente.
   */
   if (rol.nombre_rol === "Cliente") {
     redirect("/admin/usuarios?error=rol-cliente");
   }
 
-  /*
-    Validamos que el empleado exista.
-  */
   const empleado = await prisma.empleado.findUnique({
     where: {
       id_empleado,
@@ -108,9 +116,6 @@ async function crearUsuario(formData: FormData) {
     redirect("/admin/usuarios?error=empleado-invalido");
   }
 
-  /*
-    Validamos que no exista otro usuario con el mismo nombre o correo.
-  */
   const usuarioExistente = await prisma.usuario.findFirst({
     where: {
       OR: [{ nombre_usuario }, { correo }],
@@ -121,9 +126,6 @@ async function crearUsuario(formData: FormData) {
     redirect("/admin/usuarios?error=usuario-existente");
   }
 
-  /*
-    Validamos que ese empleado no tenga ya una cuenta.
-  */
   const empleadoConUsuario = await prisma.usuario.findFirst({
     where: {
       id_empleado,
@@ -134,9 +136,6 @@ async function crearUsuario(formData: FormData) {
     redirect("/admin/usuarios?error=empleado-con-usuario");
   }
 
-  /*
-    Creamos el usuario en la tabla usuario.
-  */
   await prisma.usuario.create({
     data: {
       nombre_usuario,
@@ -155,15 +154,18 @@ async function crearUsuario(formData: FormData) {
 /*
   EDITAR USUARIO
 
-  Actualiza rol, estado, correo, usuario y contraseña.
+  Actualiza:
+  - nombre de usuario
+  - correo
+  - contraseña, si se escribe una nueva
+  - rol
+  - estado
 */
 async function editarUsuario(formData: FormData) {
   "use server";
 
   const user = await requireModule("usuarios");
-
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
   if (roleName !== "Administrador") {
     redirect("/admin/usuarios");
@@ -199,9 +201,6 @@ async function editarUsuario(formData: FormData) {
     redirect(`/admin/usuarios?editar=${id_usuario}&error=rol-cliente`);
   }
 
-  /*
-    Validamos que no exista otro usuario con el mismo usuario o correo.
-  */
   const usuarioDuplicado = await prisma.usuario.findFirst({
     where: {
       id_usuario: {
@@ -215,11 +214,13 @@ async function editarUsuario(formData: FormData) {
     redirect(`/admin/usuarios?editar=${id_usuario}&error=usuario-existente`);
   }
 
-  /*
-    Datos a actualizar.
-    La contraseña solo cambia si se escribe una nueva.
-  */
-  const data: any = {
+  const data: {
+    nombre_usuario: string;
+    correo: string;
+    estado: string;
+    id_rol: number;
+    contrasena?: string;
+  } = {
     nombre_usuario,
     correo,
     estado,
@@ -240,19 +241,18 @@ async function editarUsuario(formData: FormData) {
   revalidatePath("/admin/usuarios");
   redirect("/admin/usuarios");
 }
+
 /*
   ELIMINAR USUARIO
 
   No se borra físicamente.
-  Se cambia el estado a "inactivo" para que ya no pueda iniciar sesión.
+  Solo se cambia estado a inactivo.
 */
 async function eliminarUsuario(formData: FormData) {
   "use server";
 
   const user = await requireModule("usuarios");
-
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
   if (roleName !== "Administrador") {
     redirect("/admin/usuarios");
@@ -285,22 +285,12 @@ async function eliminarUsuario(formData: FormData) {
 }
 
 export default async function UsuariosPage({ searchParams }: PageProps) {
-  /*
-    Protege la página.
-    Solo roles con permiso de usuarios pueden entrar.
-  */
   const user = await requireModule("usuarios");
-
   const params = await searchParams;
 
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
-
+  const roleName = getRoleName(user);
   const isAdmin = roleName === "Administrador";
 
-  /*
-    Si no es administrador, no debería administrar usuarios.
-  */
   if (!isAdmin) {
     redirect("/admin");
   }
@@ -322,7 +312,7 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
   });
 
   /*
-    Trae todos los empleados.
+    Trae empleados.
   */
   const empleados = await prisma.empleado.findMany({
     orderBy: {
@@ -331,7 +321,17 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
   });
 
   /*
-    Trae todos los usuarios internos.
+    Trae cargos.
+    Esto sirve para filtrar empleados según rol seleccionado.
+  */
+  const cargos = await prisma.cargo.findMany({
+    orderBy: {
+      nombre_cargo: "asc",
+    },
+  });
+
+  /*
+    Trae usuarios internos.
   */
   const usuarios = await prisma.usuario.findMany({
     orderBy: {
@@ -339,9 +339,6 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
     },
   });
 
-  /*
-    Usuario seleccionado para editar.
-  */
   const usuarioEditar = idEditar
     ? await prisma.usuario.findUnique({
         where: {
@@ -350,9 +347,6 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
       })
     : null;
 
-  /*
-    Mapas para mostrar nombres en la tabla.
-  */
   const rolMap = new Map(roles.map((rol) => [rol.id_rol, rol.nombre_rol]));
 
   const empleadoMap = new Map(
@@ -363,8 +357,7 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
   );
 
   /*
-    Empleados que todavía no tienen usuario.
-    Sirve para evitar crear dos usuarios para el mismo empleado.
+    Empleados que ya tienen usuario.
   */
   const empleadosConUsuario = new Set(
     usuarios
@@ -372,9 +365,33 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
       .filter((id): id is number => id !== null)
   );
 
+  /*
+    Solo se muestran empleados sin cuenta.
+  */
   const empleadosSinUsuario = empleados.filter(
     (empleado) => !empleadosConUsuario.has(empleado.id_empleado)
   );
+
+  /*
+    Datos simples para el componente RoleEmployeeSelect.
+  */
+  const rolesParaSelector = roles.map((rol) => ({
+    id_rol: rol.id_rol,
+    nombre_rol: rol.nombre_rol,
+  }));
+
+  const cargosParaSelector = cargos.map((cargo) => ({
+    id_cargo: cargo.id_cargo,
+    nombre_cargo: cargo.nombre_cargo,
+  }));
+
+  const empleadosParaSelector = empleadosSinUsuario.map((empleado) => ({
+    id_empleado: empleado.id_empleado,
+    nombres: empleado.nombres,
+    apellidos: empleado.apellidos,
+    ci: empleado.ci,
+    id_cargo: empleado.id_cargo,
+  }));
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -426,12 +443,13 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
 
             {params.error === "id-invalido" &&
               "El ID del usuario no es válido."}
+
             {params.error === "no-autodesactivar" &&
               "No puedes eliminar o desactivar tu propia cuenta."}
           </div>
         )}
 
-        {/* Formulario de creación */}
+        {/* Crear usuario */}
         {!usuarioEditar && (
           <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900">
@@ -439,7 +457,8 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Este formulario crea una cuenta en la tabla usuario para un empleado existente.
+              Primero selecciona el rol. Luego aparecerán solo los empleados con
+              cargo correspondiente a ese rol.
             </p>
 
             <form
@@ -465,33 +484,11 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               />
 
-              <select
-                name="id_rol"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
-                <option value="">Selecciona rol *</option>
-                {roles.map((rol) => (
-                  <option key={rol.id_rol} value={rol.id_rol}>
-                    {rol.nombre_rol}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                name="id_empleado"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
-                <option value="">Selecciona empleado *</option>
-                {empleadosSinUsuario.map((empleado) => (
-                  <option
-                    key={empleado.id_empleado}
-                    value={empleado.id_empleado}
-                  >
-                    {empleado.id_empleado} - {empleado.nombres}{" "}
-                    {empleado.apellidos}
-                  </option>
-                ))}
-              </select>
+              <RoleEmployeeSelect
+                roles={rolesParaSelector}
+                cargos={cargosParaSelector}
+                empleados={empleadosParaSelector}
+              />
 
               <select
                 name="estado"
@@ -514,7 +511,7 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
           </section>
         )}
 
-        {/* Formulario de edición */}
+        {/* Editar usuario */}
         {usuarioEditar && (
           <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-4">
@@ -639,32 +636,32 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
                   <td className="border p-3">{usuario.estado}</td>
 
                   <td className="border p-3">
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/admin/usuarios?editar=${usuario.id_usuario}`}
-                      className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white"
-                    >
-                      Editar
-                    </Link>
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/usuarios?editar=${usuario.id_usuario}`}
+                        className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white"
+                      >
+                        Editar
+                      </Link>
 
-                    {usuario.estado !== "inactivo" && (
-                      <form action={eliminarUsuario}>
-                        <input
-                          type="hidden"
-                          name="id_usuario"
-                          value={usuario.id_usuario}
-                        />
+                      {usuario.estado !== "inactivo" && (
+                        <form action={eliminarUsuario}>
+                          <input
+                            type="hidden"
+                            name="id_usuario"
+                            value={usuario.id_usuario}
+                          />
 
-                        <button
-                          type="submit"
-                          className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700"
-                        >
-                          Eliminar
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                </td>
+                          <button
+                            type="submit"
+                            className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700"
+                          >
+                            Eliminar
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
 
