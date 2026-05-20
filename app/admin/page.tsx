@@ -9,23 +9,6 @@ import {
   getRoleSummary,
 } from "../../lib/auth/permissions";
 
-/*
-  PANEL PRINCIPAL DEL SISTEMA
-
-  Ruta:
-  /admin
-
-  Esta pantalla muestra los módulos disponibles según el rol.
-
-  Importante:
-  No depende de la persona individual.
-  Depende del rol.
-
-  Ejemplo:
-  Todos los usuarios con rol Contabilidad verán lo mismo.
-  Todos los usuarios con rol Almacen verán lo mismo.
-*/
-
 function getRoleName(user: { rol: unknown }) {
   if (typeof user.rol === "string") {
     return user.rol;
@@ -56,6 +39,16 @@ function getTituloModulo(roleName: string, key: AppModule, title: string) {
   return title;
 }
 
+const moduleImages: Partial<Record<AppModule, string>> = {
+  clientes: "/images/clientes.jpg",
+  empleados: "/images/empleados.jpg",
+  proyectos: "/images/proyectos.jpg",
+  materiales: "/images/materiales.jpg",
+  pagos: "/images/pagos.jpg",
+  reportes: "/images/reportes.jpg",
+  usuarios: "/images/usuarios.jpg",
+};
+
 export default async function AdminPage() {
   const user = await getCurrentUser();
 
@@ -68,15 +61,15 @@ export default async function AdminPage() {
   const roleSummary = getRoleSummary(roleName);
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
+      <header className="border-b border-blue-900 bg-gradient-to-r from-blue-950 via-blue-900 to-sky-800 text-white shadow-lg shadow-blue-950/20">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div>
-            <p className="text-sm font-medium text-blue-700">
+            <p className="text-sm font-semibold text-blue-100">
               Panel del sistema
             </p>
 
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl font-extrabold text-white">
               Constructora e Inmobiliaria
             </h1>
           </div>
@@ -86,51 +79,59 @@ export default async function AdminPage() {
       </header>
 
       <section className="mx-auto max-w-7xl px-6 py-8">
-        <div className="rounded-3xl bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-500">Bienvenido</p>
+        <div className="overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-xl shadow-blue-100/70">
+          <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-sky-700 px-6 py-8 text-white">
+            <p className="text-sm font-semibold text-blue-100">Bienvenido</p>
 
-          <h2 className="mt-1 text-3xl font-bold text-slate-900">
-            {user.nombre_mostrar}
-          </h2>
+            <h2 className="mt-1 text-4xl font-extrabold tracking-tight text-white">
+              {user.nombre_mostrar}
+            </h2>
 
-          <div className="mt-4 flex flex-wrap gap-3">
-            <span className="rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-800">
-              Rol: {roleName}
-            </span>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <span className="rounded-full bg-white/15 px-4 py-2 text-sm font-bold text-white backdrop-blur">
+                Rol: {roleName}
+              </span>
 
-            <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-800">
-              Tipo: {user.tipo_cuenta === "cliente" ? "Cliente" : "Empresa"}
-            </span>
+              <span className="rounded-full bg-sky-300/20 px-4 py-2 text-sm font-bold text-blue-50 backdrop-blur">
+                Tipo: {user.tipo_cuenta === "cliente" ? "Cliente" : "Empresa"}
+              </span>
 
-            <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-              Usuario: {user.nombre_usuario}
-            </span>
+              <span className="rounded-full bg-white/15 px-4 py-2 text-sm font-bold text-white backdrop-blur">
+                Usuario: {user.nombre_usuario}
+              </span>
+            </div>
           </div>
 
-          <div className="mt-5 rounded-2xl bg-slate-50 p-4">
-            <h3 className="font-bold text-slate-900">
-              ¿Qué puede hacer este rol?
-            </h3>
+          <div className="p-6">
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+              <h3 className="font-extrabold text-blue-950">
+                ¿Qué puede hacer este rol?
+              </h3>
 
-            <p className="mt-1 text-sm text-slate-600">
-              {roleSummary}
-            </p>
+              <p className="mt-1 text-sm font-medium leading-6 text-blue-800">
+                {roleSummary}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-slate-900">
+        <div className="mt-10">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+            Accesos del sistema
+          </p>
+
+          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-blue-950">
             Módulos disponibles
           </h2>
 
-          <p className="mt-1 text-slate-600">
+          <p className="mt-2 text-base font-medium text-slate-600">
             Todos los usuarios con rol {roleName} tienen estos mismos permisos.
           </p>
         </div>
 
         {modules.length === 0 ? (
-          <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-            <h3 className="text-xl font-bold text-slate-900">
+          <div className="mt-6 rounded-3xl border border-blue-100 bg-white p-6 shadow-xl shadow-blue-100/70">
+            <h3 className="text-xl font-extrabold text-blue-950">
               Sin módulos asignados
             </h3>
 
@@ -139,53 +140,72 @@ export default async function AdminPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {modules.map((module) => {
               const details = getModuleDetails(roleName, module.key);
+              const imageUrl =
+                moduleImages[module.key] ?? "/images/login-construccion.jpg.png";
 
               return (
                 <Link
                   key={module.key}
                   href={module.href}
-                  className="rounded-3xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                  className="group overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-xl shadow-blue-100/70 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-200/80"
                 >
-                  <h3 className="text-xl font-bold text-slate-900">
-                    {getTituloModulo(roleName, module.key, module.title)}
-                  </h3>
+                  <div
+                    className="h-40 bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url('${imageUrl}')`,
+                    }}
+                  >
+                    <div className="flex h-full items-end bg-gradient-to-t from-blue-950/90 via-blue-900/45 to-transparent p-6">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-200">
+                          Módulo
+                        </p>
 
-                  <p className="mt-2 text-sm text-slate-500">
-                    {module.description}
-                  </p>
-
-                  <div className="mt-4 rounded-2xl bg-green-50 p-4">
-                    <p className="text-sm font-bold text-green-800">
-                      Puede hacer:
-                    </p>
-
-                    <ul className="mt-2 space-y-2 text-sm text-green-700">
-                      {details.can.map((item) => (
-                        <li key={item}>• {item}</li>
-                      ))}
-                    </ul>
+                        <h3 className="mt-1 text-2xl font-extrabold text-white">
+                          {getTituloModulo(roleName, module.key, module.title)}
+                        </h3>
+                      </div>
+                    </div>
                   </div>
 
-                  {details.cannot.length > 0 && (
-                    <div className="mt-4 rounded-2xl bg-red-50 p-4">
-                      <p className="text-sm font-bold text-red-800">
-                        No puede hacer:
+                  <div className="p-6">
+                    <p className="text-sm font-medium leading-6 text-slate-600">
+                      {module.description}
+                    </p>
+
+                    <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                      <p className="text-sm font-extrabold text-blue-950">
+                        Puede hacer:
                       </p>
 
-                      <ul className="mt-2 space-y-2 text-sm text-red-700">
-                        {details.cannot.map((item) => (
+                      <ul className="mt-2 space-y-2 text-sm font-medium text-blue-800">
+                        {details.can.map((item) => (
                           <li key={item}>• {item}</li>
                         ))}
                       </ul>
                     </div>
-                  )}
 
-                  <p className="mt-5 text-sm font-semibold text-blue-700">
-                    Entrar →
-                  </p>
+                    {details.cannot.length > 0 && (
+                      <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-4">
+                        <p className="text-sm font-extrabold text-red-800">
+                          No puede hacer:
+                        </p>
+
+                        <ul className="mt-2 space-y-2 text-sm font-medium text-red-700">
+                          {details.cannot.map((item) => (
+                            <li key={item}>• {item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <p className="mt-5 inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-700/25 transition group-hover:bg-blue-900">
+                      Entrar →
+                    </p>
+                  </div>
                 </Link>
               );
             })}
