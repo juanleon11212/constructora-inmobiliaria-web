@@ -1,159 +1,164 @@
 import Link from "next/link";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
-import { TableFilter, type FilterOption } from "../../../components/admin/TableFilter";
-import { containsText, equalsText, formatDate } from "../../../lib/table-filter";
 
-/*
-  MÓDULO REPORTES
-
-  Ruta:
-  /admin/reportes
-
-  Funcionalidades:
-  - Resumen general en tarjetas.
-  - Secciones visuales tipo cuadros.
-  - Al tocar una sección se muestra su tabla.
-  - Filtro con lupa por ID, nombre, estado, fecha, monto, etc.
-*/
-
-type PageProps = {
-  searchParams?: Promise<{
-    tabla?: string;
-    filtro?: string;
-    campo?: string;
-    valor?: string;
-  }>;
+type ReportCard = {
+  title: string;
+  value: number | string;
+  description: string;
 };
 
-function getCardClass(active: boolean) {
-  return active
-    ? "border-blue-600 bg-blue-50 text-blue-900"
-    : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50";
+function getRoleName(user: { rol: unknown }) {
+  if (typeof user.rol === "string") {
+    return user.rol;
+  }
+
+  if (
+    user.rol &&
+    typeof user.rol === "object" &&
+    "nombre_rol" in user.rol
+  ) {
+    return String(
+      (user.rol as { nombre_rol?: string | null }).nombre_rol ?? ""
+    );
+  }
+
+  return "";
 }
 
-function ReportIcon({ type }: { type: string }) {
-  const bg: Record<string, string> = {
-    proyectos: "bg-blue-100 text-blue-700",
-    pagos: "bg-emerald-100 text-emerald-700",
-    clientes: "bg-violet-100 text-violet-700",
-    empleados: "bg-amber-100 text-amber-700",
-    materiales: "bg-rose-100 text-rose-700",
-  };
-
-  return (
-    <div
-      className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
-        bg[type] ?? "bg-slate-100 text-slate-700"
-      }`}
-    >
-      <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none">
-        <path
-          d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <path
-          d="M8 17v-5M12 17V8M16 17v-7"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <path
-          d="M3 19h18"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
-    </div>
-  );
+function formatDate(value: Date | string | null | undefined) {
+  if (!value) return "-";
+  return new Date(value).toISOString().slice(0, 10);
 }
 
-const filterOptionsByTable: Record<string, FilterOption[]> = {
-  proyectos: [
-    { value: "id_proyecto", label: "ID proyecto", placeholder: "Ejemplo: 25" },
-    { value: "nombre_proyecto", label: "Proyecto", placeholder: "Ejemplo: edificio" },
-    { value: "cliente", label: "Cliente", placeholder: "Ejemplo: Juan" },
-    { value: "estado", label: "Estado", placeholder: "Ejemplo: en_ejecucion" },
-    { value: "ubicacion", label: "Ubicación", placeholder: "Ejemplo: zona norte" },
-    { value: "fecha_inicio", label: "Fecha inicio", placeholder: "Ejemplo: 2026-05-20" },
-  ],
+function getReportImage(title: string) {
+  const text = title.toLowerCase();
 
-  pagos: [
-    { value: "id_pago", label: "ID pago", placeholder: "Ejemplo: 1" },
-    { value: "tipo_pago", label: "Tipo de pago", placeholder: "Ejemplo: cliente" },
-    { value: "fecha_pago", label: "Fecha pago", placeholder: "Ejemplo: 2026-05-20" },
-    { value: "monto", label: "Monto", placeholder: "Ejemplo: 1500" },
-    { value: "metodo_pago", label: "Método", placeholder: "Ejemplo: efectivo" },
-    { value: "relacionado", label: "Relacionado", placeholder: "Ejemplo: proveedor" },
-    { value: "proyecto", label: "Proyecto", placeholder: "Ejemplo: vivienda" },
-  ],
+  if (text.includes("cliente")) return "/images/reporte-clientes.jpg";
+  if (text.includes("empleado") || text.includes("activo") || text.includes("inactivo")) {
+    return "/images/reporte-empleados.jpg";
+  }
+  if (text.includes("proyecto")) return "/images/reporte-proyectos.jpg";
+  if (text.includes("material") || text.includes("inventario")) {
+    return "/images/reporte-materiales.jpg";
+  }
+  if (text.includes("total")) return "/images/reporte-total-pagado.jpg";
+  if (text.includes("pago") || text.includes("proveedor")) {
+    return "/images/reporte-pagos.jpg";
+  }
 
-  clientes: [
-    { value: "id_cliente", label: "ID cliente", placeholder: "Ejemplo: 1" },
-    { value: "nombre", label: "Nombre / Razón social", placeholder: "Ejemplo: Juan" },
-    { value: "ci_nit", label: "CI/NIT", placeholder: "Ejemplo: 123456" },
-    { value: "correo", label: "Correo", placeholder: "Ejemplo: cliente@email.com" },
-    { value: "telefono", label: "Teléfono", placeholder: "Ejemplo: 70000000" },
-    { value: "estado_cuenta", label: "Estado", placeholder: "Ejemplo: activo" },
-  ],
+  return "/images/reporte-total-pagado.jpg";
+}
 
-  empleados: [
-    { value: "id_empleado", label: "ID empleado", placeholder: "Ejemplo: 1" },
-    { value: "nombre", label: "Nombre completo", placeholder: "Ejemplo: María" },
-    { value: "ci", label: "CI", placeholder: "Ejemplo: 123456" },
-    { value: "telefono", label: "Teléfono", placeholder: "Ejemplo: 70000000" },
-    { value: "cargo", label: "Cargo", placeholder: "Ejemplo: contador" },
-    { value: "estado", label: "Estado", placeholder: "Ejemplo: activo" },
-  ],
+function getReportIcon(title: string) {
+  const text = title.toLowerCase();
 
-  materiales: [
-    { value: "id_material", label: "ID material", placeholder: "Ejemplo: 1" },
-    { value: "nombre_material", label: "Material", placeholder: "Ejemplo: cemento" },
-    { value: "categoria", label: "Categoría", placeholder: "Ejemplo: acero" },
-    { value: "unidad_medida", label: "Unidad", placeholder: "Ejemplo: bolsa" },
-    { value: "precio_unitario", label: "Precio", placeholder: "Ejemplo: 55" },
-  ],
-};
+  if (text.includes("cliente")) return "👥";
+  if (text.includes("empleado") || text.includes("activo") || text.includes("inactivo")) return "👷";
+  if (text.includes("proyecto")) return "🏗️";
+  if (text.includes("material")) return "📦";
+  if (text.includes("inventario")) return "🏬";
+  if (text.includes("proveedor")) return "🤝";
+  if (text.includes("total")) return "📈";
+  if (text.includes("pago")) return "💵";
 
-export default async function ReportesPage({ searchParams }: PageProps) {
-  await requireModule("reportes");
+  return "📊";
+}
 
-  const params = await searchParams;
+const glassPanel =
+  "rounded-[2rem] border border-white/40 bg-white/20 shadow-2xl shadow-slate-950/30 backdrop-blur-md";
 
-  const tabla = params?.tabla ?? "proyectos";
-  const filtroActivo = params?.filtro === "1";
-  const campoFiltro = String(params?.campo ?? "").trim();
-  const valorFiltro = String(params?.valor ?? "").trim();
-  const hayFiltro = Boolean(campoFiltro && valorFiltro);
+const tableHeadClass =
+  "border border-white/30 bg-slate-900/65 px-3 py-2 text-left text-xs font-extrabold uppercase tracking-wide text-white";
 
-  const opcionesFiltro =
-    filterOptionsByTable[tabla] ?? filterOptionsByTable.proyectos;
+const tableCellClass =
+  "border border-white/30 px-3 py-2 text-sm font-semibold text-slate-950";
+
+const tableSectionClass =
+  "overflow-hidden rounded-[1.5rem] border border-white/40 bg-white/45 shadow-2xl shadow-slate-950/25 backdrop-blur-md";
+
+export default async function ReportesPage() {
+  const user = await requireModule("reportes");
+  const roleName = getRoleName(user);
+
+  const isAdmin = roleName === "Administrador";
+  const isContabilidad = roleName === "Contabilidad";
+  const isObra = roleName === "Encargado de Obra";
+  const isAlmacen = roleName === "Almacen" || roleName === "Almacén";
+  const isRRHH = roleName === "Recursos Humanos";
+  const isCompras = roleName === "Compras";
 
   const [
-    clientes,
-    empleados,
-    cargos,
-    proyectos,
-    pagos,
+    totalClientes,
+    totalEmpleados,
+    totalEmpleadosActivos,
+    totalEmpleadosInactivos,
+    totalProyectos,
+    totalMateriales,
+    totalProveedores,
+    totalPagos,
+    totalPagosProveedor,
+    sumaPagos,
+    sumaPagosProveedor,
+    proyectosRecientes,
+    pagosRecientes,
+    pagosProveedorRecientes,
+    empleadosRecientes,
+    materialesRecientes,
+    inventarioReciente,
     materiales,
-    categorias,
+    almacenes,
   ] = await Promise.all([
-    prisma.cliente.findMany({
-      orderBy: {
-        id_cliente: "desc",
+    prisma.cliente.count(),
+
+    prisma.empleado.count(),
+
+    prisma.empleado.count({
+      where: {
+        estado: "activo",
       },
     }),
 
-    prisma.empleado.findMany({
-      orderBy: {
-        id_empleado: "desc",
+    prisma.empleado.count({
+      where: {
+        estado: "inactivo",
       },
     }),
 
-    prisma.cargo.findMany(),
+    prisma.proyecto.count({
+      where: {
+        estado: {
+          not: "eliminado",
+        },
+      },
+    }),
+
+    prisma.material.count(),
+
+    prisma.proveedor.count(),
+
+    prisma.pago.count(),
+
+    prisma.pago.count({
+      where: {
+        tipo_pago: "proveedor",
+      },
+    }),
+
+    prisma.pago.aggregate({
+      _sum: {
+        monto: true,
+      },
+    }),
+
+    prisma.pago.aggregate({
+      where: {
+        tipo_pago: "proveedor",
+      },
+      _sum: {
+        monto: true,
+      },
+    }),
 
     prisma.proyecto.findMany({
       where: {
@@ -164,594 +169,516 @@ export default async function ReportesPage({ searchParams }: PageProps) {
       orderBy: {
         id_proyecto: "desc",
       },
+      take: 5,
     }),
 
     prisma.pago.findMany({
       orderBy: {
         id_pago: "desc",
       },
+      take: 5,
+    }),
+
+    prisma.pago.findMany({
+      where: {
+        tipo_pago: "proveedor",
+      },
+      orderBy: {
+        id_pago: "desc",
+      },
+      take: 5,
+    }),
+
+    prisma.empleado.findMany({
+      orderBy: {
+        id_empleado: "desc",
+      },
+      take: 5,
     }),
 
     prisma.material.findMany({
       orderBy: {
         id_material: "desc",
       },
+      take: 5,
     }),
 
-    prisma.categoria_material.findMany(),
+    prisma.inventario.findMany({
+      orderBy: {
+        id_inventario: "desc",
+      },
+      take: 5,
+    }),
+
+    prisma.material.findMany(),
+
+    prisma.almacen.findMany(),
   ]);
 
-  const clienteMap = new Map(
-    clientes.map((cliente) => [
-      cliente.id_cliente,
-      cliente.razon_social ||
-        `${cliente.nombres ?? ""} ${cliente.apellidos ?? ""}`.trim() ||
-        `Cliente ${cliente.id_cliente}`,
+  const materialMap = new Map(
+    materiales.map((material) => [
+      material.id_material,
+      material.nombre_material,
     ])
   );
 
-  const empleadoMap = new Map(
-    empleados.map((empleado) => [
-      empleado.id_empleado,
-      `${empleado.nombres} ${empleado.apellidos}`.trim(),
+  const almacenMap = new Map(
+    almacenes.map((almacen) => [
+      almacen.id_almacen,
+      almacen.nombre_almacen,
     ])
   );
 
-  const cargoMap = new Map(
-    cargos.map((cargo) => [cargo.id_cargo, cargo.nombre_cargo])
-  );
+  const cards: ReportCard[] = [];
 
-  const proyectoMap = new Map(
-    proyectos.map((proyecto) => [
-      proyecto.id_proyecto,
-      proyecto.nombre_proyecto,
-    ])
-  );
+  if (isAdmin) {
+    cards.push(
+      {
+        title: "Clientes",
+        value: totalClientes,
+        description: "Clientes registrados",
+      },
+      {
+        title: "Empleados",
+        value: totalEmpleados,
+        description: "Personal registrado",
+      },
+      {
+        title: "Proyectos",
+        value: totalProyectos,
+        description: "Proyectos activos o visibles",
+      },
+      {
+        title: "Materiales",
+        value: totalMateriales,
+        description: "Materiales registrados",
+      },
+      {
+        title: "Pagos",
+        value: totalPagos,
+        description: "Movimientos registrados",
+      },
+      {
+        title: "Total pagado",
+        value: `Bs. ${sumaPagos._sum.monto?.toString() ?? "0"}`,
+        description: "Suma total de pagos",
+      }
+    );
+  }
 
-  const categoriaMap = new Map(
-    categorias.map((categoria) => [
-      categoria.id_categoria_material,
-      categoria.nombre_categoria,
-    ])
-  );
+  if (isContabilidad) {
+    cards.push(
+      {
+        title: "Pagos",
+        value: totalPagos,
+        description: "Pagos registrados para consulta",
+      },
+      {
+        title: "Total pagado",
+        value: `Bs. ${sumaPagos._sum.monto?.toString() ?? "0"}`,
+        description: "Suma total de pagos",
+      },
+      {
+        title: "Clientes",
+        value: totalClientes,
+        description: "Clientes para consulta contable",
+      },
+      {
+        title: "Proyectos",
+        value: totalProyectos,
+        description: "Proyectos con relación financiera",
+      }
+    );
+  }
 
-  const totalPagado = pagos.reduce((total, pago) => {
-    return total + Number(pago.monto);
-  }, 0);
+  if (isObra) {
+    cards.push(
+      {
+        title: "Proyectos",
+        value: totalProyectos,
+        description: "Proyectos visibles para obra",
+      },
+      {
+        title: "Materiales",
+        value: totalMateriales,
+        description: "Materiales disponibles para consulta",
+      }
+    );
+  }
 
-  const proyectosFiltrados = proyectos.filter((proyecto) => {
-    if (!hayFiltro || tabla !== "proyectos") return true;
+  if (isAlmacen) {
+    cards.push(
+      {
+        title: "Materiales",
+        value: totalMateriales,
+        description: "Materiales registrados",
+      },
+      {
+        title: "Inventario",
+        value: inventarioReciente.length,
+        description: "Movimientos o registros recientes de inventario",
+      }
+    );
+  }
 
-    if (campoFiltro === "id_proyecto") {
-      return equalsText(proyecto.id_proyecto, valorFiltro);
-    }
+  if (isRRHH) {
+    cards.push(
+      {
+        title: "Empleados",
+        value: totalEmpleados,
+        description: "Total de personal registrado",
+      },
+      {
+        title: "Activos",
+        value: totalEmpleadosActivos,
+        description: "Empleados activos",
+      },
+      {
+        title: "Inactivos",
+        value: totalEmpleadosInactivos,
+        description: "Empleados inactivos",
+      }
+    );
+  }
 
-    if (campoFiltro === "nombre_proyecto") {
-      return containsText(proyecto.nombre_proyecto, valorFiltro);
-    }
-
-    if (campoFiltro === "cliente") {
-      return containsText(clienteMap.get(proyecto.id_cliente), valorFiltro);
-    }
-
-    if (campoFiltro === "estado") {
-      return containsText(proyecto.estado, valorFiltro);
-    }
-
-    if (campoFiltro === "ubicacion") {
-      return containsText(proyecto.ubicacion, valorFiltro);
-    }
-
-    if (campoFiltro === "fecha_inicio") {
-      return containsText(formatDate(proyecto.fecha_inicio), valorFiltro);
-    }
-
-    return true;
-  });
-
-  const pagosFiltrados = pagos.filter((pago) => {
-    if (!hayFiltro || tabla !== "pagos") return true;
-
-    const relacionado = pago.id_cliente
-      ? clienteMap.get(pago.id_cliente)
-      : pago.id_empleado
-      ? empleadoMap.get(pago.id_empleado)
-      : "-";
-
-    if (campoFiltro === "id_pago") {
-      return equalsText(pago.id_pago, valorFiltro);
-    }
-
-    if (campoFiltro === "tipo_pago") {
-      return containsText(pago.tipo_pago, valorFiltro);
-    }
-
-    if (campoFiltro === "fecha_pago") {
-      return containsText(formatDate(pago.fecha_pago), valorFiltro);
-    }
-
-    if (campoFiltro === "monto") {
-      return containsText(pago.monto, valorFiltro);
-    }
-
-    if (campoFiltro === "metodo_pago") {
-      return containsText(pago.metodo_pago, valorFiltro);
-    }
-
-    if (campoFiltro === "relacionado") {
-      return containsText(relacionado, valorFiltro);
-    }
-
-    if (campoFiltro === "proyecto") {
-      return containsText(
-        pago.id_proyecto ? proyectoMap.get(pago.id_proyecto) : "-",
-        valorFiltro
-      );
-    }
-
-    return true;
-  });
-
-  const clientesFiltrados = clientes.filter((cliente) => {
-    if (!hayFiltro || tabla !== "clientes") return true;
-
-    const nombre =
-      cliente.razon_social ||
-      `${cliente.nombres ?? ""} ${cliente.apellidos ?? ""}`.trim();
-
-    if (campoFiltro === "id_cliente") {
-      return equalsText(cliente.id_cliente, valorFiltro);
-    }
-
-    if (campoFiltro === "nombre") {
-      return containsText(nombre, valorFiltro);
-    }
-
-    if (campoFiltro === "ci_nit") {
-      return containsText(cliente.ci_nit, valorFiltro);
-    }
-
-    if (campoFiltro === "correo") {
-      return containsText(cliente.correo, valorFiltro);
-    }
-
-    if (campoFiltro === "telefono") {
-      return containsText(cliente.telefono, valorFiltro);
-    }
-
-    if (campoFiltro === "estado_cuenta") {
-      return containsText(cliente.estado_cuenta, valorFiltro);
-    }
-
-    return true;
-  });
-
-  const empleadosFiltrados = empleados.filter((empleado) => {
-    if (!hayFiltro || tabla !== "empleados") return true;
-
-    const nombre = `${empleado.nombres} ${empleado.apellidos}`.trim();
-
-    if (campoFiltro === "id_empleado") {
-      return equalsText(empleado.id_empleado, valorFiltro);
-    }
-
-    if (campoFiltro === "nombre") {
-      return containsText(nombre, valorFiltro);
-    }
-
-    if (campoFiltro === "ci") {
-      return containsText(empleado.ci, valorFiltro);
-    }
-
-    if (campoFiltro === "telefono") {
-      return containsText(empleado.telefono, valorFiltro);
-    }
-
-    if (campoFiltro === "cargo") {
-      return containsText(cargoMap.get(empleado.id_cargo), valorFiltro);
-    }
-
-    if (campoFiltro === "estado") {
-      return containsText(empleado.estado, valorFiltro);
-    }
-
-    return true;
-  });
-
-  const materialesFiltrados = materiales.filter((material) => {
-    if (!hayFiltro || tabla !== "materiales") return true;
-
-    if (campoFiltro === "id_material") {
-      return equalsText(material.id_material, valorFiltro);
-    }
-
-    if (campoFiltro === "nombre_material") {
-      return containsText(material.nombre_material, valorFiltro);
-    }
-
-    if (campoFiltro === "categoria") {
-      return containsText(
-        categoriaMap.get(material.id_categoria_material),
-        valorFiltro
-      );
-    }
-
-    if (campoFiltro === "unidad_medida") {
-      return containsText(material.unidad_medida, valorFiltro);
-    }
-
-    if (campoFiltro === "precio_unitario") {
-      return containsText(material.precio_unitario, valorFiltro);
-    }
-
-    return true;
-  });
-
-  const reportCards = [
-    {
-      key: "proyectos",
-      title: "Proyectos recientes",
-      description: "Consulta los últimos proyectos registrados.",
-      count: proyectosFiltrados.length,
-    },
-    {
-      key: "pagos",
-      title: "Pagos recientes",
-      description: "Consulta movimientos y montos registrados.",
-      count: pagosFiltrados.length,
-    },
-    {
-      key: "clientes",
-      title: "Clientes registrados",
-      description: "Consulta la lista general de clientes.",
-      count: clientesFiltrados.length,
-    },
-    {
-      key: "empleados",
-      title: "Personal registrado",
-      description: "Consulta empleados y cargos.",
-      count: empleadosFiltrados.length,
-    },
-    {
-      key: "materiales",
-      title: "Materiales registrados",
-      description: "Consulta materiales y precios.",
-      count: materialesFiltrados.length,
-    },
-  ];
-
-  const currentCard =
-    reportCards.find((card) => card.key === tabla) ?? reportCards[0];
-
-  const resultadosPorTabla: Record<string, number> = {
-    proyectos: proyectosFiltrados.length,
-    pagos: pagosFiltrados.length,
-    clientes: clientesFiltrados.length,
-    empleados: empleadosFiltrados.length,
-    materiales: materialesFiltrados.length,
-  };
+  if (isCompras) {
+    cards.push(
+      {
+        title: "Materiales",
+        value: totalMateriales,
+        description: "Materiales relacionados a compras",
+      },
+      {
+        title: "Proveedores",
+        value: totalProveedores,
+        description: "Proveedores registrados",
+      },
+      {
+        title: "Pagos a proveedores",
+        value: totalPagosProveedor,
+        description: "Pagos relacionados a proveedores",
+      },
+      {
+        title: "Total proveedores",
+        value: `Bs. ${sumaPagosProveedor._sum.monto?.toString() ?? "0"}`,
+        description: "Suma de pagos a proveedores",
+      }
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
+    <main
+      className="min-h-screen bg-cover bg-center bg-fixed p-6"
+      style={{
+        backgroundImage:
+          "linear-gradient(90deg, rgba(15,23,42,0.76) 0%, rgba(15,23,42,0.50) 45%, rgba(255,255,255,0.10) 100%), url('/images/reportes-fondo.jpg')",
+      }}
+    >
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-blue-700">
-              Módulo Reportes
-            </p>
+        <section className={`${glassPanel} px-6 py-5`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="text-white drop-shadow">
+              <p className="text-sm font-bold text-blue-200">
+                Módulo Reportes
+              </p>
 
-            <h1 className="text-3xl font-bold text-slate-900">
-              Reportes generales
-            </h1>
+              <h1 className="text-4xl font-extrabold tracking-tight">
+                Reportes
+              </h1>
 
-            <p className="mt-1 text-slate-600">
-              Resumen visual de clientes, empleados, proyectos, pagos y materiales.
-            </p>
-          </div>
+              <p className="mt-1 text-base font-semibold text-white/90">
+                Reportes visibles para el rol: {roleName}
+              </p>
+            </div>
 
-          <Link
-            href="/admin"
-            className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white"
-          >
-            Volver al panel
-          </Link>
-        </div>
-
-        <section className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-blue-700">Clientes</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-900">
-              {clientes.length}
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">Clientes registrados</p>
-          </div>
-
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-blue-700">Empleados</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-900">
-              {empleados.length}
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">Personal registrado</p>
-          </div>
-
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-blue-700">Proyectos</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-900">
-              {proyectos.length}
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">Proyectos visibles</p>
-          </div>
-
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-blue-700">Materiales</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-900">
-              {materiales.length}
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">Materiales registrados</p>
-          </div>
-
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-blue-700">Pagos</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-900">
-              {pagos.length}
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">Movimientos registrados</p>
-          </div>
-
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-blue-700">Total pagado</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-900">
-              Bs. {totalPagado.toFixed(2)}
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">Suma total de pagos</p>
+            <Link
+              href="/admin"
+              className="rounded-xl border border-white/40 bg-gradient-to-r from-blue-800 to-sky-600 px-5 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/40 backdrop-blur transition hover:from-blue-950 hover:to-sky-700"
+            >
+              Volver al panel
+            </Link>
           </div>
         </section>
 
-        <section className="mt-8">
-          <h2 className="text-xl font-bold text-slate-900">
-            Reportes disponibles
-          </h2>
+        <section className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {cards.map((card) => (
+            <article
+              key={card.title}
+              className="overflow-hidden rounded-[1.5rem] border border-white/40 bg-white/25 p-5 shadow-2xl shadow-slate-950/25 backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/35"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-white drop-shadow">
+                  <p className="text-sm font-extrabold">
+                    {card.title}{" "}
+                    <span className="text-lg">{getReportIcon(card.title)}</span>
+                  </p>
 
-          <p className="mt-1 text-sm text-slate-500">
-            Toca una tarjeta para ver la tabla correspondiente.
-          </p>
+                  <h2 className="mt-2 text-4xl font-extrabold">
+                    {card.value}
+                  </h2>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            {reportCards.map((card) => (
-              <Link
-                key={card.key}
-                href={`/admin/reportes?tabla=${card.key}`}
-                scroll={false}
-                className={`rounded-[2rem] border p-5 shadow-sm transition ${getCardClass(
-                  tabla === card.key
-                )}`}
-              >
-                <ReportIcon type={card.key} />
+                  <p className="mt-1 text-sm font-semibold text-white/90">
+                    {card.description}
+                  </p>
+                </div>
 
-                <h3 className="mt-4 text-lg font-bold">{card.title}</h3>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  {card.description}
-                </p>
-
-                <p className="mt-4 rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-                  Total: {card.count}
-                </p>
-              </Link>
-            ))}
-          </div>
+                <img
+                  src={getReportImage(card.title)}
+                  alt={card.title}
+                  className="h-24 w-28 rounded-xl object-cover shadow-xl"
+                />
+              </div>
+            </article>
+          ))}
         </section>
 
-        <TableFilter
-          basePath="/admin/reportes"
-          title="Filtro de reportes"
-          currentLabel={currentCard.title}
-          options={opcionesFiltro}
-          filtroActivo={filtroActivo}
-          campoFiltro={campoFiltro}
-          valorFiltro={valorFiltro}
-          resultados={resultadosPorTabla[tabla] ?? 0}
-          extraParams={{
-            tabla,
-          }}
-        />
+        <section className="mt-6 grid gap-5 lg:grid-cols-3">
+          {(isAdmin || isContabilidad || isObra) && (
+            <div className={tableSectionClass}>
+              <h2 className="p-4 text-xl font-extrabold text-white drop-shadow">
+                Proyectos recientes
+              </h2>
 
-        {tabla === "proyectos" && (
-          <section className="mt-6 overflow-x-auto rounded-[2rem] bg-white shadow-sm">
-            <h2 className="p-5 text-xl font-bold text-slate-900">
-              Proyectos recientes
-            </h2>
-
-            <table className="w-full border-collapse text-sm">
-              <thead className="bg-slate-200">
-                <tr>
-                  <th className="border p-3 text-left">ID</th>
-                  <th className="border p-3 text-left">Proyecto</th>
-                  <th className="border p-3 text-left">Cliente</th>
-                  <th className="border p-3 text-left">Ubicación</th>
-                  <th className="border p-3 text-left">Estado</th>
-                  <th className="border p-3 text-left">Inicio</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {proyectosFiltrados.map((proyecto) => (
-                  <tr key={proyecto.id_proyecto} className="hover:bg-slate-50">
-                    <td className="border p-3">{proyecto.id_proyecto}</td>
-                    <td className="border p-3 font-medium">{proyecto.nombre_proyecto}</td>
-                    <td className="border p-3">{clienteMap.get(proyecto.id_cliente) ?? "-"}</td>
-                    <td className="border p-3">{proyecto.ubicacion ?? "-"}</td>
-                    <td className="border p-3">{proyecto.estado ?? "-"}</td>
-                    <td className="border p-3">{formatDate(proyecto.fecha_inicio)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
-
-        {tabla === "pagos" && (
-          <section className="mt-6 overflow-x-auto rounded-[2rem] bg-white shadow-sm">
-            <h2 className="p-5 text-xl font-bold text-slate-900">
-              Pagos recientes
-            </h2>
-
-            <table className="w-full border-collapse text-sm">
-              <thead className="bg-slate-200">
-                <tr>
-                  <th className="border p-3 text-left">ID</th>
-                  <th className="border p-3 text-left">Tipo</th>
-                  <th className="border p-3 text-left">Fecha</th>
-                  <th className="border p-3 text-left">Monto</th>
-                  <th className="border p-3 text-left">Método</th>
-                  <th className="border p-3 text-left">Relacionado</th>
-                  <th className="border p-3 text-left">Proyecto</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {pagosFiltrados.map((pago) => {
-                  const relacionado = pago.id_cliente
-                    ? clienteMap.get(pago.id_cliente)
-                    : pago.id_empleado
-                    ? empleadoMap.get(pago.id_empleado)
-                    : "-";
-
-                  return (
-                    <tr key={pago.id_pago} className="hover:bg-slate-50">
-                      <td className="border p-3">{pago.id_pago}</td>
-                      <td className="border p-3">{pago.tipo_pago}</td>
-                      <td className="border p-3">{formatDate(pago.fecha_pago)}</td>
-                      <td className="border p-3">Bs. {pago.monto.toString()}</td>
-                      <td className="border p-3">{pago.metodo_pago}</td>
-                      <td className="border p-3">{relacionado}</td>
-                      <td className="border p-3">
-                        {pago.id_proyecto
-                          ? proyectoMap.get(pago.id_proyecto) ?? "-"
-                          : "-"}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr>
+                      <th className={tableHeadClass}>ID</th>
+                      <th className={tableHeadClass}>Proyecto</th>
+                      <th className={tableHeadClass}>Estado</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </section>
-        )}
+                  </thead>
 
-        {tabla === "clientes" && (
-          <section className="mt-6 overflow-x-auto rounded-[2rem] bg-white shadow-sm">
-            <h2 className="p-5 text-xl font-bold text-slate-900">
-              Clientes registrados
-            </h2>
+                  <tbody className="bg-white/35">
+                    {proyectosRecientes.map((proyecto) => (
+                      <tr
+                        key={proyecto.id_proyecto}
+                        className="hover:bg-blue-50/80"
+                      >
+                        <td className={tableCellClass}>
+                          {proyecto.id_proyecto}
+                        </td>
 
-            <table className="w-full border-collapse text-sm">
-              <thead className="bg-slate-200">
-                <tr>
-                  <th className="border p-3 text-left">ID</th>
-                  <th className="border p-3 text-left">Cliente</th>
-                  <th className="border p-3 text-left">CI/NIT</th>
-                  <th className="border p-3 text-left">Teléfono</th>
-                  <th className="border p-3 text-left">Correo</th>
-                  <th className="border p-3 text-left">Estado</th>
-                </tr>
-              </thead>
+                        <td className="border border-white/30 px-3 py-2 text-sm font-extrabold text-blue-950">
+                          {proyecto.nombre_proyecto}
+                        </td>
 
-              <tbody>
-                {clientesFiltrados.map((cliente) => {
-                  const nombre =
-                    cliente.razon_social ||
-                    `${cliente.nombres ?? ""} ${cliente.apellidos ?? ""}`.trim() ||
-                    "Sin nombre";
+                        <td className={tableCellClass}>{proyecto.estado}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
-                  return (
-                    <tr key={cliente.id_cliente} className="hover:bg-slate-50">
-                      <td className="border p-3">{cliente.id_cliente}</td>
-                      <td className="border p-3 font-medium">{nombre}</td>
-                      <td className="border p-3">{cliente.ci_nit}</td>
-                      <td className="border p-3">{cliente.telefono ?? "-"}</td>
-                      <td className="border p-3">{cliente.correo ?? "-"}</td>
-                      <td className="border p-3">{cliente.estado_cuenta ?? "-"}</td>
+          {(isAdmin || isContabilidad) && (
+            <div className={tableSectionClass}>
+              <h2 className="p-4 text-xl font-extrabold text-white drop-shadow">
+                Pagos recientes
+              </h2>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr>
+                      <th className={tableHeadClass}>ID</th>
+                      <th className={tableHeadClass}>Tipo</th>
+                      <th className={tableHeadClass}>Monto</th>
+                      <th className={tableHeadClass}>Fecha</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </section>
-        )}
+                  </thead>
 
-        {tabla === "empleados" && (
-          <section className="mt-6 overflow-x-auto rounded-[2rem] bg-white shadow-sm">
-            <h2 className="p-5 text-xl font-bold text-slate-900">
-              Personal registrado
-            </h2>
+                  <tbody className="bg-white/35">
+                    {pagosRecientes.map((pago) => (
+                      <tr key={pago.id_pago} className="hover:bg-blue-50/80">
+                        <td className={tableCellClass}>{pago.id_pago}</td>
 
-            <table className="w-full border-collapse text-sm">
-              <thead className="bg-slate-200">
-                <tr>
-                  <th className="border p-3 text-left">ID</th>
-                  <th className="border p-3 text-left">Empleado</th>
-                  <th className="border p-3 text-left">CI</th>
-                  <th className="border p-3 text-left">Teléfono</th>
-                  <th className="border p-3 text-left">Cargo</th>
-                  <th className="border p-3 text-left">Estado</th>
-                </tr>
-              </thead>
+                        <td className={tableCellClass}>{pago.tipo_pago}</td>
 
-              <tbody>
-                {empleadosFiltrados.map((empleado) => (
-                  <tr key={empleado.id_empleado} className="hover:bg-slate-50">
-                    <td className="border p-3">{empleado.id_empleado}</td>
-                    <td className="border p-3 font-medium">
-                      {empleado.nombres} {empleado.apellidos}
-                    </td>
-                    <td className="border p-3">{empleado.ci}</td>
-                    <td className="border p-3">{empleado.telefono ?? "-"}</td>
-                    <td className="border p-3">
-                      {cargoMap.get(empleado.id_cargo) ?? "-"}
-                    </td>
-                    <td className="border p-3">{empleado.estado}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
+                        <td className={tableCellClass}>
+                          Bs. {pago.monto.toString()}
+                        </td>
 
-        {tabla === "materiales" && (
-          <section className="mt-6 overflow-x-auto rounded-[2rem] bg-white shadow-sm">
-            <h2 className="p-5 text-xl font-bold text-slate-900">
-              Materiales registrados
-            </h2>
+                        <td className={tableCellClass}>
+                          {formatDate(pago.fecha_pago)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
-            <table className="w-full border-collapse text-sm">
-              <thead className="bg-slate-200">
-                <tr>
-                  <th className="border p-3 text-left">ID</th>
-                  <th className="border p-3 text-left">Material</th>
-                  <th className="border p-3 text-left">Categoría</th>
-                  <th className="border p-3 text-left">Unidad</th>
-                  <th className="border p-3 text-left">Precio</th>
-                  <th className="border p-3 text-left">Stock mínimo</th>
-                </tr>
-              </thead>
+          {(isAdmin || isAlmacen || isCompras || isObra) && (
+            <div className={tableSectionClass}>
+              <h2 className="p-4 text-xl font-extrabold text-white drop-shadow">
+                Materiales recientes
+              </h2>
 
-              <tbody>
-                {materialesFiltrados.map((material) => (
-                  <tr key={material.id_material} className="hover:bg-slate-50">
-                    <td className="border p-3">{material.id_material}</td>
-                    <td className="border p-3 font-medium">{material.nombre_material}</td>
-                    <td className="border p-3">
-                      {categoriaMap.get(material.id_categoria_material) ?? "-"}
-                    </td>
-                    <td className="border p-3">{material.unidad_medida}</td>
-                    <td className="border p-3">Bs. {material.precio_unitario.toString()}</td>
-                    <td className="border p-3">{material.stock_minimo.toString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr>
+                      <th className={tableHeadClass}>ID</th>
+                      <th className={tableHeadClass}>Material</th>
+                      <th className={tableHeadClass}>Unidad</th>
+                      <th className={tableHeadClass}>Precio</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="bg-white/35">
+                    {materialesRecientes.map((material) => (
+                      <tr
+                        key={material.id_material}
+                        className="hover:bg-blue-50/80"
+                      >
+                        <td className={tableCellClass}>
+                          {material.id_material}
+                        </td>
+
+                        <td className="border border-white/30 px-3 py-2 text-sm font-extrabold text-blue-950">
+                          {material.nombre_material}
+                        </td>
+
+                        <td className={tableCellClass}>
+                          {material.unidad_medida}
+                        </td>
+
+                        <td className={tableCellClass}>
+                          Bs. {material.precio_unitario.toString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {(isAdmin || isCompras) && (
+            <div className={tableSectionClass}>
+              <h2 className="p-4 text-xl font-extrabold text-white drop-shadow">
+                Pagos recientes a proveedores
+              </h2>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr>
+                      <th className={tableHeadClass}>ID</th>
+                      <th className={tableHeadClass}>Monto</th>
+                      <th className={tableHeadClass}>Fecha</th>
+                      <th className={tableHeadClass}>Método</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="bg-white/35">
+                    {pagosProveedorRecientes.map((pago) => (
+                      <tr key={pago.id_pago} className="hover:bg-blue-50/80">
+                        <td className={tableCellClass}>{pago.id_pago}</td>
+
+                        <td className={tableCellClass}>
+                          Bs. {pago.monto.toString()}
+                        </td>
+
+                        <td className={tableCellClass}>
+                          {formatDate(pago.fecha_pago)}
+                        </td>
+
+                        <td className={tableCellClass}>{pago.metodo_pago}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {(isAdmin || isRRHH) && (
+            <div className={tableSectionClass}>
+              <h2 className="p-4 text-xl font-extrabold text-white drop-shadow">
+                Empleados recientes
+              </h2>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr>
+                      <th className={tableHeadClass}>ID</th>
+                      <th className={tableHeadClass}>Empleado</th>
+                      <th className={tableHeadClass}>CI</th>
+                      <th className={tableHeadClass}>Estado</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="bg-white/35">
+                    {empleadosRecientes.map((empleado) => (
+                      <tr
+                        key={empleado.id_empleado}
+                        className="hover:bg-blue-50/80"
+                      >
+                        <td className={tableCellClass}>
+                          {empleado.id_empleado}
+                        </td>
+
+                        <td className="border border-white/30 px-3 py-2 text-sm font-extrabold text-blue-950">
+                          {empleado.nombres} {empleado.apellidos}
+                        </td>
+
+                        <td className={tableCellClass}>{empleado.ci}</td>
+
+                        <td className={tableCellClass}>{empleado.estado}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {(isAdmin || isAlmacen) && (
+            <div className={tableSectionClass}>
+              <h2 className="p-4 text-xl font-extrabold text-white drop-shadow">
+                Inventario reciente
+              </h2>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr>
+                      <th className={tableHeadClass}>Material</th>
+                      <th className={tableHeadClass}>Almacén</th>
+                      <th className={tableHeadClass}>Cantidad</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="bg-white/35">
+                    {inventarioReciente.map((item) => (
+                      <tr
+                        key={item.id_inventario}
+                        className="hover:bg-blue-50/80"
+                      >
+                        <td className="border border-white/30 px-3 py-2 text-sm font-extrabold text-blue-950">
+                          {materialMap.get(item.id_material) ?? "-"}
+                        </td>
+
+                        <td className={tableCellClass}>
+                          {almacenMap.get(item.id_almacen) ?? "-"}
+                        </td>
+
+                        <td className={tableCellClass}>
+                          {item.cantidad_disponible.toString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </main>
   );
