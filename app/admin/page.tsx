@@ -175,32 +175,7 @@ export default async function AdminPage() {
                     <p className="text-sm font-medium leading-6 text-slate-600">
                       {module.description}
                     </p>
-
-                    <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4">
-                      <p className="text-sm font-extrabold text-blue-950">
-                        Puede hacer:
-                      </p>
-
-                      <ul className="mt-2 space-y-2 text-sm font-medium text-blue-800">
-                        {details.can.map((item) => (
-                          <li key={item}>• {item}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {details.cannot.length > 0 && (
-                      <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-4">
-                        <p className="text-sm font-extrabold text-red-800">
-                          No puede hacer:
-                        </p>
-
-                        <ul className="mt-2 space-y-2 text-sm font-medium text-red-700">
-                          {details.cannot.map((item) => (
-                            <li key={item}>• {item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+               
 
                     <p className="mt-5 inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-700/25 transition group-hover:bg-blue-900">
                       Entrar →

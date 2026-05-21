@@ -188,73 +188,7 @@ export const roleModuleDetails: Record<
     },
   },
 
-  Almacen: {
-    materiales: {
-      can: [
-        "Ver materiales",
-        "Crear materiales",
-        "Editar materiales",
-        "Controlar stock",
-        "Consultar inventario",
-        "Ver almacenes",
-        "Actualizar cantidad disponible por material y almacén",
-      ],
-      cannot: [
-        "No puede registrar compras",
-        "No puede gestionar proveedores",
-        "No puede registrar pagos",
-        "No puede crear proyectos",
-        "No puede editar clientes",
-        "No puede editar empleados",
-        "No puede administrar usuarios",
-      ],
-    },
-    reportes: {
-      can: [
-        "Ver reportes de inventario",
-        "Ver materiales registrados",
-        "Ver resumen de stock",
-      ],
-      cannot: [
-        "No puede ver reportes financieros completos",
-        "No puede cambiar roles",
-      ],
-    },
-  },
 
-  Almacén: {
-    materiales: {
-      can: [
-        "Ver materiales",
-        "Crear materiales",
-        "Editar materiales",
-        "Controlar stock",
-        "Consultar inventario",
-        "Ver almacenes",
-        "Actualizar cantidad disponible por material y almacén",
-      ],
-      cannot: [
-        "No puede registrar compras",
-        "No puede gestionar proveedores",
-        "No puede registrar pagos",
-        "No puede crear proyectos",
-        "No puede editar clientes",
-        "No puede editar empleados",
-        "No puede administrar usuarios",
-      ],
-    },
-    reportes: {
-      can: [
-        "Ver reportes de inventario",
-        "Ver materiales registrados",
-        "Ver resumen de stock",
-      ],
-      cannot: [
-        "No puede ver reportes financieros completos",
-        "No puede cambiar roles",
-      ],
-    },
-  },
 
   Compras: {
     materiales: {

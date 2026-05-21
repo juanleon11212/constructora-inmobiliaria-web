@@ -11,12 +11,12 @@ import { canDo } from "../../../../lib/auth/permissions";
   Ruta:
   /admin/proyectos/[id]
 
-  Funcionalidades:
-  - Ver detalle del proyecto.
-  - Ver imágenes ilustrativas del proyecto.
-  - Editar proyecto si el rol tiene permiso.
-  - Marcar proyecto como terminado.
-  - Cliente solo puede entrar a sus propios proyectos.
+  Correcciones:
+  - El administrador puede editar.
+  - El administrador puede marcar como terminado.
+  - Al guardar cambios NO manda fecha_fin_real null.
+  - Si el estado es terminado, asigna fecha_fin_real automáticamente.
+  - Cliente solo puede ver sus propios proyectos.
 */
 
 type PageProps = {
@@ -34,7 +34,9 @@ function getText(formData: FormData, field: string) {
 }
 
 function getRoleName(user: { rol: unknown }) {
-  if (typeof user.rol === "string") return user.rol;
+  if (typeof user.rol === "string") {
+    return user.rol;
+  }
 
   if (
     user.rol &&
@@ -49,9 +51,54 @@ function getRoleName(user: { rol: unknown }) {
   return "";
 }
 
-function formatDate(value: Date | string | null | undefined) {
+function isAdminRole(roleName: string) {
+  const normalized = roleName.toLowerCase();
+
+  return (
+    normalized === "administrador" ||
+    normalized === "admin" ||
+    normalized.includes("admin")
+  );
+}
+
+function canEditProjects(roleName: string) {
+  return isAdminRole(roleName) || canDo(roleName, "proyectos", "edit");
+}
+
+function formatDateText(value: Date | string | null | undefined) {
   if (!value) return "-";
-  return new Date(value).toISOString().slice(0, 10);
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
+function formatDateInput(value: Date | string | null | undefined) {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
+function parseDateOrNull(value: string) {
+  if (!value) return null;
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date;
 }
 
 function getEstadoLabel(estado: string | null | undefined) {
@@ -63,13 +110,22 @@ function getEstadoLabel(estado: string | null | undefined) {
     eliminado: "Eliminado",
   };
 
-  return labels[estado ?? ""] ?? "Sin estado";
+  return labels[estado ?? ""] ?? estado ?? "Sin estado";
 }
 
 function getEstadoClass(estado: string | null | undefined) {
-  if (estado === "terminado") return "bg-emerald-100 text-emerald-800";
-  if (estado === "en_ejecucion") return "bg-blue-100 text-blue-800";
-  if (estado === "cancelado") return "bg-red-100 text-red-800";
+  if (estado === "terminado") {
+    return "bg-emerald-100 text-emerald-800";
+  }
+
+  if (estado === "en_ejecucion") {
+    return "bg-blue-100 text-blue-800";
+  }
+
+  if (estado === "cancelado") {
+    return "bg-red-100 text-red-800";
+  }
+
   return "bg-amber-100 text-amber-800";
 }
 
@@ -155,19 +211,22 @@ function ProjectGalleryImage({
   );
 }
 
+/*
+  GUARDAR CAMBIOS DEL PROYECTO
+*/
 async function actualizarProyecto(formData: FormData) {
   "use server";
 
   const user = await requireModule("proyectos");
   const roleName = getRoleName(user);
 
-  if (!canDo(roleName, "proyectos", "edit")) {
+  if (!canEditProjects(roleName)) {
     redirect("/admin/proyectos");
   }
 
   const id_proyecto = Number(formData.get("id_proyecto"));
 
-  if (!id_proyecto) {
+  if (!id_proyecto || Number.isNaN(id_proyecto)) {
     redirect("/admin/proyectos");
   }
 
@@ -175,64 +234,101 @@ async function actualizarProyecto(formData: FormData) {
   const descripcion = getText(formData, "descripcion");
   const ubicacion = getText(formData, "ubicacion");
   const estado = getText(formData, "estado");
-  const fecha_inicio = getText(formData, "fecha_inicio");
-  const fecha_fin_estimada = getText(formData, "fecha_fin_estimada");
-  const fecha_fin_real = getText(formData, "fecha_fin_real");
+  const fecha_inicio_text = getText(formData, "fecha_inicio");
+  const fecha_fin_estimada_text = getText(formData, "fecha_fin_estimada");
+  const fecha_fin_real_text = getText(formData, "fecha_fin_real");
 
   if (!nombre_proyecto || !ubicacion || !estado) {
     redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=datos`);
   }
 
-  await prisma.proyecto.update({
-    where: {
-      id_proyecto,
-    },
-    data: {
-      nombre_proyecto,
-      descripcion: descripcion || null,
-      ubicacion,
-      estado,
-      fecha_inicio: fecha_inicio ? new Date(fecha_inicio) : undefined,
-      fecha_fin_estimada: fecha_fin_estimada
-        ? new Date(fecha_fin_estimada)
-        : undefined,
-      fecha_fin_real: fecha_fin_real ? new Date(fecha_fin_real) : null,
-    },
-  });
+  const fecha_inicio = parseDateOrNull(fecha_inicio_text);
+  const fecha_fin_estimada = parseDateOrNull(fecha_fin_estimada_text);
+  const fecha_fin_real = parseDateOrNull(fecha_fin_real_text);
+
+  if (!fecha_inicio || !fecha_fin_estimada) {
+    redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=fechas`);
+  }
+
+  /*
+    IMPORTANTE:
+    No mandamos fecha_fin_real: null.
+    Eso era lo que podía romper Prisma si la columna no acepta null.
+  */
+  const dataUpdate = {
+    nombre_proyecto,
+    descripcion: descripcion || null,
+    ubicacion,
+    estado,
+    fecha_inicio,
+    fecha_fin_estimada,
+    ...(fecha_fin_real
+      ? {
+          fecha_fin_real,
+        }
+      : {}),
+    ...(estado === "terminado" && !fecha_fin_real
+      ? {
+          fecha_fin_real: new Date(),
+        }
+      : {}),
+  };
+
+  try {
+    await prisma.proyecto.update({
+      where: {
+        id_proyecto,
+      },
+      data: dataUpdate,
+    });
+  } catch (error) {
+    console.error("Error al actualizar proyecto:", error);
+    redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=guardar`);
+  }
 
   revalidatePath("/admin/proyectos");
   revalidatePath(`/admin/proyectos/${id_proyecto}`);
+
   redirect(`/admin/proyectos/${id_proyecto}`);
 }
 
+/*
+  MARCAR COMO TERMINADO
+*/
 async function marcarTerminado(formData: FormData) {
   "use server";
 
   const user = await requireModule("proyectos");
   const roleName = getRoleName(user);
 
-  if (!canDo(roleName, "proyectos", "edit")) {
+  if (!canEditProjects(roleName)) {
     redirect("/admin/proyectos");
   }
 
   const id_proyecto = Number(formData.get("id_proyecto"));
 
-  if (!id_proyecto) {
+  if (!id_proyecto || Number.isNaN(id_proyecto)) {
     redirect("/admin/proyectos");
   }
 
-  await prisma.proyecto.update({
-    where: {
-      id_proyecto,
-    },
-    data: {
-      estado: "terminado",
-      fecha_fin_real: new Date(),
-    },
-  });
+  try {
+    await prisma.proyecto.update({
+      where: {
+        id_proyecto,
+      },
+      data: {
+        estado: "terminado",
+        fecha_fin_real: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error("Error al marcar proyecto como terminado:", error);
+    redirect(`/admin/proyectos/${id_proyecto}?error=guardar`);
+  }
 
   revalidatePath("/admin/proyectos");
   revalidatePath(`/admin/proyectos/${id_proyecto}`);
+
   redirect(`/admin/proyectos/${id_proyecto}`);
 }
 
@@ -246,11 +342,11 @@ export default async function ProyectoDetallePage({
 
   const roleName = getRoleName(user);
   const isCliente = roleName === "Cliente";
-  const canEditProject = canDo(roleName, "proyectos", "edit");
+  const canEditProject = canEditProjects(roleName);
 
   const idProyecto = Number(routeParams.id);
 
-  if (!idProyecto) {
+  if (!idProyecto || Number.isNaN(idProyecto)) {
     notFound();
   }
 
@@ -294,8 +390,10 @@ export default async function ProyectoDetallePage({
               {proyecto.nombre_proyecto}
             </h1>
 
-            <p className="mt-1 text-slate-600">
-              Cliente: {clienteNombre}
+            <p className="mt-1 text-slate-600">Cliente: {clienteNombre}</p>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Rol actual: {roleName}
             </p>
           </div>
 
@@ -322,6 +420,12 @@ export default async function ProyectoDetallePage({
           <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {query.error === "datos" &&
               "Nombre, ubicación y estado son obligatorios."}
+
+            {query.error === "fechas" &&
+              "Fecha de inicio y fecha fin estimada son obligatorias y deben ser válidas."}
+
+            {query.error === "guardar" &&
+              "No se pudo guardar el proyecto. Revisa que el estado y las fechas sean correctas."}
           </div>
         )}
 
@@ -363,7 +467,7 @@ export default async function ProyectoDetallePage({
                       Fecha inicio
                     </p>
                     <p className="font-semibold text-slate-800">
-                      {formatDate(proyecto.fecha_inicio)}
+                      {formatDateText(proyecto.fecha_inicio)}
                     </p>
                   </div>
 
@@ -372,7 +476,7 @@ export default async function ProyectoDetallePage({
                       Fin estimado
                     </p>
                     <p className="font-semibold text-slate-800">
-                      {formatDate(proyecto.fecha_fin_estimada)}
+                      {formatDateText(proyecto.fecha_fin_estimada)}
                     </p>
                   </div>
 
@@ -381,7 +485,7 @@ export default async function ProyectoDetallePage({
                       Fin real
                     </p>
                     <p className="font-semibold text-slate-800">
-                      {formatDate(proyecto.fecha_fin_real)}
+                      {formatDateText(proyecto.fecha_fin_real)}
                     </p>
                   </div>
                 </div>
@@ -436,6 +540,10 @@ export default async function ProyectoDetallePage({
               Editar proyecto
             </h2>
 
+            <p className="mt-1 text-sm text-slate-500">
+              Modifica los datos del proyecto y presiona Guardar cambios.
+            </p>
+
             <form
               action={actualizarProyecto}
               className="mt-5 grid gap-4 md:grid-cols-2"
@@ -443,7 +551,7 @@ export default async function ProyectoDetallePage({
               <input
                 type="hidden"
                 name="id_proyecto"
-                defaultValue={proyecto.id_proyecto}
+                value={proyecto.id_proyecto}
               />
 
               <input
@@ -462,7 +570,7 @@ export default async function ProyectoDetallePage({
 
               <select
                 name="estado"
-                defaultValue={proyecto.estado}
+                defaultValue={proyecto.estado ?? "pendiente"}
                 className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
               >
                 <option value="pendiente">Pendiente</option>
@@ -475,10 +583,11 @@ export default async function ProyectoDetallePage({
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Fecha inicio
                 </label>
+
                 <input
                   type="date"
                   name="fecha_inicio"
-                  defaultValue={formatDate(proyecto.fecha_inicio)}
+                  defaultValue={formatDateInput(proyecto.fecha_inicio)}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
                 />
               </div>
@@ -487,10 +596,11 @@ export default async function ProyectoDetallePage({
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Fecha fin estimada
                 </label>
+
                 <input
                   type="date"
                   name="fecha_fin_estimada"
-                  defaultValue={formatDate(proyecto.fecha_fin_estimada)}
+                  defaultValue={formatDateInput(proyecto.fecha_fin_estimada)}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
                 />
               </div>
@@ -499,10 +609,11 @@ export default async function ProyectoDetallePage({
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Fecha fin real
                 </label>
+
                 <input
                   type="date"
                   name="fecha_fin_real"
-                  defaultValue={formatDate(proyecto.fecha_fin_real)}
+                  defaultValue={formatDateInput(proyecto.fecha_fin_real)}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
                 />
               </div>
