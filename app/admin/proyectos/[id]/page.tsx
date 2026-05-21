@@ -105,16 +105,15 @@ function getEstadoLabel(estado: string | null | undefined) {
   const labels: Record<string, string> = {
     pendiente: "Pendiente",
     en_ejecucion: "En ejecución",
-    terminado: "Terminado",
-    cancelado: "Cancelado",
-    eliminado: "Eliminado",
+    finalizado: "Finalizado",
+    suspendido: "Suspendido",
   };
 
   return labels[estado ?? ""] ?? estado ?? "Sin estado";
 }
 
 function getEstadoClass(estado: string | null | undefined) {
-  if (estado === "terminado") {
+  if (estado === "finalizado") {
     return "bg-emerald-100 text-emerald-800";
   }
 
@@ -122,7 +121,7 @@ function getEstadoClass(estado: string | null | undefined) {
     return "bg-blue-100 text-blue-800";
   }
 
-  if (estado === "cancelado") {
+  if (estado === "suspendido") {
     return "bg-red-100 text-red-800";
   }
 
@@ -245,16 +244,31 @@ async function actualizarProyecto(formData: FormData) {
   const fecha_inicio = parseDateOrNull(fecha_inicio_text);
   const fecha_fin_estimada = parseDateOrNull(fecha_fin_estimada_text);
   const fecha_fin_real = parseDateOrNull(fecha_fin_real_text);
+  const proyectoActual = await prisma.proyecto.findUnique({
+  where: {
+    id_proyecto,
+  },
+});
 
+if (!proyectoActual) {
+  redirect("/admin/proyectos");
+}
+
+/*
+  RESTRICCIÓN:
+  No se puede cambiar a finalizado si el proyecto no estaba en ejecución.
+*/
+if (
+  estado === "finalizado" &&
+  proyectoActual.estado !== "en_ejecucion" &&
+  proyectoActual.estado !== "finalizado"
+) {
+  redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=solo-ejecucion`);
+}
   if (!fecha_inicio || !fecha_fin_estimada) {
     redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=fechas`);
   }
 
-  /*
-    IMPORTANTE:
-    No mandamos fecha_fin_real: null.
-    Eso era lo que podía romper Prisma si la columna no acepta null.
-  */
   const dataUpdate = {
     nombre_proyecto,
     descripcion: descripcion || null,
@@ -267,7 +281,7 @@ async function actualizarProyecto(formData: FormData) {
           fecha_fin_real,
         }
       : {}),
-    ...(estado === "terminado" && !fecha_fin_real
+    ...(estado === "finalizado" && !fecha_fin_real
       ? {
           fecha_fin_real: new Date(),
         }
@@ -291,7 +305,6 @@ async function actualizarProyecto(formData: FormData) {
 
   redirect(`/admin/proyectos/${id_proyecto}`);
 }
-
 /*
   MARCAR COMO TERMINADO
 */
@@ -311,18 +324,37 @@ async function marcarTerminado(formData: FormData) {
     redirect("/admin/proyectos");
   }
 
+  const proyectoActual = await prisma.proyecto.findUnique({
+    where: {
+      id_proyecto,
+    },
+  });
+
+  if (!proyectoActual) {
+    redirect("/admin/proyectos");
+  }
+
+  /*
+    RESTRICCIÓN:
+    Solo un proyecto que está en ejecución puede pasar a finalizado.
+    Si está pendiente, sin estado, suspendido u otro estado, no se permite.
+  */
+  if (proyectoActual.estado !== "en_ejecucion") {
+    redirect(`/admin/proyectos/${id_proyecto}?error=solo-ejecucion`);
+  }
+
   try {
     await prisma.proyecto.update({
       where: {
         id_proyecto,
       },
       data: {
-        estado: "terminado",
+        estado: "finalizado",
         fecha_fin_real: new Date(),
       },
     });
   } catch (error) {
-    console.error("Error al marcar proyecto como terminado:", error);
+    console.error("Error al marcar proyecto como finalizado:", error);
     redirect(`/admin/proyectos/${id_proyecto}?error=guardar`);
   }
 
@@ -426,6 +458,8 @@ export default async function ProyectoDetallePage({
 
             {query.error === "guardar" &&
               "No se pudo guardar el proyecto. Revisa que el estado y las fechas sean correctas."}
+            {query.error === "solo-ejecucion" &&
+  "Solo los proyectos que están en ejecución pueden marcarse como finalizados."}
           </div>
         )}
 
@@ -490,7 +524,7 @@ export default async function ProyectoDetallePage({
                   </div>
                 </div>
 
-                {canEditProject && proyecto.estado !== "terminado" && (
+                {canEditProject && proyecto.estado === "en_ejecucion" && (
                   <form action={marcarTerminado} className="mt-6">
                     <input
                       type="hidden"
@@ -575,9 +609,8 @@ export default async function ProyectoDetallePage({
               >
                 <option value="pendiente">Pendiente</option>
                 <option value="en_ejecucion">En ejecución</option>
-                <option value="terminado">Terminado</option>
-                <option value="cancelado">Cancelado</option>
-              </select>
+                <option value="finalizado">Finalizado</option>
+                <option value="suspendido">Suspendido</option></select>
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">

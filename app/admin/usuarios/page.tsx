@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
 import RoleEmployeeSelect from "../../../components/froms/RoleEmployeeSelect";
+import {
+  TableFilter,
+  type FilterOption,
+} from "../../../components/admin/TableFilter";
+import { containsText, equalsText } from "../../../lib/table-filter";
 
 /*
   MÓDULO USUARIOS
@@ -36,6 +41,9 @@ import RoleEmployeeSelect from "../../../components/froms/RoleEmployeeSelect";
 type PageProps = {
   searchParams?: Promise<{
     editar?: string;
+    filtro?: string;
+    campo?: string;
+    valor?: string;
     error?: string;
   }>;
 };
@@ -297,7 +305,43 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
   }
 
   const idEditar = Number(params?.editar);
+  const filtroActivo = params?.filtro === "1";
+const campoFiltro = String(params?.campo ?? "").trim();
+const valorFiltro = String(params?.valor ?? "").trim();
+const hayFiltro = Boolean(campoFiltro && valorFiltro);
 
+const opcionesFiltroUsuarios: FilterOption[] = [
+  {
+    value: "id_usuario",
+    label: "ID usuario",
+    placeholder: "Ejemplo: 1",
+  },
+  {
+    value: "nombre_usuario",
+    label: "Nombre de usuario",
+    placeholder: "Ejemplo: admin",
+  },
+  {
+    value: "correo",
+    label: "Correo",
+    placeholder: "Ejemplo: usuario@correo.com",
+  },
+  {
+    value: "rol",
+    label: "Rol",
+    placeholder: "Ejemplo: Administrador",
+  },
+  {
+    value: "empleado",
+    label: "Empleado",
+    placeholder: "Ejemplo: Juan",
+  },
+  {
+    value: "estado",
+    label: "Estado",
+    placeholder: "Ejemplo: activo",
+  },
+];
   /*
     Trae roles, pero excluye Cliente porque cliente se maneja en tabla cliente.
   */
@@ -356,6 +400,38 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
       `${empleado.nombres} ${empleado.apellidos}`,
     ])
   );
+  const usuariosFiltrados = usuarios.filter((usuario) => {
+  if (!hayFiltro) return true;
+
+  if (campoFiltro === "id_usuario") {
+    return equalsText(usuario.id_usuario, valorFiltro);
+  }
+
+  if (campoFiltro === "nombre_usuario") {
+    return containsText(usuario.nombre_usuario, valorFiltro);
+  }
+
+  if (campoFiltro === "correo") {
+    return containsText(usuario.correo, valorFiltro);
+  }
+
+  if (campoFiltro === "rol") {
+    return containsText(rolMap.get(usuario.id_rol), valorFiltro);
+  }
+
+  if (campoFiltro === "empleado") {
+    return containsText(
+      usuario.id_empleado ? empleadoMap.get(usuario.id_empleado) : "-",
+      valorFiltro
+    );
+  }
+
+  if (campoFiltro === "estado") {
+    return containsText(usuario.estado, valorFiltro);
+  }
+
+  return true;
+});
 
   /*
     Empleados que ya tienen usuario.
@@ -526,12 +602,13 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
                 </p>
               </div>
 
-              <Link
-                href="/admin/usuarios"
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
-              >
-                Cancelar
-              </Link>
+             <Link
+                  href="/admin/usuarios"
+                  scroll={false}
+                  className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
+                >
+                  Cancelar
+                </Link>
             </div>
 
             <form
@@ -597,7 +674,16 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
             </form>
           </section>
         )}
-
+          <TableFilter
+            basePath="/admin/usuarios"
+            title="Filtro de usuarios"
+            currentLabel="Usuarios"
+            options={opcionesFiltroUsuarios}
+            filtroActivo={filtroActivo}
+            campoFiltro={campoFiltro}
+            valorFiltro={valorFiltro}
+            resultados={usuariosFiltrados.length}
+/>
         {/* Tabla de usuarios */}
         <section className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-sm">
           <table className="w-full border-collapse text-sm">
@@ -614,7 +700,7 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
             </thead>
 
             <tbody>
-              {usuarios.map((usuario) => (
+              {usuariosFiltrados.map((usuario) => (
                 <tr key={usuario.id_usuario} className="hover:bg-slate-50">
                   <td className="border p-3">{usuario.id_usuario}</td>
 
@@ -639,11 +725,12 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
                   <td className="border p-3">
                     <div className="flex gap-2">
                       <Link
-                        href={`/admin/usuarios?editar=${usuario.id_usuario}`}
-                        className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white"
-                      >
-                        Editar
-                      </Link>
+                      href={`/admin/usuarios?editar=${usuario.id_usuario}`}
+                      scroll={false}
+                      className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white"
+                    >
+                      Editar
+                    </Link>
 
                       {usuario.estado !== "inactivo" && (
                         <form action={eliminarUsuario}>
@@ -666,7 +753,7 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
                 </tr>
               ))}
 
-              {usuarios.length === 0 && (
+              {usuariosFiltrados.length === 0 && (
                 <tr>
                   <td
                     colSpan={7}
