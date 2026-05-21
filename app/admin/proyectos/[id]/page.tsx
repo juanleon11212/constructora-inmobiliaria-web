@@ -11,12 +11,11 @@ import { canDo } from "../../../../lib/auth/permissions";
   Ruta:
   /admin/proyectos/[id]
 
-  Correcciones:
-  - El administrador puede editar.
-  - El administrador puede marcar como terminado.
-  - Al guardar cambios NO manda fecha_fin_real null.
-  - Si el estado es terminado, asigna fecha_fin_real automáticamente.
-  - Cliente solo puede ver sus propios proyectos.
+  Cambios visuales:
+  - Fondo y tarjetas glass estilo módulo Proyectos.
+  - Detalle con portada, métricas, descripción y galería.
+  - Formulario de edición con diseño consistente.
+  - Se mantiene la lógica de permisos, guardar y finalizar.
 */
 
 type PageProps = {
@@ -107,13 +106,15 @@ function getEstadoLabel(estado: string | null | undefined) {
     en_ejecucion: "En ejecución",
     finalizado: "Finalizado",
     suspendido: "Suspendido",
+    terminado: "Terminado",
+    cancelado: "Cancelado",
   };
 
   return labels[estado ?? ""] ?? estado ?? "Sin estado";
 }
 
 function getEstadoClass(estado: string | null | undefined) {
-  if (estado === "finalizado") {
+  if (estado === "finalizado" || estado === "terminado") {
     return "bg-emerald-100 text-emerald-800";
   }
 
@@ -121,98 +122,102 @@ function getEstadoClass(estado: string | null | undefined) {
     return "bg-blue-100 text-blue-800";
   }
 
-  if (estado === "suspendido") {
+  if (estado === "suspendido" || estado === "cancelado") {
     return "bg-red-100 text-red-800";
   }
 
   return "bg-amber-100 text-amber-800";
 }
 
-function ProjectGalleryImage({
-  title,
-  index,
-}: {
-  title: string;
-  index: number;
+function getProyectoImagen(proyecto: {
+  nombre_proyecto?: string | null;
+  descripcion?: string | null;
+  ubicacion?: string | null;
 }) {
-  const fondos = [
-    "from-blue-600 to-cyan-300",
-    "from-emerald-600 to-lime-300",
-    "from-amber-600 to-orange-300",
-  ];
+  const texto = `${proyecto.nombre_proyecto ?? ""} ${
+    proyecto.descripcion ?? ""
+  } ${proyecto.ubicacion ?? ""}`.toLowerCase();
 
-  const fondo = fondos[index % fondos.length];
+  if (
+    texto.includes("vivienda") ||
+    texto.includes("casa") ||
+    texto.includes("familiar") ||
+    texto.includes("hogar")
+  ) {
+    return "/images/proyecto-vivienda.jpg";
+  }
 
+  return "/images/proyecto-edificio.jpg";
+}
+
+const inputClass =
+  "w-full rounded-xl border border-white/50 bg-white/80 px-4 py-3 text-sm font-bold text-slate-950 shadow-sm outline-none backdrop-blur placeholder:text-slate-500 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-200";
+
+const selectClass =
+  "w-full rounded-xl border border-white/50 bg-white/80 px-4 py-3 text-sm font-bold text-slate-950 shadow-sm outline-none backdrop-blur focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-200";
+
+function InfoCard({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon: string;
+}) {
   return (
-    <div
-      className={`relative h-64 overflow-hidden rounded-[2rem] bg-gradient-to-br ${fondo}`}
-    >
-      <svg viewBox="0 0 480 300" className="absolute inset-0 h-full w-full">
-        <circle cx="390" cy="58" r="34" fill="rgba(255,255,255,0.75)" />
+    <div className="rounded-2xl border border-white/40 bg-white/60 p-4 shadow-lg shadow-slate-950/10 backdrop-blur">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-900 text-lg text-white shadow">
+          {icon}
+        </div>
 
-        <rect
-          x="82"
-          y="140"
-          width="300"
-          height="105"
-          rx="16"
-          fill="rgba(255,255,255,0.92)"
-        />
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-blue-900">
+            {label}
+          </p>
 
-        <path d="M55 148 L232 50 L410 148 Z" fill="rgba(15,23,42,0.9)" />
-
-        <rect
-          x="125"
-          y="175"
-          width="60"
-          height="70"
-          rx="7"
-          fill="rgba(37,99,235,0.85)"
-        />
-
-        <rect
-          x="235"
-          y="175"
-          width="85"
-          height="50"
-          rx="8"
-          fill="rgba(14,165,233,0.75)"
-        />
-
-        <line
-          x1="277"
-          y1="175"
-          x2="277"
-          y2="225"
-          stroke="white"
-          strokeWidth="4"
-        />
-
-        <line
-          x1="235"
-          y1="200"
-          x2="320"
-          y2="200"
-          stroke="white"
-          strokeWidth="4"
-        />
-
-        <path
-          d="M40 255 C100 230 145 268 205 248 C270 225 315 266 380 245 C420 233 445 245 470 256 L470 300 L40 300 Z"
-          fill="rgba(15,23,42,0.18)"
-        />
-      </svg>
-
-      <div className="absolute bottom-4 left-4 rounded-2xl bg-white/90 px-4 py-2 text-sm font-bold text-slate-900">
-        {title}
+          <p className="mt-1 text-sm font-extrabold text-slate-950">
+            {value}
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
-/*
-  GUARDAR CAMBIOS DEL PROYECTO
-*/
+function GalleryCard({
+  title,
+  src,
+  description,
+}: {
+  title: string;
+  src: string;
+  description: string;
+}) {
+  return (
+    <article className="overflow-hidden rounded-[1.7rem] border border-white/45 bg-white/60 shadow-xl shadow-slate-950/20 backdrop-blur-md">
+      <div className="relative h-52 overflow-hidden p-3">
+        <img
+          src={src}
+          alt={title}
+          className="h-full w-full rounded-2xl object-cover shadow-lg"
+        />
+
+        <div className="absolute inset-3 rounded-2xl bg-gradient-to-t from-slate-950/45 via-slate-900/10 to-transparent" />
+      </div>
+
+      <div className="p-5 pt-2">
+        <h3 className="text-lg font-extrabold text-slate-950">{title}</h3>
+
+        <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
+          {description}
+        </p>
+      </div>
+    </article>
+  );
+}
+
 async function actualizarProyecto(formData: FormData) {
   "use server";
 
@@ -244,27 +249,25 @@ async function actualizarProyecto(formData: FormData) {
   const fecha_inicio = parseDateOrNull(fecha_inicio_text);
   const fecha_fin_estimada = parseDateOrNull(fecha_fin_estimada_text);
   const fecha_fin_real = parseDateOrNull(fecha_fin_real_text);
+
   const proyectoActual = await prisma.proyecto.findUnique({
-  where: {
-    id_proyecto,
-  },
-});
+    where: {
+      id_proyecto,
+    },
+  });
 
-if (!proyectoActual) {
-  redirect("/admin/proyectos");
-}
+  if (!proyectoActual) {
+    redirect("/admin/proyectos");
+  }
 
-/*
-  RESTRICCIÓN:
-  No se puede cambiar a finalizado si el proyecto no estaba en ejecución.
-*/
-if (
-  estado === "finalizado" &&
-  proyectoActual.estado !== "en_ejecucion" &&
-  proyectoActual.estado !== "finalizado"
-) {
-  redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=solo-ejecucion`);
-}
+  if (
+    estado === "finalizado" &&
+    proyectoActual.estado !== "en_ejecucion" &&
+    proyectoActual.estado !== "finalizado"
+  ) {
+    redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=solo-ejecucion`);
+  }
+
   if (!fecha_inicio || !fecha_fin_estimada) {
     redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=fechas`);
   }
@@ -305,9 +308,7 @@ if (
 
   redirect(`/admin/proyectos/${id_proyecto}`);
 }
-/*
-  MARCAR COMO TERMINADO
-*/
+
 async function marcarTerminado(formData: FormData) {
   "use server";
 
@@ -334,11 +335,6 @@ async function marcarTerminado(formData: FormData) {
     redirect("/admin/proyectos");
   }
 
-  /*
-    RESTRICCIÓN:
-    Solo un proyecto que está en ejecución puede pasar a finalizado.
-    Si está pendiente, sin estado, suspendido u otro estado, no se permite.
-  */
   if (proyectoActual.estado !== "en_ejecucion") {
     redirect(`/admin/proyectos/${id_proyecto}?error=solo-ejecucion`);
   }
@@ -408,48 +404,55 @@ export default async function ProyectoDetallePage({
     `Cliente ${proyecto.id_cliente}`;
 
   const modoEditar = query?.modo === "editar" && canEditProject;
+  const imagenPrincipal = getProyectoImagen(proyecto);
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
+    <main
+      className="min-h-screen bg-cover bg-center bg-fixed p-6"
+      style={{
+        backgroundImage:
+          "linear-gradient(90deg, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.58) 36%, rgba(255,255,255,0.12) 100%), url('/images/proyectos-fondo.jpg')",
+      }}
+    >
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-blue-700">
-              Detalle de proyecto
-            </p>
+        <section className="rounded-[28px] border border-white/40 bg-white/25 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="text-white drop-shadow">
+              <p className="text-sm font-bold text-blue-100">
+                Detalle de proyecto
+              </p>
 
-            <h1 className="text-3xl font-bold text-slate-900">
-              {proyecto.nombre_proyecto}
-            </h1>
+              <h1 className="text-4xl font-extrabold tracking-tight">
+                {proyecto.nombre_proyecto}
+              </h1>
 
-            <p className="mt-1 text-slate-600">Cliente: {clienteNombre}</p>
+              <p className="mt-1 text-sm font-medium text-blue-100">
+                Cliente: {clienteNombre} · Rol actual: {roleName}
+              </p>
+            </div>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Rol actual: {roleName}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/admin/proyectos"
-              className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white"
-            >
-              Volver
-            </Link>
-
-            {canEditProject && !modoEditar && (
+            <div className="flex flex-wrap gap-3">
               <Link
-                href={`/admin/proyectos/${proyecto.id_proyecto}?modo=editar`}
-                className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                href="/admin/proyectos"
+                className="rounded-xl border border-white/40 bg-white/75 px-5 py-3 text-sm font-extrabold text-blue-900 shadow-xl shadow-slate-900/20 backdrop-blur transition hover:bg-white"
               >
-                Editar proyecto
+                Volver
               </Link>
-            )}
+
+              {canEditProject && !modoEditar && (
+                <Link
+                  href={`/admin/proyectos/${proyecto.id_proyecto}?modo=editar`}
+                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-5 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/30 transition hover:from-blue-950 hover:to-sky-700"
+                >
+                  Editar proyecto
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
+        </section>
 
         {query?.error && (
-          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm font-bold text-red-700 shadow-lg backdrop-blur">
             {query.error === "datos" &&
               "Nombre, ubicación y estado son obligatorios."}
 
@@ -458,70 +461,81 @@ export default async function ProyectoDetallePage({
 
             {query.error === "guardar" &&
               "No se pudo guardar el proyecto. Revisa que el estado y las fechas sean correctas."}
+
             {query.error === "solo-ejecucion" &&
-  "Solo los proyectos que están en ejecución pueden marcarse como finalizados."}
+              "Solo los proyectos que están en ejecución pueden marcarse como finalizados."}
           </div>
         )}
 
         {!modoEditar && (
           <>
-            <section className="mt-6 grid gap-6 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <ProjectGalleryImage
-                  title={proyecto.nombre_proyecto}
-                  index={0}
-                />
-              </div>
+            <section className="mt-6 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
+              <article className="overflow-hidden rounded-[28px] border border-white/50 bg-white/55 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
+                <div className="relative h-[440px] overflow-hidden p-4">
+                  <img
+                    src={imagenPrincipal}
+                    alt={proyecto.nombre_proyecto}
+                    className="h-full w-full rounded-[1.5rem] object-cover shadow-xl"
+                  />
 
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${getEstadoClass(
-                    proyecto.estado
-                  )}`}
-                >
-                  {getEstadoLabel(proyecto.estado)}
-                </span>
+                  <div className="absolute inset-4 rounded-[1.5rem] bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent" />
 
-                <h2 className="mt-4 text-xl font-bold text-slate-900">
+                  <div className="absolute bottom-8 left-8 right-8">
+                    <span
+                      className={`rounded-full px-4 py-2 text-xs font-extrabold shadow ${getEstadoClass(
+                        proyecto.estado
+                      )}`}
+                    >
+                      {getEstadoLabel(proyecto.estado)}
+                    </span>
+
+                    <h2 className="mt-4 text-3xl font-black text-white drop-shadow">
+                      {proyecto.nombre_proyecto}
+                    </h2>
+
+                    <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-blue-50 drop-shadow">
+                      {proyecto.descripcion ||
+                        "Proyecto de construcción enfocado en seguridad, calidad de materiales y cumplimiento de tiempos de entrega."}
+                    </p>
+                  </div>
+                </div>
+              </article>
+
+              <aside className="rounded-[28px] border border-white/40 bg-white/35 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+                <h2 className="text-2xl font-extrabold text-white drop-shadow">
                   Información principal
                 </h2>
 
-                <div className="mt-5 space-y-4 text-sm">
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-400">
-                      Ubicación
-                    </p>
-                    <p className="font-semibold text-slate-800">
-                      {proyecto.ubicacion ?? "-"}
-                    </p>
-                  </div>
+                <p className="mt-1 text-sm font-bold text-blue-100">
+                  Datos generales del proyecto seleccionado.
+                </p>
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-400">
-                      Fecha inicio
-                    </p>
-                    <p className="font-semibold text-slate-800">
-                      {formatDateText(proyecto.fecha_inicio)}
-                    </p>
-                  </div>
+                <div className="mt-5 grid gap-4">
+                  <InfoCard label="Cliente" value={clienteNombre} icon="👤" />
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-400">
-                      Fin estimado
-                    </p>
-                    <p className="font-semibold text-slate-800">
-                      {formatDateText(proyecto.fecha_fin_estimada)}
-                    </p>
-                  </div>
+                  <InfoCard
+                    label="Ubicación"
+                    value={proyecto.ubicacion ?? "-"}
+                    icon="📍"
+                  />
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-400">
-                      Fin real
-                    </p>
-                    <p className="font-semibold text-slate-800">
-                      {formatDateText(proyecto.fecha_fin_real)}
-                    </p>
-                  </div>
+                  <InfoCard
+                    label="Fecha inicio"
+                    value={formatDateText(proyecto.fecha_inicio)}
+                    icon="📅"
+                  />
+
+                  <InfoCard
+                    label="Fin estimado"
+                    value={formatDateText(proyecto.fecha_fin_estimada)}
+                    icon="🗓️"
+                  />
+
+                  <InfoCard
+                    label="Fin real"
+                    value={formatDateText(proyecto.fecha_fin_real)}
+                    icon="✅"
+                  />
                 </div>
 
                 {canEditProject && proyecto.estado === "en_ejecucion" && (
@@ -534,53 +548,75 @@ export default async function ProyectoDetallePage({
 
                     <button
                       type="submit"
-                      className="w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                      className="w-full rounded-xl bg-gradient-to-r from-emerald-700 to-green-600 px-4 py-3 text-sm font-extrabold text-white shadow-xl shadow-emerald-950/30 transition hover:from-emerald-900 hover:to-green-700"
                     >
-                      Marcar como terminado
+                      Marcar como finalizado
                     </button>
                   </form>
                 )}
-              </div>
+              </aside>
             </section>
 
-            <section className="mt-6 rounded-[2rem] bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900">
+            <section className="mt-6 rounded-[28px] border border-white/40 bg-white/35 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+              <h2 className="text-2xl font-extrabold text-white drop-shadow">
                 Descripción del proyecto
               </h2>
 
-              <p className="mt-3 leading-7 text-slate-600">
+              <p className="mt-3 rounded-2xl bg-white/65 p-5 text-sm font-semibold leading-7 text-slate-800 shadow backdrop-blur">
                 {proyecto.descripcion ||
                   "Este proyecto está enfocado en la construcción de espacios funcionales, seguros y cómodos, cuidando la calidad de materiales, tiempos de ejecución y necesidades del cliente."}
               </p>
             </section>
 
             <section className="mt-6">
-              <h2 className="text-xl font-bold text-slate-900">
-                Galería del proyecto
-              </h2>
+              <div className="mb-4 rounded-[28px] border border-white/40 bg-white/25 p-5 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
+                <h2 className="text-2xl font-extrabold text-white drop-shadow">
+                  Galería del proyecto
+                </h2>
 
-              <div className="mt-4 grid gap-5 md:grid-cols-3">
-                <ProjectGalleryImage title="Fachada referencial" index={0} />
-                <ProjectGalleryImage title="Área interior" index={1} />
-                <ProjectGalleryImage title="Avance de obra" index={2} />
+                <p className="mt-1 text-sm font-bold text-blue-100">
+                  Imágenes referenciales para presentar mejor el avance y tipo de obra.
+                </p>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-3">
+                <GalleryCard
+                  title="Vista principal"
+                  src={imagenPrincipal}
+                  description="Imagen principal del tipo de proyecto registrado."
+                />
+
+                <GalleryCard
+                  title="Fachada referencial"
+                  src="/images/proyecto-edificio.jpg"
+                  description="Representación de fachada y presentación exterior."
+                />
+
+                <GalleryCard
+                  title="Vivienda referencial"
+                  src="/images/proyecto-vivienda.jpg"
+                  description="Referencia visual para proyectos habitacionales."
+                />
               </div>
             </section>
           </>
         )}
 
         {modoEditar && (
-          <section className="mt-6 rounded-[2rem] bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900">
-              Editar proyecto
-            </h2>
+          <section className="mt-6 rounded-[28px] border border-white/40 bg-white/30 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+            <div className="mb-5">
+              <h2 className="text-2xl font-extrabold text-white drop-shadow">
+                Editar proyecto
+              </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Modifica los datos del proyecto y presiona Guardar cambios.
-            </p>
+              <p className="mt-1 text-sm font-bold text-blue-100">
+                Modifica los datos del proyecto y guarda los cambios.
+              </p>
+            </div>
 
             <form
               action={actualizarProyecto}
-              className="mt-5 grid gap-4 md:grid-cols-2"
+              className="grid gap-4 md:grid-cols-2"
             >
               <input
                 type="hidden"
@@ -592,28 +628,29 @@ export default async function ProyectoDetallePage({
                 name="nombre_proyecto"
                 defaultValue={proyecto.nombre_proyecto}
                 placeholder="Nombre del proyecto"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
               <input
                 name="ubicacion"
                 defaultValue={proyecto.ubicacion ?? ""}
                 placeholder="Ubicación"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
               <select
                 name="estado"
                 defaultValue={proyecto.estado ?? "pendiente"}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={selectClass}
               >
                 <option value="pendiente">Pendiente</option>
                 <option value="en_ejecucion">En ejecución</option>
                 <option value="finalizado">Finalizado</option>
-                <option value="suspendido">Suspendido</option></select>
+                <option value="suspendido">Suspendido</option>
+              </select>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
                   Fecha inicio
                 </label>
 
@@ -621,12 +658,12 @@ export default async function ProyectoDetallePage({
                   type="date"
                   name="fecha_inicio"
                   defaultValue={formatDateInput(proyecto.fecha_inicio)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
                   Fecha fin estimada
                 </label>
 
@@ -634,12 +671,12 @@ export default async function ProyectoDetallePage({
                   type="date"
                   name="fecha_fin_estimada"
                   defaultValue={formatDateInput(proyecto.fecha_fin_estimada)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
                   Fecha fin real
                 </label>
 
@@ -647,7 +684,7 @@ export default async function ProyectoDetallePage({
                   type="date"
                   name="fecha_fin_real"
                   defaultValue={formatDateInput(proyecto.fecha_fin_real)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                  className={inputClass}
                 />
               </div>
 
@@ -656,20 +693,20 @@ export default async function ProyectoDetallePage({
                 defaultValue={proyecto.descripcion ?? ""}
                 placeholder="Descripción"
                 rows={5}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+                className={`${inputClass} md:col-span-2`}
               />
 
               <div className="md:col-span-2 flex flex-wrap gap-3">
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/30 transition hover:from-blue-950 hover:to-sky-700"
                 >
                   Guardar cambios
                 </button>
 
                 <Link
                   href={`/admin/proyectos/${proyecto.id_proyecto}`}
-                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700"
+                  className="rounded-xl border border-white/40 bg-white/70 px-5 py-3 text-sm font-extrabold text-blue-900 shadow-lg transition hover:bg-white"
                 >
                   Cancelar
                 </Link>

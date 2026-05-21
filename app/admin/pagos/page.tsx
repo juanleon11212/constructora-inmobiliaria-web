@@ -16,16 +16,12 @@ import { containsText, equalsText, formatDate } from "../../../lib/table-filter"
   Ruta:
   /admin/pagos
 
-  Permisos:
-  - Administrador: ve, crea y edita pagos.
-  - Contabilidad: ve, crea y edita pagos.
-  - Compras: solo ve pagos de proveedores.
-  - Cliente: solo ve sus propios pagos.
-
-  Incluye:
-  - Filtro por ID, tipo, fecha, monto, método, relacionado, proyecto y descripción.
-  - El filtro no vuelve al inicio porque TableFilter usa scroll false.
-  - Editar y cancelar también usan scroll false.
+  Cambios visuales:
+  - Fondo y colores estilo módulos Proyectos/Clientes.
+  - Tarjetas resumen.
+  - Formularios en cajas glass.
+  - Tabla con diseño translúcido.
+  - Se mantiene la lógica de crear, editar, filtrar y permisos.
 */
 
 type PageProps = {
@@ -58,6 +54,68 @@ function getRoleName(user: { rol: unknown }) {
   }
 
   return "";
+}
+
+const inputClass =
+  "w-full rounded-xl border border-white/50 bg-white/80 px-4 py-3 text-sm font-bold text-slate-950 shadow-sm outline-none backdrop-blur placeholder:text-slate-500 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-200";
+
+const selectClass =
+  "w-full rounded-xl border border-white/50 bg-white/80 px-4 py-3 text-sm font-bold text-slate-950 shadow-sm outline-none backdrop-blur focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-200";
+
+const tableHeaderClass =
+  "border border-white/30 px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wide text-slate-800";
+
+const tableCellClass =
+  "border border-white/30 px-4 py-3 text-sm font-semibold text-slate-800";
+
+function StatCard({
+  label,
+  value,
+  helper,
+  icon,
+}: {
+  label: string;
+  value: string | number;
+  helper: string;
+  icon: string;
+}) {
+  return (
+    <div className="rounded-[1.7rem] border border-white/40 bg-white/50 p-5 shadow-xl shadow-slate-950/20 backdrop-blur-md">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-blue-900">
+            {label}
+          </p>
+
+          <h3 className="mt-2 text-3xl font-black text-slate-950">
+            {value}
+          </h3>
+        </div>
+
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-900/90 text-2xl text-white shadow-lg">
+          {icon}
+        </div>
+      </div>
+
+      <p className="mt-3 text-sm font-bold text-slate-700">{helper}</p>
+    </div>
+  );
+}
+
+function getPagoBadgeClass(tipo: string | null | undefined) {
+  if (tipo === "cliente") {
+    return "bg-emerald-100 text-emerald-800";
+  }
+
+  if (tipo === "empleado") {
+    return "bg-blue-100 text-blue-800";
+  }
+
+  if (tipo === "proveedor") {
+    return "bg-amber-100 text-amber-800";
+  }
+
+  return "bg-slate-100 text-slate-700";
 }
 
 async function validarProyectoPago(
@@ -414,36 +472,86 @@ export default async function PagosPage({ searchParams }: PageProps) {
     return true;
   });
 
+  const totalPagado = pagos.reduce((total, pago) => total + Number(pago.monto), 0);
+  const totalFiltrado = pagosFiltrados.reduce(
+    (total, pago) => total + Number(pago.monto),
+    0
+  );
+  const totalClientes = pagos.filter((pago) => pago.tipo_pago === "cliente").length;
+  const totalProveedores = pagos.filter(
+    (pago) => pago.tipo_pago === "proveedor"
+  ).length;
+
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
+    <main
+      className="min-h-screen bg-cover bg-center bg-fixed p-6"
+      style={{
+        backgroundImage:
+          "linear-gradient(90deg, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.62) 36%, rgba(255,255,255,0.12) 100%), url('/images/pagos.jpg')",
+      }}
+    >
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-blue-700">Módulo Pagos</p>
+        <section className="rounded-[28px] border border-white/40 bg-white/25 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="text-white drop-shadow">
+              <p className="text-sm font-bold text-blue-100">
+                Módulo Pagos
+              </p>
 
-            <h1 className="text-3xl font-bold text-slate-900">
-              {isCliente ? "Mis pagos" : "Pagos"}
-            </h1>
+              <h1 className="text-4xl font-extrabold tracking-tight">
+                {isCliente ? "Mis pagos" : "Pagos"}
+              </h1>
 
-            <p className="mt-1 text-slate-600">
-              {isCliente
-                ? "Consulta los pagos relacionados con tu cuenta."
-                : isCompras
-                ? "Consulta pagos relacionados a proveedores."
-                : "Registro y control de pagos del sistema."}
-            </p>
+              <p className="mt-1 text-sm font-medium text-blue-100">
+                {isCliente
+                  ? "Consulta los pagos relacionados con tu cuenta."
+                  : isCompras
+                  ? "Consulta pagos relacionados a proveedores."
+                  : "Registro y control de pagos del sistema."}
+              </p>
+            </div>
+
+            <Link
+              href="/admin"
+              className="rounded-xl border border-white/40 bg-white/75 px-5 py-3 text-sm font-extrabold text-blue-900 shadow-xl shadow-slate-900/20 backdrop-blur transition hover:bg-white"
+            >
+              Volver al panel
+            </Link>
           </div>
 
-          <Link
-            href="/admin"
-            className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white"
-          >
-            Volver al panel
-          </Link>
-        </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              label="Pagos visibles"
+              value={pagos.length}
+              helper="Registros según tu rol actual"
+              icon="💳"
+            />
+
+            <StatCard
+              label="Total registrado"
+              value={`Bs. ${totalPagado.toFixed(2)}`}
+              helper="Suma general de pagos visibles"
+              icon="📊"
+            />
+
+            <StatCard
+              label="Pagos de clientes"
+              value={totalClientes}
+              helper="Ingresos relacionados a clientes"
+              icon="👤"
+            />
+
+            <StatCard
+              label="Pagos proveedores"
+              value={totalProveedores}
+              helper="Egresos o pagos a proveedores"
+              icon="🏗️"
+            />
+          </div>
+        </section>
 
         {params?.error && (
-          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm font-bold text-red-700 shadow-lg backdrop-blur">
             {params.error === "datos-obligatorios" &&
               "Tipo de pago, fecha, monto y método son obligatorios."}
 
@@ -465,36 +573,32 @@ export default async function PagosPage({ searchParams }: PageProps) {
             {params.error === "proyecto-no-corresponde" &&
               "El proyecto seleccionado no pertenece al cliente elegido."}
 
-            {params.error === "id-invalido" &&
-              "El ID del pago no es válido."}
+            {params.error === "id-invalido" && "El ID del pago no es válido."}
           </div>
         )}
 
         {canCreatePago && !pagoEditar && (
-          <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900">
-              Registrar pago
-            </h2>
+          <section className="mt-6 rounded-[28px] border border-white/40 bg-white/30 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+            <div className="mb-5">
+              <h2 className="text-2xl font-extrabold text-white drop-shadow">
+                Registrar pago
+              </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Este formulario puede usarlo Administración o Contabilidad.
-            </p>
+              <p className="mt-1 text-sm font-bold text-blue-100">
+                Completa los datos del movimiento y relaciónalo con cliente,
+                empleado, proveedor o proyecto.
+              </p>
+            </div>
 
-            <form action={crearPago} className="mt-5 grid gap-4 md:grid-cols-2">
-              <select
-                name="tipo_pago"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
+            <form action={crearPago} className="grid gap-4 md:grid-cols-2">
+              <select name="tipo_pago" className={selectClass}>
                 <option value="">Tipo de pago *</option>
                 <option value="cliente">Cliente</option>
                 <option value="empleado">Empleado</option>
                 <option value="proveedor">Proveedor</option>
               </select>
 
-              <select
-                name="metodo_pago"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
+              <select name="metodo_pago" className={selectClass}>
                 <option value="">Método *</option>
                 <option value="efectivo">Efectivo</option>
                 <option value="transferencia">Transferencia</option>
@@ -503,15 +607,11 @@ export default async function PagosPage({ searchParams }: PageProps) {
               </select>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
                   Fecha de pago *
                 </label>
 
-                <input
-                  type="date"
-                  name="fecha_pago"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-                />
+                <input type="date" name="fecha_pago" className={inputClass} />
               </div>
 
               <input
@@ -519,14 +619,12 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 step="0.01"
                 name="monto"
                 placeholder="Monto *"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
-              <select
-                name="id_cliente"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
+              <select name="id_cliente" className={selectClass}>
                 <option value="">Cliente relacionado</option>
+
                 {clientes.map((cliente) => (
                   <option key={cliente.id_cliente} value={cliente.id_cliente}>
                     {clienteMap.get(cliente.id_cliente)}
@@ -534,11 +632,9 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 ))}
               </select>
 
-              <select
-                name="id_empleado"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
+              <select name="id_empleado" className={selectClass}>
                 <option value="">Empleado relacionado</option>
+
                 {empleados.map((empleado) => (
                   <option
                     key={empleado.id_empleado}
@@ -549,11 +645,9 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 ))}
               </select>
 
-              <select
-                name="id_proveedor"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
+              <select name="id_proveedor" className={selectClass}>
                 <option value="">Proveedor relacionado</option>
+
                 {proveedores.map((proveedor) => (
                   <option
                     key={proveedor.id_proveedor}
@@ -564,11 +658,9 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 ))}
               </select>
 
-              <select
-                name="id_proyecto"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
+              <select name="id_proyecto" className={selectClass}>
                 <option value="">Proyecto relacionado opcional</option>
+
                 {proyectos.map((proyecto) => (
                   <option
                     key={proyecto.id_proyecto}
@@ -581,14 +673,14 @@ export default async function PagosPage({ searchParams }: PageProps) {
 
               <input
                 name="descripcion"
-                placeholder="Descripción"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+                placeholder="Descripción del pago"
+                className={`${inputClass} md:col-span-2`}
               />
 
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/30 transition hover:from-blue-950 hover:to-sky-700"
                 >
                   Registrar pago
                 </button>
@@ -598,14 +690,14 @@ export default async function PagosPage({ searchParams }: PageProps) {
         )}
 
         {canEditPago && pagoEditar && (
-          <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+          <section className="mt-6 rounded-[28px] border border-white/40 bg-white/30 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className="text-2xl font-extrabold text-white drop-shadow">
                   Editar pago
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm font-bold text-blue-100">
                   Actualiza los datos del pago seleccionado.
                 </p>
               </div>
@@ -613,7 +705,7 @@ export default async function PagosPage({ searchParams }: PageProps) {
               <Link
                 href="/admin/pagos"
                 scroll={false}
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
+                className="rounded-xl border border-white/40 bg-white/70 px-4 py-2 text-sm font-extrabold text-blue-900 transition hover:bg-white"
               >
                 Cancelar
               </Link>
@@ -629,7 +721,7 @@ export default async function PagosPage({ searchParams }: PageProps) {
               <select
                 name="tipo_pago"
                 defaultValue={pagoEditar.tipo_pago}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={selectClass}
               >
                 <option value="cliente">Cliente</option>
                 <option value="empleado">Empleado</option>
@@ -639,7 +731,7 @@ export default async function PagosPage({ searchParams }: PageProps) {
               <select
                 name="metodo_pago"
                 defaultValue={pagoEditar.metodo_pago}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={selectClass}
               >
                 <option value="efectivo">Efectivo</option>
                 <option value="transferencia">Transferencia</option>
@@ -648,7 +740,7 @@ export default async function PagosPage({ searchParams }: PageProps) {
               </select>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
                   Fecha de pago *
                 </label>
 
@@ -658,7 +750,7 @@ export default async function PagosPage({ searchParams }: PageProps) {
                   defaultValue={new Date(pagoEditar.fecha_pago)
                     .toISOString()
                     .slice(0, 10)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                  className={inputClass}
                 />
               </div>
 
@@ -668,15 +760,16 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 name="monto"
                 placeholder="Monto *"
                 defaultValue={pagoEditar.monto.toString()}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
               <select
                 name="id_cliente"
                 defaultValue={pagoEditar.id_cliente ?? ""}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={selectClass}
               >
                 <option value="">Cliente relacionado</option>
+
                 {clientes.map((cliente) => (
                   <option key={cliente.id_cliente} value={cliente.id_cliente}>
                     {clienteMap.get(cliente.id_cliente)}
@@ -687,9 +780,10 @@ export default async function PagosPage({ searchParams }: PageProps) {
               <select
                 name="id_empleado"
                 defaultValue={pagoEditar.id_empleado ?? ""}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={selectClass}
               >
                 <option value="">Empleado relacionado</option>
+
                 {empleados.map((empleado) => (
                   <option
                     key={empleado.id_empleado}
@@ -703,9 +797,10 @@ export default async function PagosPage({ searchParams }: PageProps) {
               <select
                 name="id_proveedor"
                 defaultValue={pagoEditar.id_proveedor ?? ""}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={selectClass}
               >
                 <option value="">Proveedor relacionado</option>
+
                 {proveedores.map((proveedor) => (
                   <option
                     key={proveedor.id_proveedor}
@@ -719,9 +814,10 @@ export default async function PagosPage({ searchParams }: PageProps) {
               <select
                 name="id_proyecto"
                 defaultValue={pagoEditar.id_proyecto ?? ""}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={selectClass}
               >
                 <option value="">Proyecto relacionado opcional</option>
+
                 {proyectos.map((proyecto) => (
                   <option
                     key={proyecto.id_proyecto}
@@ -736,13 +832,13 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 name="descripcion"
                 placeholder="Descripción"
                 defaultValue={pagoEditar.descripcion ?? ""}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+                className={`${inputClass} md:col-span-2`}
               />
 
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/30 transition hover:from-blue-950 hover:to-sky-700"
                 >
                   Guardar cambios
                 </button>
@@ -751,36 +847,53 @@ export default async function PagosPage({ searchParams }: PageProps) {
           </section>
         )}
 
-        <TableFilter
-          basePath="/admin/pagos"
-          title="Filtro de pagos"
-          currentLabel="Pagos"
-          options={opcionesFiltroPagos}
-          filtroActivo={filtroActivo}
-          campoFiltro={campoFiltro}
-          valorFiltro={valorFiltro}
-          resultados={pagosFiltrados.length}
-        />
+        <div className="rounded-[28px] border border-white/40 bg-white/25 p-1 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <TableFilter
+            basePath="/admin/pagos"
+            title="Filtro de pagos"
+            currentLabel="Pagos"
+            options={opcionesFiltroPagos}
+            filtroActivo={filtroActivo}
+            campoFiltro={campoFiltro}
+            valorFiltro={valorFiltro}
+            resultados={pagosFiltrados.length}
+          />
+        </div>
 
-        <section className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-sm">
+        <section className="mt-6 overflow-x-auto rounded-[28px] border border-white/40 bg-white/35 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+            <div>
+              <h2 className="text-2xl font-extrabold text-white drop-shadow">
+                Lista de pagos registrados
+              </h2>
+
+              <p className="mt-1 text-sm font-bold text-blue-100">
+                Total filtrado: Bs. {totalFiltrado.toFixed(2)}
+              </p>
+            </div>
+
+            <span className="rounded-full bg-white/80 px-4 py-2 text-sm font-extrabold text-slate-800 shadow">
+              Registros: {pagosFiltrados.length}
+            </span>
+          </div>
+
           <table className="w-full border-collapse text-sm">
-            <thead className="bg-slate-200">
+            <thead className="bg-white/70 backdrop-blur">
               <tr>
-                <th className="border p-3 text-left">ID</th>
-                <th className="border p-3 text-left">Tipo</th>
-                <th className="border p-3 text-left">Fecha</th>
-                <th className="border p-3 text-left">Monto</th>
-                <th className="border p-3 text-left">Método</th>
-                <th className="border p-3 text-left">Relacionado</th>
-                <th className="border p-3 text-left">Proyecto</th>
-                <th className="border p-3 text-left">Descripción</th>
-                {canEditPago && (
-                  <th className="border p-3 text-left">Acciones</th>
-                )}
+                <th className={tableHeaderClass}>ID</th>
+                <th className={tableHeaderClass}>Tipo</th>
+                <th className={tableHeaderClass}>Fecha</th>
+                <th className={tableHeaderClass}>Monto</th>
+                <th className={tableHeaderClass}>Método</th>
+                <th className={tableHeaderClass}>Relacionado</th>
+                <th className={tableHeaderClass}>Proyecto</th>
+                <th className={tableHeaderClass}>Descripción</th>
+
+                {canEditPago && <th className={tableHeaderClass}>Acciones</th>}
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="bg-white/40 backdrop-blur">
               {pagosFiltrados.map((pago) => {
                 const relacionado = pago.id_cliente
                   ? clienteMap.get(pago.id_cliente)
@@ -791,39 +904,50 @@ export default async function PagosPage({ searchParams }: PageProps) {
                   : "-";
 
                 return (
-                  <tr key={pago.id_pago} className="hover:bg-slate-50">
-                    <td className="border p-3">{pago.id_pago}</td>
+                  <tr
+                    key={pago.id_pago}
+                    className="transition hover:bg-white/70"
+                  >
+                    <td className={tableCellClass}>{pago.id_pago}</td>
 
-                    <td className="border p-3">{pago.tipo_pago}</td>
+                    <td className={tableCellClass}>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-extrabold ${getPagoBadgeClass(
+                          pago.tipo_pago
+                        )}`}
+                      >
+                        {pago.tipo_pago}
+                      </span>
+                    </td>
 
-                    <td className="border p-3">
+                    <td className={tableCellClass}>
                       {formatDate(pago.fecha_pago)}
                     </td>
 
-                    <td className="border p-3">
+                    <td className="border border-white/30 px-4 py-3 text-sm font-extrabold text-slate-950">
                       Bs. {pago.monto.toString()}
                     </td>
 
-                    <td className="border p-3">{pago.metodo_pago}</td>
+                    <td className={tableCellClass}>{pago.metodo_pago}</td>
 
-                    <td className="border p-3">{relacionado}</td>
+                    <td className={tableCellClass}>{relacionado}</td>
 
-                    <td className="border p-3">
+                    <td className={tableCellClass}>
                       {pago.id_proyecto
                         ? proyectoMap.get(pago.id_proyecto) ?? "-"
                         : "-"}
                     </td>
 
-                    <td className="border p-3">
+                    <td className={tableCellClass}>
                       {pago.descripcion ?? "-"}
                     </td>
 
                     {canEditPago && (
-                      <td className="border p-3">
+                      <td className="border border-white/30 px-4 py-3">
                         <Link
                           href={`/admin/pagos?editar=${pago.id_pago}`}
                           scroll={false}
-                          className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white"
+                          className="rounded-lg bg-white/75 px-3 py-2 text-xs font-extrabold text-blue-900 shadow transition hover:bg-white"
                         >
                           Editar
                         </Link>
@@ -837,7 +961,7 @@ export default async function PagosPage({ searchParams }: PageProps) {
                 <tr>
                   <td
                     colSpan={canEditPago ? 9 : 8}
-                    className="border p-6 text-center text-slate-500"
+                    className="border border-white/30 p-6 text-center font-semibold text-slate-700"
                   >
                     {isCliente
                       ? "No tienes pagos registrados."

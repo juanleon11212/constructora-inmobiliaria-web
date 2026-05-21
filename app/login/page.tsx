@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { LoginForm } from "../../components/auth/LoginForm";
+import LoginForm from "../../components/auth/LoginForm";
 import { getCurrentUser } from "../../lib/auth/current-user";
 
 export default async function LoginPage() {
@@ -34,7 +34,8 @@ export default async function LoginPage() {
                   <p className="text-xl font-black leading-5 tracking-wide text-white">
                     CONSTRUCTORA
                   </p>
-                  <p className="mt-6 max-w-xl text-lg font-medium leading-8 text-blue-100">
+
+                  <p className="mt-2 text-sm font-bold tracking-[0.3em] text-blue-100">
                     INMOBILIARIA
                   </p>
                 </div>
@@ -66,7 +67,9 @@ export default async function LoginPage() {
 
               <div className="rounded-2xl border border-blue-200/25 bg-white/10 p-5 shadow-lg shadow-blue-950/20 backdrop-blur">
                 <p className="text-lg font-bold text-white">Reportes</p>
-                <p className="mt-1 text-sm text-blue-100">Datos en tiempo real</p>
+                <p className="mt-1 text-sm text-blue-100">
+                  Datos en tiempo real
+                </p>
               </div>
             </div>
           </div>
