@@ -9,28 +9,21 @@ import {
 } from "../../../components/admin/TableFilter";
 import { containsText, equalsText } from "../../../lib/table-filter";
 
-<<<<<<< HEAD
-=======
 /*
   MÓDULO CLIENTES
 
   Ruta:
   /admin/clientes
 
-  Funciones:
-  - Ver todos los clientes.
-  - Crear cliente.
-  - Editar cliente.
-  - Ver detalle del cliente.
-  - Ver proyectos del cliente.
-  - Filtrar clientes por ID, nombre, CI/NIT, teléfono, correo, usuario y estado.
-
-  Reglas:
-  - Administrador puede crear y editar.
-  - Roles con permiso de clientes pueden ver.
+  Versión corregida:
+  - Sin conflictos de Git.
+  - Sin nombre_usuario ni contrasena en cliente.
+  - Mantiene crear cliente.
+  - Mantiene editar cliente.
+  - Mantiene ver detalle del cliente.
+  - Mantiene filtro de clientes.
 */
 
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
 type PageProps = {
   searchParams?: Promise<{
     editar?: string;
@@ -44,6 +37,24 @@ type PageProps = {
 
 function getText(formData: FormData, field: string) {
   return String(formData.get(field) ?? "").trim();
+}
+
+function getRoleName(user: { rol: unknown }) {
+  if (typeof user.rol === "string") {
+    return user.rol;
+  }
+
+  if (
+    user.rol &&
+    typeof user.rol === "object" &&
+    "nombre_rol" in user.rol
+  ) {
+    return String(
+      (user.rol as { nombre_rol?: string | null }).nombre_rol ?? ""
+    );
+  }
+
+  return "";
 }
 
 const inputClass =
@@ -91,15 +102,9 @@ async function crearCliente(formData: FormData) {
   "use server";
 
   const user = await requireModule("clientes");
-
-<<<<<<< HEAD
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
   if (roleName !== "Administrador") {
-=======
-  if (user.rol.nombre_rol !== "Administrador") {
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
     redirect("/admin/clientes");
   }
 
@@ -110,32 +115,20 @@ async function crearCliente(formData: FormData) {
   const telefono = getText(formData, "telefono");
   const correo = getText(formData, "correo");
   const direccion = getText(formData, "direccion");
-  const nombre_usuario = getText(formData, "nombre_usuario");
-  const contrasena = getText(formData, "contrasena");
 
   if (!ci_nit || !correo) {
     redirect("/admin/clientes?error=datos-obligatorios");
   }
 
-  if (nombre_usuario && !contrasena) {
-    redirect("/admin/clientes?error=password-requerido");
-  }
-
   const clienteExistente = await prisma.cliente.findFirst({
     where: {
-      OR: [{ ci_nit }, ...(nombre_usuario ? [{ nombre_usuario }] : [])],
+      ci_nit,
     },
   });
 
   if (clienteExistente) {
     redirect("/admin/clientes?error=cliente-existente");
   }
-
-  const rolCliente = await prisma.rol.findFirst({
-    where: {
-      nombre_rol: "Cliente",
-    },
-  });
 
   await prisma.cliente.create({
     data: {
@@ -146,10 +139,7 @@ async function crearCliente(formData: FormData) {
       telefono: telefono || null,
       correo,
       direccion: direccion || null,
-      nombre_usuario: nombre_usuario || null,
-      contrasena: contrasena || null,
       estado_cuenta: "activo",
-      id_rol: rolCliente?.id_rol ?? null,
     },
   });
 
@@ -161,15 +151,9 @@ async function editarCliente(formData: FormData) {
   "use server";
 
   const user = await requireModule("clientes");
-
-<<<<<<< HEAD
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
+  const roleName = getRoleName(user);
 
   if (roleName !== "Administrador") {
-=======
-  if (user.rol.nombre_rol !== "Administrador") {
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
     redirect("/admin/clientes");
   }
 
@@ -186,8 +170,6 @@ async function editarCliente(formData: FormData) {
   const telefono = getText(formData, "telefono");
   const correo = getText(formData, "correo");
   const direccion = getText(formData, "direccion");
-  const nombre_usuario = getText(formData, "nombre_usuario");
-  const contrasena = getText(formData, "contrasena");
   const estado_cuenta = getText(formData, "estado_cuenta") || "activo";
 
   if (!ci_nit || !correo) {
@@ -199,7 +181,7 @@ async function editarCliente(formData: FormData) {
       id_cliente: {
         not: id_cliente,
       },
-      OR: [{ ci_nit }, ...(nombre_usuario ? [{ nombre_usuario }] : [])],
+      ci_nit,
     },
   });
 
@@ -207,27 +189,20 @@ async function editarCliente(formData: FormData) {
     redirect(`/admin/clientes?editar=${id_cliente}&error=cliente-existente`);
   }
 
-  const data: any = {
-    nombres: nombres || null,
-    apellidos: apellidos || null,
-    razon_social: razon_social || null,
-    ci_nit,
-    telefono: telefono || null,
-    correo,
-    direccion: direccion || null,
-    nombre_usuario: nombre_usuario || null,
-    estado_cuenta,
-  };
-
-  if (contrasena) {
-    data.contrasena = contrasena;
-  }
-
   await prisma.cliente.update({
     where: {
       id_cliente,
     },
-    data,
+    data: {
+      nombres: nombres || null,
+      apellidos: apellidos || null,
+      razon_social: razon_social || null,
+      ci_nit,
+      telefono: telefono || null,
+      correo,
+      direccion: direccion || null,
+      estado_cuenta,
+    },
   });
 
   revalidatePath("/admin/clientes");
@@ -238,26 +213,12 @@ export default async function ClientesPage({ searchParams }: PageProps) {
   const user = await requireModule("clientes");
   const params = await searchParams;
 
-<<<<<<< HEAD
-  const roleName =
-    typeof user.rol === "string" ? user.rol : user.rol?.nombre_rol ?? "";
-
+  const roleName = getRoleName(user);
   const isAdmin = roleName === "Administrador";
-=======
-  /*
-    Solo el administrador puede crear y editar.
-  */
-  const isAdmin = user.rol.nombre_rol === "Administrador";
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
 
   const idEditar = Number(params?.editar);
   const idVer = Number(params?.ver);
 
-<<<<<<< HEAD
-=======
-  /*
-    Datos del filtro.
-  */
   const filtroActivo = params?.filtro === "1";
   const campoFiltro = String(params?.campo ?? "").trim();
   const valorFiltro = String(params?.valor ?? "").trim();
@@ -290,33 +251,18 @@ export default async function ClientesPage({ searchParams }: PageProps) {
       placeholder: "Ejemplo: cliente@email.com",
     },
     {
-      value: "usuario",
-      label: "Usuario",
-      placeholder: "Ejemplo: cliente_demo",
-    },
-    {
       value: "estado",
       label: "Estado",
       placeholder: "Ejemplo: activo",
     },
   ];
 
-  /*
-    Lista todos los clientes.
-  */
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
   const clientes = await prisma.cliente.findMany({
     orderBy: {
       id_cliente: "desc",
     },
   });
 
-<<<<<<< HEAD
-=======
-  /*
-    Filtro visual de clientes.
-    No cambia la base de datos, solo cambia lo que se muestra en la tabla.
-  */
   const clientesFiltrados = clientes.filter((cliente) => {
     if (!hayFiltro) return true;
 
@@ -345,10 +291,6 @@ export default async function ClientesPage({ searchParams }: PageProps) {
       return containsText(cliente.correo, valorFiltro);
     }
 
-    if (campoFiltro === "usuario") {
-      return containsText(cliente.nombre_usuario, valorFiltro);
-    }
-
     if (campoFiltro === "estado") {
       return containsText(cliente.estado_cuenta, valorFiltro);
     }
@@ -356,17 +298,14 @@ export default async function ClientesPage({ searchParams }: PageProps) {
     return true;
   });
 
-  /*
-    Cliente seleccionado para editar.
-  */
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
-  const clienteEditar = idEditar
-    ? await prisma.cliente.findUnique({
-        where: {
-          id_cliente: idEditar,
-        },
-      })
-    : null;
+  const clienteEditar =
+    idEditar && isAdmin
+      ? await prisma.cliente.findUnique({
+          where: {
+            id_cliente: idEditar,
+          },
+        })
+      : null;
 
   const clienteVer = idVer
     ? await prisma.cliente.findUnique({
@@ -402,13 +341,9 @@ export default async function ClientesPage({ searchParams }: PageProps) {
               Módulo de Gestión de Clientes
             </p>
 
-<<<<<<< HEAD
             <h1 className="text-4xl font-extrabold tracking-tight">
               Módulo Clientes
             </h1>
-=======
-            <h1 className="text-3xl font-bold text-slate-900">Clientes</h1>
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
 
             <p className="mt-1 text-sm font-medium text-blue-100">
               Administración de clientes de la constructora.
@@ -428,11 +363,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
             {params.error === "datos-obligatorios" &&
               "CI/NIT y correo son obligatorios."}
 
-            {params.error === "password-requerido" &&
-              "Si colocas usuario de acceso, también debes colocar contraseña."}
-
             {params.error === "cliente-existente" &&
-              "Ya existe un cliente con ese CI/NIT o usuario."}
+              "Ya existe un cliente con ese CI/NIT."}
 
             {params.error === "id-invalido" &&
               "El ID del cliente no es válido."}
@@ -440,30 +372,30 @@ export default async function ClientesPage({ searchParams }: PageProps) {
         )}
 
         {isAdmin && !clienteEditar && (
-<<<<<<< HEAD
           <section className="mt-6 rounded-3xl border border-white/40 bg-white/25 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
             <h2 className="text-2xl font-extrabold text-white drop-shadow">
               Administración de Clientes
             </h2>
-=======
-          <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900">Crear cliente</h2>
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
 
             <p className="mt-1 text-sm font-bold text-blue-100">
               Crear Nuevo Cliente
             </p>
 
             <form action={crearCliente} className="mt-5">
-              <div className="grid gap-5 lg:grid-cols-3">
+              <div className="grid gap-5 lg:grid-cols-2">
                 <div className="rounded-2xl border border-white/40 bg-white/45 p-5 shadow-xl shadow-slate-900/20 backdrop-blur-md">
                   <h3 className="mb-4 text-base font-extrabold text-slate-900">
                     Información General
                   </h3>
 
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <TextInput name="nombres" placeholder="Nombres" icon="👤" />
-                    <TextInput name="apellidos" placeholder="Apellidos" icon="👥" />
+
+                    <TextInput
+                      name="apellidos"
+                      placeholder="Apellidos"
+                      icon="👥"
+                    />
 
                     <TextInput
                       name="razon_social"
@@ -487,29 +419,18 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                   </h3>
 
                   <div className="grid gap-4">
-                    <TextInput name="telefono" placeholder="Teléfono" icon="📞" />
-                    <TextInput name="correo" placeholder="Correo" icon="✉️" />
-                    <TextInput name="direccion" placeholder="Dirección" icon="📍" />
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-white/40 bg-white/45 p-5 shadow-xl shadow-slate-900/20 backdrop-blur-md">
-                  <h3 className="mb-4 text-base font-extrabold text-slate-900">
-                    Información de Acceso
-                  </h3>
-
-                  <div className="grid gap-4">
                     <TextInput
-                      name="nombre_usuario"
-                      placeholder="Usuario"
-                      icon="👤"
+                      name="telefono"
+                      placeholder="Teléfono"
+                      icon="📞"
                     />
 
+                    <TextInput name="correo" placeholder="Correo" icon="✉️" />
+
                     <TextInput
-                      type="password"
-                      name="contrasena"
-                      placeholder="Contraseña"
-                      icon="🔑"
+                      name="direccion"
+                      placeholder="Dirección"
+                      icon="📍"
                     />
                   </div>
                 </div>
@@ -540,12 +461,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
 
               <Link
                 href="/admin/clientes"
-<<<<<<< HEAD
-                className="rounded-xl border border-white/40 bg-white/70 px-4 py-2 text-sm font-extrabold text-blue-900 transition hover:bg-white"
-=======
                 scroll={false}
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
+                className="rounded-xl border border-white/40 bg-white/70 px-4 py-2 text-sm font-extrabold text-blue-900 transition hover:bg-white"
               >
                 Cancelar
               </Link>
@@ -558,7 +475,7 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                 defaultValue={clienteEditar.id_cliente}
               />
 
-              <div className="grid gap-5 lg:grid-cols-3">
+              <div className="grid gap-5 lg:grid-cols-2">
                 <div className="rounded-2xl border border-white/40 bg-white/45 p-5 shadow-xl shadow-slate-900/20 backdrop-blur-md">
                   <h3 className="mb-4 text-base font-extrabold text-slate-900">
                     Información General
@@ -623,28 +540,6 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                       defaultValue={clienteEditar.direccion ?? ""}
                       icon="📍"
                     />
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-white/40 bg-white/45 p-5 shadow-xl shadow-slate-900/20 backdrop-blur-md">
-                  <h3 className="mb-4 text-base font-extrabold text-slate-900">
-                    Información de Acceso
-                  </h3>
-
-                  <div className="grid gap-4">
-                    <TextInput
-                      name="nombre_usuario"
-                      placeholder="Usuario"
-                      defaultValue={clienteEditar.nombre_usuario ?? ""}
-                      icon="👤"
-                    />
-
-                    <TextInput
-                      type="password"
-                      name="contrasena"
-                      placeholder="Nueva contraseña o dejar vacío"
-                      icon="🔑"
-                    />
 
                     <select
                       name="estado_cuenta"
@@ -683,12 +578,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
 
               <Link
                 href="/admin/clientes"
-<<<<<<< HEAD
-                className="rounded-xl border border-white/40 bg-white/70 px-4 py-2 text-sm font-extrabold text-blue-900 transition hover:bg-white"
-=======
                 scroll={false}
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
+                className="rounded-xl border border-white/40 bg-white/70 px-4 py-2 text-sm font-extrabold text-blue-900 transition hover:bg-white"
               >
                 Cerrar detalle
               </Link>
@@ -708,7 +599,9 @@ export default async function ClientesPage({ searchParams }: PageProps) {
               <p className="font-semibold text-slate-800">
                 <span className="font-extrabold text-blue-950">Nombre:</span>{" "}
                 {clienteVer.razon_social ||
-                  `${clienteVer.nombres ?? ""} ${clienteVer.apellidos ?? ""}`}
+                  `${clienteVer.nombres ?? ""} ${
+                    clienteVer.apellidos ?? ""
+                  }`}
               </p>
 
               <p className="font-semibold text-slate-800">
@@ -722,8 +615,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
               </p>
 
               <p className="font-semibold text-slate-800">
-                <span className="font-extrabold text-blue-950">Usuario:</span>{" "}
-                {clienteVer.nombre_usuario ?? "-"}
+                <span className="font-extrabold text-blue-950">Estado:</span>{" "}
+                {clienteVer.estado_cuenta ?? "-"}
               </p>
             </div>
 
@@ -749,13 +642,18 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                       className="transition hover:bg-white/70"
                     >
                       <td className={tableCellClass}>{proyecto.id_proyecto}</td>
+
                       <td className={tableCellClass}>
                         {proyecto.nombre_proyecto}
                       </td>
+
                       <td className={tableCellClass}>
                         {proyecto.ubicacion ?? "-"}
                       </td>
-                      <td className={tableCellClass}>{proyecto.estado ?? "-"}</td>
+
+                      <td className={tableCellClass}>
+                        {proyecto.estado ?? "-"}
+                      </td>
                     </tr>
                   ))}
 
@@ -775,15 +673,6 @@ export default async function ClientesPage({ searchParams }: PageProps) {
           </section>
         )}
 
-<<<<<<< HEAD
-        <section className="mt-6 overflow-x-auto rounded-3xl border border-white/40 bg-white/35 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
-          <div className="px-5 py-4">
-            <h2 className="text-2xl font-extrabold text-white drop-shadow">
-              Lista de Clientes Registrados
-            </h2>
-          </div>
-
-=======
         <TableFilter
           basePath="/admin/clientes"
           title="Filtro de clientes"
@@ -795,8 +684,13 @@ export default async function ClientesPage({ searchParams }: PageProps) {
           resultados={clientesFiltrados.length}
         />
 
-        <section className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-sm">
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
+        <section className="mt-6 overflow-x-auto rounded-3xl border border-white/40 bg-white/35 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <div className="px-5 py-4">
+            <h2 className="text-2xl font-extrabold text-white drop-shadow">
+              Lista de Clientes Registrados
+            </h2>
+          </div>
+
           <table className="w-full border-collapse text-sm">
             <thead className="bg-white/70 backdrop-blur">
               <tr>
@@ -805,19 +699,13 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                 <th className={tableHeaderClass}>CI/NIT</th>
                 <th className={tableHeaderClass}>Teléfono</th>
                 <th className={tableHeaderClass}>Correo</th>
-                <th className={tableHeaderClass}>Usuario</th>
                 <th className={tableHeaderClass}>Estado</th>
                 <th className={tableHeaderClass}>Acciones</th>
               </tr>
             </thead>
 
-<<<<<<< HEAD
             <tbody className="bg-white/40 backdrop-blur">
-              {clientes.map((cliente) => {
-=======
-            <tbody>
               {clientesFiltrados.map((cliente) => {
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
                 const nombreCliente =
                   cliente.razon_social ||
                   `${cliente.nombres ?? ""} ${cliente.apellidos ?? ""}`.trim() ||
@@ -840,15 +728,7 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                       {cliente.telefono ?? "-"}
                     </td>
 
-<<<<<<< HEAD
                     <td className={tableCellClass}>{cliente.correo ?? "-"}</td>
-=======
-                    <td className="border p-3">{cliente.correo ?? "-"}</td>
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
-
-                    <td className={tableCellClass}>
-                      {cliente.nombre_usuario ?? "-"}
-                    </td>
 
                     <td className={tableCellClass}>
                       {cliente.estado_cuenta ?? "-"}
@@ -858,12 +738,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                       <div className="flex gap-2">
                         <Link
                           href={`/admin/clientes?ver=${cliente.id_cliente}`}
-<<<<<<< HEAD
-                          className="rounded-lg bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800 shadow transition hover:bg-white"
-=======
                           scroll={false}
-                          className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
+                          className="rounded-lg bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800 shadow transition hover:bg-white"
                         >
                           Ver
                         </Link>
@@ -871,12 +747,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                         {isAdmin && (
                           <Link
                             href={`/admin/clientes?editar=${cliente.id_cliente}`}
-<<<<<<< HEAD
-                            className="rounded-lg bg-white/70 px-3 py-2 text-xs font-extrabold text-blue-900 shadow transition hover:bg-white"
-=======
                             scroll={false}
-                            className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white"
->>>>>>> f6dabfb (Agregar filtros en pagos empleados clientes usuarios y reportes)
+                            className="rounded-lg bg-white/70 px-3 py-2 text-xs font-extrabold text-blue-900 shadow transition hover:bg-white"
                           >
                             Editar
                           </Link>
@@ -890,7 +762,7 @@ export default async function ClientesPage({ searchParams }: PageProps) {
               {clientesFiltrados.length === 0 && (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={7}
                     className="border border-white/30 p-6 text-center font-semibold text-slate-700"
                   >
                     No hay clientes registrados.
