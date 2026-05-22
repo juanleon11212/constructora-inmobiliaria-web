@@ -22,6 +22,12 @@ import { containsText, equalsText, formatDate } from "../../../lib/table-filter"
   - Desactivar empleados.
   - Filtrar empleados por ID, nombre, CI, cargo, teléfono, fecha de ingreso y estado.
   - Los filtros no vuelven al inicio de la página.
+
+  Visual:
+  - Fondo con imagen.
+  - Tarjetas resumen.
+  - Formulario estilo glass.
+  - Tabla estilo glass.
 */
 
 type PageProps = {
@@ -66,6 +72,49 @@ function formatDateInput(value: Date | string | null | undefined) {
   }
 
   return date.toISOString().slice(0, 10);
+}
+
+const inputClass =
+  "w-full rounded-xl border border-white/50 bg-white/80 px-4 py-3 text-sm font-bold text-slate-950 shadow-sm outline-none backdrop-blur placeholder:text-slate-500 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-200";
+
+const tableHeaderClass =
+  "border border-white/30 px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wide text-slate-800";
+
+const tableCellClass =
+  "border border-white/30 px-4 py-3 text-sm font-semibold text-slate-800";
+
+function StatCard({
+  label,
+  value,
+  helper,
+  icon,
+}: {
+  label: string;
+  value: string | number;
+  helper: string;
+  icon: string;
+}) {
+  return (
+    <div className="rounded-[1.7rem] border border-white/40 bg-white/50 p-5 shadow-xl shadow-slate-950/20 backdrop-blur-md">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-blue-900">
+            {label}
+          </p>
+
+          <h3 className="mt-2 text-3xl font-black text-slate-950">
+            {value}
+          </h3>
+        </div>
+
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-900/90 text-2xl text-white shadow-lg">
+          {icon}
+        </div>
+      </div>
+
+      <p className="mt-3 text-sm font-bold text-slate-700">{helper}</p>
+    </div>
+  );
 }
 
 async function crearEmpleado(formData: FormData) {
@@ -200,10 +249,6 @@ async function eliminarEmpleado(formData: FormData) {
     redirect("/admin/empleados?error=id-invalido");
   }
 
-  /*
-    Si el empleado tiene usuario relacionado,
-    también se desactiva su cuenta.
-  */
   await prisma.usuario.updateMany({
     where: {
       id_empleado,
@@ -213,10 +258,6 @@ async function eliminarEmpleado(formData: FormData) {
     },
   });
 
-  /*
-    No se borra físicamente.
-    Solo se desactiva para no romper relaciones.
-  */
   await prisma.empleado.update({
     where: {
       id_empleado,
@@ -344,31 +385,71 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
       : null;
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
+    <main
+      className="min-h-screen bg-cover bg-center bg-fixed p-6"
+      style={{
+        backgroundImage:
+          "linear-gradient(90deg, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.62) 36%, rgba(255,255,255,0.12) 100%), url('/images/empleados-fondo.jpg')",
+      }}
+    >
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-blue-700">
-              Módulo Empleados
-            </p>
+        <section className="rounded-[28px] border border-white/40 bg-white/25 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="text-white drop-shadow">
+              <p className="text-sm font-bold text-blue-100">
+                Módulo Empleados
+              </p>
 
-            <h1 className="text-3xl font-bold text-slate-900">Empleados</h1>
+              <h1 className="text-4xl font-extrabold tracking-tight">
+                Empleados
+              </h1>
 
-            <p className="mt-1 text-slate-600">
-              Administración del personal de la empresa.
-            </p>
+              <p className="mt-1 text-sm font-medium text-blue-100">
+                Administración del personal de la empresa.
+              </p>
+            </div>
+
+            <Link
+              href="/admin"
+              className="rounded-xl border border-white/40 bg-white/75 px-5 py-3 text-sm font-extrabold text-blue-900 shadow-xl shadow-slate-900/20 backdrop-blur transition hover:bg-white"
+            >
+              Volver al panel
+            </Link>
           </div>
+        </section>
 
-          <Link
-            href="/admin"
-            className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white"
-          >
-            Volver al panel
-          </Link>
-        </div>
+        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            label="Empleados"
+            value={empleados.length}
+            helper="Personal registrado en el sistema"
+            icon="👷"
+          />
+
+          <StatCard
+            label="Filtrados"
+            value={empleadosFiltrados.length}
+            helper="Resultados visibles según búsqueda"
+            icon="🔎"
+          />
+
+          <StatCard
+            label="Cargos"
+            value={cargos.length}
+            helper="Cargos disponibles para asignar"
+            icon="🧰"
+          />
+
+          <StatCard
+            label="Activos"
+            value={empleados.filter((empleado) => empleado.estado === "activo").length}
+            helper="Empleados habilitados actualmente"
+            icon="✅"
+          />
+        </section>
 
         {params?.error && (
-          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm font-bold text-red-700 shadow-lg backdrop-blur">
             {params.error === "datos-obligatorios" &&
               "Nombres, apellidos, CI, fecha de ingreso y cargo son obligatorios."}
 
@@ -381,12 +462,12 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
         )}
 
         {isAdmin && !empleadoEditar && (
-          <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900">
+          <section className="mt-6 rounded-[28px] border border-white/40 bg-white/30 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+            <h2 className="text-2xl font-extrabold text-white drop-shadow">
               Crear empleado
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm font-bold text-blue-100">
               Este formulario guarda un trabajador en la tabla empleado.
             </p>
 
@@ -397,61 +478,54 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <input
                 name="nombres"
                 placeholder="Nombres *"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
               <input
                 name="apellidos"
                 placeholder="Apellidos *"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
-              <input
-                name="ci"
-                placeholder="CI *"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              />
+              <input name="ci" placeholder="CI *" className={inputClass} />
 
               <input
                 name="telefono"
                 placeholder="Teléfono"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
               <input
                 name="direccion"
                 placeholder="Dirección"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+                className={`${inputClass} md:col-span-2`}
               />
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
                   Fecha nacimiento
                 </label>
 
                 <input
                   type="date"
                   name="fecha_nacimiento"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
                   Fecha ingreso *
                 </label>
 
                 <input
                   type="date"
                   name="fecha_ingreso"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                  className={inputClass}
                 />
               </div>
 
-              <select
-                name="id_cargo"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
+              <select name="id_cargo" className={inputClass}>
                 <option value="">Selecciona cargo *</option>
 
                 {cargos.map((cargo) => (
@@ -461,11 +535,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                 ))}
               </select>
 
-              <select
-                name="estado"
-                defaultValue="activo"
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              >
+              <select name="estado" defaultValue="activo" className={inputClass}>
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
               </select>
@@ -473,7 +543,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/30 transition hover:from-blue-950 hover:to-sky-700"
                 >
                   Crear empleado
                 </button>
@@ -483,14 +553,14 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
         )}
 
         {isAdmin && empleadoEditar && (
-          <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+          <section className="mt-6 rounded-[28px] border border-white/40 bg-white/30 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className="text-2xl font-extrabold text-white drop-shadow">
                   Editar empleado
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm font-bold text-blue-100">
                   Modifica los datos del empleado seleccionado.
                 </p>
               </div>
@@ -498,7 +568,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <Link
                 href="/admin/empleados"
                 scroll={false}
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
+                className="rounded-xl border border-white/40 bg-white/70 px-4 py-2 text-sm font-extrabold text-blue-900 transition hover:bg-white"
               >
                 Cancelar
               </Link>
@@ -518,39 +588,39 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                 name="nombres"
                 placeholder="Nombres *"
                 defaultValue={empleadoEditar.nombres}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
               <input
                 name="apellidos"
                 placeholder="Apellidos *"
                 defaultValue={empleadoEditar.apellidos}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
               <input
                 name="ci"
                 placeholder="CI *"
                 defaultValue={empleadoEditar.ci}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
               <input
                 name="telefono"
                 placeholder="Teléfono"
                 defaultValue={empleadoEditar.telefono ?? ""}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               />
 
               <input
                 name="direccion"
                 placeholder="Dirección"
                 defaultValue={empleadoEditar.direccion ?? ""}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+                className={`${inputClass} md:col-span-2`}
               />
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
                   Fecha nacimiento
                 </label>
 
@@ -558,12 +628,12 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                   type="date"
                   name="fecha_nacimiento"
                   defaultValue={formatDateInput(empleadoEditar.fecha_nacimiento)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
                   Fecha ingreso *
                 </label>
 
@@ -571,14 +641,14 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                   type="date"
                   name="fecha_ingreso"
                   defaultValue={formatDateInput(empleadoEditar.fecha_ingreso)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                  className={inputClass}
                 />
               </div>
 
               <select
                 name="id_cargo"
                 defaultValue={empleadoEditar.id_cargo}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               >
                 {cargos.map((cargo) => (
                   <option key={cargo.id_cargo} value={cargo.id_cargo}>
@@ -590,7 +660,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <select
                 name="estado"
                 defaultValue={empleadoEditar.estado}
-                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                className={inputClass}
               >
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
@@ -599,7 +669,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/30 transition hover:from-blue-950 hover:to-sky-700"
                 >
                   Guardar cambios
                 </button>
@@ -608,62 +678,79 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
           </section>
         )}
 
-        <TableFilter
-          basePath="/admin/empleados"
-          title="Filtro de empleados"
-          currentLabel="Empleados"
-          options={opcionesFiltroEmpleados}
-          filtroActivo={filtroActivo}
-          campoFiltro={campoFiltro}
-          valorFiltro={valorFiltro}
-          resultados={empleadosFiltrados.length}
-        />
+        <div className="mt-6 rounded-[28px] border border-white/40 bg-white/25 p-1 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <TableFilter
+            basePath="/admin/empleados"
+            title="Filtro de empleados"
+            currentLabel="Empleados"
+            options={opcionesFiltroEmpleados}
+            filtroActivo={filtroActivo}
+            campoFiltro={campoFiltro}
+            valorFiltro={valorFiltro}
+            resultados={empleadosFiltrados.length}
+          />
+        </div>
 
-        <section className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-sm">
+        <section className="mt-6 overflow-x-auto rounded-[28px] border border-white/40 bg-white/35 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <div className="px-5 py-4">
+            <h2 className="text-2xl font-extrabold text-white drop-shadow">
+              Lista de empleados registrados
+            </h2>
+
+            <p className="mt-1 text-sm font-bold text-blue-100">
+              Registros visibles: {empleadosFiltrados.length}
+            </p>
+          </div>
+
           <table className="w-full border-collapse text-sm">
-            <thead className="bg-slate-200">
+            <thead className="bg-white/70 backdrop-blur">
               <tr>
-                <th className="border p-3 text-left">ID</th>
-                <th className="border p-3 text-left">Empleado</th>
-                <th className="border p-3 text-left">CI</th>
-                <th className="border p-3 text-left">Cargo</th>
-                <th className="border p-3 text-left">Teléfono</th>
-                <th className="border p-3 text-left">Ingreso</th>
-                <th className="border p-3 text-left">Estado</th>
-                <th className="border p-3 text-left">Acciones</th>
+                <th className={tableHeaderClass}>ID</th>
+                <th className={tableHeaderClass}>Empleado</th>
+                <th className={tableHeaderClass}>CI</th>
+                <th className={tableHeaderClass}>Cargo</th>
+                <th className={tableHeaderClass}>Teléfono</th>
+                <th className={tableHeaderClass}>Ingreso</th>
+                <th className={tableHeaderClass}>Estado</th>
+                <th className={tableHeaderClass}>Acciones</th>
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="bg-white/40 backdrop-blur">
               {empleadosFiltrados.map((empleado) => (
-                <tr key={empleado.id_empleado} className="hover:bg-slate-50">
-                  <td className="border p-3">{empleado.id_empleado}</td>
+                <tr
+                  key={empleado.id_empleado}
+                  className="transition hover:bg-white/70"
+                >
+                  <td className={tableCellClass}>{empleado.id_empleado}</td>
 
-                  <td className="border p-3 font-medium">
+                  <td className="border border-white/30 px-4 py-3 text-sm font-extrabold text-slate-950">
                     {empleado.nombres} {empleado.apellidos}
                   </td>
 
-                  <td className="border p-3">{empleado.ci}</td>
+                  <td className={tableCellClass}>{empleado.ci}</td>
 
-                  <td className="border p-3">
+                  <td className={tableCellClass}>
                     {cargoMap.get(empleado.id_cargo) ?? "-"}
                   </td>
 
-                  <td className="border p-3">{empleado.telefono ?? "-"}</td>
+                  <td className={tableCellClass}>
+                    {empleado.telefono ?? "-"}
+                  </td>
 
-                  <td className="border p-3">
+                  <td className={tableCellClass}>
                     {formatDate(empleado.fecha_ingreso)}
                   </td>
 
-                  <td className="border p-3">{empleado.estado}</td>
+                  <td className={tableCellClass}>{empleado.estado}</td>
 
-                  <td className="border p-3">
+                  <td className="border border-white/30 px-4 py-3">
                     {isAdmin ? (
                       <div className="flex flex-wrap gap-2">
                         <Link
                           href={`/admin/empleados?editar=${empleado.id_empleado}`}
                           scroll={false}
-                          className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white"
+                          className="rounded-lg bg-white/75 px-3 py-2 text-xs font-extrabold text-blue-900 shadow transition hover:bg-white"
                         >
                           Editar
                         </Link>
@@ -678,7 +765,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
 
                             <button
                               type="submit"
-                              className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700"
+                              className="rounded-lg bg-red-600 px-3 py-2 text-xs font-extrabold text-white shadow transition hover:bg-red-700"
                             >
                               Eliminar
                             </button>
@@ -686,7 +773,9 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                         )}
                       </div>
                     ) : (
-                      <span className="text-slate-400">Sin acciones</span>
+                      <span className="font-bold text-slate-500">
+                        Sin acciones
+                      </span>
                     )}
                   </td>
                 </tr>
@@ -696,7 +785,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                 <tr>
                   <td
                     colSpan={8}
-                    className="border p-6 text-center text-slate-500"
+                    className="border border-white/30 p-6 text-center font-semibold text-slate-700"
                   >
                     No hay empleados registrados.
                   </td>
