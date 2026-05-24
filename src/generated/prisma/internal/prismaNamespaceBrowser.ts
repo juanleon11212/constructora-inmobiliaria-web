@@ -76,7 +76,8 @@ export const ModelName = {
   rol: 'rol',
   rol_modulo: 'rol_modulo',
   rol_permiso: 'rol_permiso',
-  usuario: 'usuario'
+  usuario: 'usuario',
+  LogAuditoria: 'LogAuditoria'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -426,6 +427,22 @@ export const UsuarioScalarFieldEnum = {
 } as const
 
 export type UsuarioScalarFieldEnum = (typeof UsuarioScalarFieldEnum)[keyof typeof UsuarioScalarFieldEnum]
+
+
+export const LogAuditoriaScalarFieldEnum = {
+  id_log: 'id_log',
+  id_usuario: 'id_usuario',
+  usuario: 'usuario',
+  rol: 'rol',
+  accion: 'accion',
+  modulo: 'modulo',
+  sector: 'sector',
+  descripcion: 'descripcion',
+  registro_id: 'registro_id',
+  fecha: 'fecha'
+} as const
+
+export type LogAuditoriaScalarFieldEnum = (typeof LogAuditoriaScalarFieldEnum)[keyof typeof LogAuditoriaScalarFieldEnum]
 
 
 export const SortOrder = {

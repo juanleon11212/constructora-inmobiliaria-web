@@ -5,7 +5,7 @@ import {
   isStrongEnoughPassword,
   isValidEmail,
 } from "../../../../lib/validations";
-
+import { createAuditLog } from "../../../../lib/audit-log";
 /*
   API REGISTRO
 
@@ -124,7 +124,7 @@ if (telefono && !isOnlyNumbers(telefono)) {
     );
   }
 
-  const cliente = await prisma.cliente.create({
+const clienteCreado = await prisma.cliente.create({
     data: {
       nombre_usuario,
       contrasena,
@@ -139,15 +139,31 @@ if (telefono && !isOnlyNumbers(telefono)) {
       id_rol: rolCliente.id_rol,
     },
   });
+  await createAuditLog({
+  id_usuario: clienteCreado.id_cliente,
+  usuario:
+    clienteCreado.nombre_usuario ??
+    clienteCreado.correo ??
+    clienteCreado.ci_nit ??
+    "Cliente",
+  rol: "Cliente",
+  accion: "CREAR",
+  modulo: "Autenticación",
+  sector: "Registro de cliente",
+  descripcion: `El cliente ${
+    clienteCreado.nombre_usuario ?? clienteCreado.correo
+  } creó una cuenta.`,
+  registro_id: clienteCreado.id_cliente,
+});
 
   return NextResponse.json({
     ok: true,
     message: "Cliente registrado correctamente.",
     tipo_cuenta: "cliente",
     cliente: {
-      id_cliente: cliente.id_cliente,
-      nombre_usuario: cliente.nombre_usuario,
-      correo: cliente.correo,
+      id_cliente: clienteCreado.id_cliente,
+      nombre_usuario: clienteCreado.nombre_usuario,
+      correo: clienteCreado.correo,
     },
   });
 }

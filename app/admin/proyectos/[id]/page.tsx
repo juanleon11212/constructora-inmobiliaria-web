@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "../../../../lib/prisma";
 import { requireModule } from "../../../../lib/auth/require-permission";
 import { canDo } from "../../../../lib/auth/permissions";
+import { createAuditLog } from "../../../../lib/audit-log";
 
 /*
   DETALLE DE PROYECTO
@@ -11,11 +12,12 @@ import { canDo } from "../../../../lib/auth/permissions";
   Ruta:
   /admin/proyectos/[id]
 
-  Cambios visuales:
+  Cambios:
   - Fondo y tarjetas glass estilo módulo Proyectos.
   - Detalle con portada, métricas, descripción y galería.
   - Formulario de edición con diseño consistente.
   - Se mantiene la lógica de permisos, guardar y finalizar.
+  - Registra logs al editar proyecto y al marcar como finalizado.
 */
 
 type PageProps = {
@@ -298,6 +300,26 @@ async function actualizarProyecto(formData: FormData) {
       },
       data: dataUpdate,
     });
+
+    await createAuditLog({
+      id_usuario: user.id_usuario ?? null,
+      usuario: user.nombre_usuario ?? null,
+      rol: roleName,
+      accion:
+        estado === "finalizado" && proyectoActual.estado !== "finalizado"
+          ? "FINALIZAR"
+          : "EDITAR",
+      modulo: "Proyectos",
+      sector:
+        estado === "finalizado" && proyectoActual.estado !== "finalizado"
+          ? "Finalizar proyecto desde edición"
+          : "Editar proyecto",
+      descripcion:
+        estado === "finalizado" && proyectoActual.estado !== "finalizado"
+          ? `Se editó y marcó como finalizado el proyecto ${nombre_proyecto} con ID ${id_proyecto}.`
+          : `Se editó el proyecto ${nombre_proyecto} con ID ${id_proyecto}.`,
+      registro_id: id_proyecto,
+    });
   } catch (error) {
     console.error("Error al actualizar proyecto:", error);
     redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=guardar`);
@@ -348,6 +370,17 @@ async function marcarTerminado(formData: FormData) {
         estado: "finalizado",
         fecha_fin_real: new Date(),
       },
+    });
+
+    await createAuditLog({
+      id_usuario: user.id_usuario ?? null,
+      usuario: user.nombre_usuario ?? null,
+      rol: roleName,
+      accion: "FINALIZAR",
+      modulo: "Proyectos",
+      sector: "Finalizar proyecto",
+      descripcion: `Se marcó como finalizado el proyecto ${proyectoActual.nombre_proyecto} con ID ${id_proyecto}.`,
+      registro_id: id_proyecto,
     });
   } catch (error) {
     console.error("Error al marcar proyecto como finalizado:", error);
@@ -575,7 +608,8 @@ export default async function ProyectoDetallePage({
                 </h2>
 
                 <p className="mt-1 text-sm font-bold text-blue-100">
-                  Imágenes referenciales para presentar mejor el avance y tipo de obra.
+                  Imágenes referenciales para presentar mejor el avance y tipo
+                  de obra.
                 </p>
               </div>
 

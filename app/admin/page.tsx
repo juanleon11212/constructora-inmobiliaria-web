@@ -60,6 +60,8 @@ export default async function AdminPage() {
   const modules = getModulesByRole(roleName);
   const roleSummary = getRoleSummary(roleName);
 
+  const showLogsModule = roleName === "Administrador";
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
       <header className="border-b border-blue-900 bg-gradient-to-r from-blue-950 via-blue-900 to-sky-800 text-white shadow-lg shadow-blue-950/20">
@@ -129,7 +131,7 @@ export default async function AdminPage() {
           </p>
         </div>
 
-        {modules.length === 0 ? (
+        {modules.length === 0 && !showLogsModule ? (
           <div className="mt-6 rounded-3xl border border-blue-100 bg-white p-6 shadow-xl shadow-blue-100/70">
             <h3 className="text-xl font-extrabold text-blue-950">
               Sin módulos asignados
@@ -175,7 +177,6 @@ export default async function AdminPage() {
                     <p className="text-sm font-medium leading-6 text-slate-600">
                       {module.description}
                     </p>
-               
 
                     <p className="mt-5 inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-700/25 transition group-hover:bg-blue-900">
                       Entrar →
@@ -184,6 +185,43 @@ export default async function AdminPage() {
                 </Link>
               );
             })}
+
+            {showLogsModule && (
+              <Link
+                href="/admin/logs"
+                className="group overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-xl shadow-blue-100/70 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-200/80"
+              >
+                <div
+                  className="h-40 bg-cover bg-center"
+                  style={{
+                    backgroundImage: "url('/images/usuarios.jpg')",
+                  }}
+                >
+                  <div className="flex h-full items-end bg-gradient-to-t from-slate-950/95 via-blue-900/50 to-transparent p-6">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-200">
+                        Auditoría
+                      </p>
+
+                      <h3 className="mt-1 text-2xl font-extrabold text-white">
+                        Logs del sistema
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <p className="text-sm font-medium leading-6 text-slate-600">
+                    Ver ingresos, ediciones y acciones realizadas por los
+                    usuarios dentro del sistema.
+                  </p>
+
+                  <p className="mt-5 inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-700/25 transition group-hover:bg-blue-900">
+                    Entrar →
+                  </p>
+                </div>
+              </Link>
+            )}
           </div>
         )}
       </section>

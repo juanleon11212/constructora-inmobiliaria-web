@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
 import { canDo } from "../../../lib/auth/permissions";
-
+import { createAuditLog } from "../../../lib/audit-log";
 /*
   MÓDULO MATERIALES
 
@@ -305,8 +305,7 @@ async function crearMaterial(formData: FormData) {
   if (Number.isNaN(stock_minimo) || stock_minimo < 0) {
     redirect("/admin/materiales?paso=material&error=stock-minimo-invalido");
   }
-
-  const material = await prisma.material.create({
+  const materialCreado = await prisma.material.create({
     data: {
       nombre_material,
       descripcion: descripcion || null,
@@ -316,11 +315,20 @@ async function crearMaterial(formData: FormData) {
       id_categoria_material,
     },
   });
-
+ await createAuditLog({
+  id_usuario: user.id_usuario ?? null,
+  usuario: user.nombre_usuario ?? null,
+  rol: roleName,
+  accion: "CREAR",
+  modulo: "Materiales",
+  sector: "Crear material",
+  descripcion: `Se creó el material ${nombre_material}.`,
+  registro_id: materialCreado.id_material,
+});
   revalidatePath("/admin/materiales");
 
   redirect(
-    `/admin/materiales?paso=stock&lista=materiales&id_material=${material.id_material}`
+    `/admin/materiales?paso=stock&lista=materiales&id_material=${materialCreado.id_material}`
   );
 }
 
@@ -379,6 +387,16 @@ async function editarMaterial(formData: FormData) {
       id_categoria_material,
     },
   });
+   await createAuditLog({
+  id_usuario: user.id_usuario ?? null,
+  usuario: user.nombre_usuario ?? null,
+  rol: roleName,
+  accion: "EDITAR",
+  modulo: "Materiales",
+  sector: "Editar material",
+  descripcion: `Se editó el material con ID ${id_material}.`,
+  registro_id: id_material,
+});
 
   revalidatePath("/admin/materiales");
   redirect("/admin/materiales?lista=materiales");
@@ -433,6 +451,16 @@ async function actualizarStock(formData: FormData) {
       },
     });
   }
+  await createAuditLog({
+  id_usuario: user.id_usuario ?? null,
+  usuario: user.nombre_usuario ?? null,
+  rol: roleName,
+  accion: "EDITAR",
+  modulo: "Inventario",
+  sector: "Controlar stock",
+  descripcion: `Se actualizó el stock del material con ID ${id_material}.`,
+  registro_id: id_material,
+});
 
   revalidatePath("/admin/materiales");
 
@@ -478,7 +506,7 @@ async function crearProveedor(formData: FormData) {
     );
   }
 
-  const proveedor = await prisma.proveedor.create({
+  const proveedorCreado = await prisma.proveedor.create({
     data: {
       nombre_proveedor,
       nit,
@@ -487,11 +515,20 @@ async function crearProveedor(formData: FormData) {
       direccion: direccion || null,
     },
   });
-
+  await createAuditLog({
+  id_usuario: user.id_usuario ?? null,
+  usuario: user.nombre_usuario ?? null,
+  rol: roleName,
+  accion: "CREAR",
+  modulo: "Proveedores",
+  sector: "Crear proveedor",
+  descripcion: `Se creó un proveedor.`,
+  registro_id: proveedorCreado.id_proveedor,
+});
   revalidatePath("/admin/materiales");
 
   redirect(
-    `/admin/materiales?paso=compra&lista=proveedores&id_material=${id_material}&id_almacen=${id_almacen}&id_proveedor=${proveedor.id_proveedor}`
+    `/admin/materiales?paso=compra&lista=proveedores&id_material=${id_material}&id_almacen=${id_almacen}&id_proveedor=${proveedorCreado.id_proveedor}`
   );
 }
 
@@ -606,7 +643,7 @@ async function registrarCompra(formData: FormData) {
 
   const subtotal = cantidad * precio_unitario;
 
-  const compra = await prisma.compra_material.create({
+const compraCreada = await prisma.compra_material.create({
     data: {
       numero_factura,
       fecha_compra: new Date(fecha_compra),
@@ -619,10 +656,20 @@ async function registrarCompra(formData: FormData) {
       id_usuario_registro: user.id_usuario ?? null,
     },
   });
+  await createAuditLog({
+  id_usuario: user.id_usuario ?? null,
+  usuario: user.nombre_usuario ?? null,
+  rol: roleName,
+  accion: "CREAR",
+  modulo: "Compras",
+  sector: "Registrar compra de material",
+  descripcion: `Se registró una compra de material.`,
+  registro_id: compraCreada.id_compra,
+});
 
   await prisma.detalle_compra_material.create({
     data: {
-      id_compra: compra.id_compra,
+      id_compra: compraCreada.id_compra,
       id_material,
       cantidad,
       precio_unitario,

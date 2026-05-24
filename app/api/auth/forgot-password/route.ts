@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { isStrongEnoughPassword } from "../../../../lib/validations";
+import { createAuditLog } from "../../../../lib/audit-log";
 
 /*
   API RECUPERAR CONTRASEÑA
@@ -8,15 +9,37 @@ import { isStrongEnoughPassword } from "../../../../lib/validations";
   Solo se ejecuta cuando se envía el formulario de recuperar contraseña.
   No se ejecuta al abrir login.
   No se ejecuta al cargar datos ya existentes.
+
+  LOGS:
+  - Registra cuando un usuario interno cambia contraseña.
+  - Registra cuando un cliente cambia contraseña.
 */
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const identificador = String(body.identificador ?? "").trim();
-    const nuevaContrasena = String(body.nuevaContrasena ?? "").trim();
-    const confirmarContrasena = String(body.confirmarContrasena ?? "").trim();
+    const identificador = String(
+      body.identificador ??
+        body.usuario ??
+        body.correo ??
+        body.nombre_usuario ??
+        ""
+    ).trim();
+
+    const nuevaContrasena = String(
+      body.nuevaContrasena ??
+        body.contrasena ??
+        body.password ??
+        ""
+    ).trim();
+
+    const confirmarContrasena = String(
+      body.confirmarContrasena ??
+        body.confirmar_contrasena ??
+        body.confirmPassword ??
+        ""
+    ).trim();
 
     if (!identificador || !nuevaContrasena || !confirmarContrasena) {
       return NextResponse.json(
@@ -43,16 +66,38 @@ export async function POST(request: Request) {
       where: {
         OR: [{ nombre_usuario: identificador }, { correo: identificador }],
       },
+      include: {
+        rol: true,
+      },
     });
 
     if (usuario) {
-      await prisma.usuario.update({
+      const usuarioActualizado = await prisma.usuario.update({
         where: {
           id_usuario: usuario.id_usuario,
         },
         data: {
           contrasena: nuevaContrasena,
         },
+        include: {
+          rol: true,
+        },
+      });
+
+      await createAuditLog({
+        id_usuario: usuarioActualizado.id_usuario ?? null,
+        usuario:
+          usuarioActualizado.nombre_usuario ??
+          usuarioActualizado.correo ??
+          "Usuario",
+        rol: usuarioActualizado.rol?.nombre_rol ?? "Usuario",
+        accion: "EDITAR",
+        modulo: "Autenticación",
+        sector: "Cambiar contraseña",
+        descripcion: `Se cambió la contraseña del usuario ${
+          usuarioActualizado.nombre_usuario ?? usuarioActualizado.correo
+        }.`,
+        registro_id: usuarioActualizado.id_usuario ?? null,
       });
 
       return NextResponse.json({
@@ -65,16 +110,41 @@ export async function POST(request: Request) {
       where: {
         OR: [{ nombre_usuario: identificador }, { correo: identificador }],
       },
+      include: {
+        rol: true,
+      },
     });
 
     if (cliente) {
-      await prisma.cliente.update({
+      const clienteActualizado = await prisma.cliente.update({
         where: {
           id_cliente: cliente.id_cliente,
         },
         data: {
           contrasena: nuevaContrasena,
         },
+        include: {
+          rol: true,
+        },
+      });
+
+      await createAuditLog({
+        id_usuario: clienteActualizado.id_cliente ?? null,
+        usuario:
+          clienteActualizado.nombre_usuario ??
+          clienteActualizado.correo ??
+          clienteActualizado.ci_nit ??
+          "Cliente",
+        rol: clienteActualizado.rol?.nombre_rol ?? "Cliente",
+        accion: "EDITAR",
+        modulo: "Autenticación",
+        sector: "Cambiar contraseña",
+        descripcion: `Se cambió la contraseña del cliente ${
+          clienteActualizado.nombre_usuario ??
+          clienteActualizado.correo ??
+          clienteActualizado.ci_nit
+        }.`,
+        registro_id: clienteActualizado.id_cliente ?? null,
       });
 
       return NextResponse.json({
@@ -87,7 +157,9 @@ export async function POST(request: Request) {
       { message: "No se encontró una cuenta con ese usuario o correo." },
       { status: 404 }
     );
-  } catch {
+  } catch (error) {
+    console.error("Error al recuperar contraseña:", error);
+
     return NextResponse.json(
       { message: "Error de conexión con el servidor." },
       { status: 500 }

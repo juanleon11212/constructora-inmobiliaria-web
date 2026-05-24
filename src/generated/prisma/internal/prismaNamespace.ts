@@ -409,7 +409,8 @@ export const ModelName = {
   rol: 'rol',
   rol_modulo: 'rol_modulo',
   rol_permiso: 'rol_permiso',
-  usuario: 'usuario'
+  usuario: 'usuario',
+  LogAuditoria: 'LogAuditoria'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -425,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "almacen" | "asignacion_obra" | "cargo" | "categoria_material" | "cliente" | "compra_material" | "consumo_material_obra" | "contrato" | "control_diario_trabajo" | "cotizacion_cliente" | "detalle_compra_material" | "detalle_cotizacion_cliente" | "empleado" | "historial_pago_hora" | "inventario" | "material" | "modulo" | "pago" | "permiso" | "presupuesto" | "proveedor" | "proyecto" | "rol" | "rol_modulo" | "rol_permiso" | "usuario"
+    modelProps: "almacen" | "asignacion_obra" | "cargo" | "categoria_material" | "cliente" | "compra_material" | "consumo_material_obra" | "contrato" | "control_diario_trabajo" | "cotizacion_cliente" | "detalle_compra_material" | "detalle_cotizacion_cliente" | "empleado" | "historial_pago_hora" | "inventario" | "material" | "modulo" | "pago" | "permiso" | "presupuesto" | "proveedor" | "proyecto" | "rol" | "rol_modulo" | "rol_permiso" | "usuario" | "logAuditoria"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2145,6 +2146,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LogAuditoria: {
+      payload: Prisma.$LogAuditoriaPayload<ExtArgs>
+      fields: Prisma.LogAuditoriaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LogAuditoriaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogAuditoriaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LogAuditoriaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogAuditoriaPayload>
+        }
+        findFirst: {
+          args: Prisma.LogAuditoriaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogAuditoriaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LogAuditoriaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogAuditoriaPayload>
+        }
+        findMany: {
+          args: Prisma.LogAuditoriaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogAuditoriaPayload>[]
+        }
+        create: {
+          args: Prisma.LogAuditoriaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogAuditoriaPayload>
+        }
+        createMany: {
+          args: Prisma.LogAuditoriaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.LogAuditoriaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogAuditoriaPayload>
+        }
+        update: {
+          args: Prisma.LogAuditoriaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogAuditoriaPayload>
+        }
+        deleteMany: {
+          args: Prisma.LogAuditoriaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LogAuditoriaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.LogAuditoriaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogAuditoriaPayload>
+        }
+        aggregate: {
+          args: Prisma.LogAuditoriaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLogAuditoria>
+        }
+        groupBy: {
+          args: Prisma.LogAuditoriaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LogAuditoriaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LogAuditoriaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LogAuditoriaCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2517,6 +2584,22 @@ export const UsuarioScalarFieldEnum = {
 export type UsuarioScalarFieldEnum = (typeof UsuarioScalarFieldEnum)[keyof typeof UsuarioScalarFieldEnum]
 
 
+export const LogAuditoriaScalarFieldEnum = {
+  id_log: 'id_log',
+  id_usuario: 'id_usuario',
+  usuario: 'usuario',
+  rol: 'rol',
+  accion: 'accion',
+  modulo: 'modulo',
+  sector: 'sector',
+  descripcion: 'descripcion',
+  registro_id: 'registro_id',
+  fecha: 'fecha'
+} as const
+
+export type LogAuditoriaScalarFieldEnum = (typeof LogAuditoriaScalarFieldEnum)[keyof typeof LogAuditoriaScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2709,6 +2792,7 @@ export type GlobalOmitConfig = {
   rol_modulo?: Prisma.rol_moduloOmit
   rol_permiso?: Prisma.rol_permisoOmit
   usuario?: Prisma.usuarioOmit
+  logAuditoria?: Prisma.LogAuditoriaOmit
 }
 
 /* Types for Logging */

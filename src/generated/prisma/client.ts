@@ -171,3 +171,8 @@ export type rol_permiso = Prisma.rol_permisoModel
  * 
  */
 export type usuario = Prisma.usuarioModel
+/**
+ * Model LogAuditoria
+ * 
+ */
+export type LogAuditoria = Prisma.LogAuditoriaModel

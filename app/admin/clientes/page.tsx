@@ -8,6 +8,7 @@ import {
   type FilterOption,
 } from "../../../components/admin/TableFilter";
 import { containsText, equalsText } from "../../../lib/table-filter";
+import { createAuditLog } from "../../../lib/audit-log";
 
 /*
   MÓDULO CLIENTES
@@ -15,13 +16,13 @@ import { containsText, equalsText } from "../../../lib/table-filter";
   Ruta:
   /admin/clientes
 
-  Versión corregida:
-  - Sin conflictos de Git.
-  - Sin nombre_usuario ni contrasena en cliente.
-  - Mantiene crear cliente.
-  - Mantiene editar cliente.
-  - Mantiene ver detalle del cliente.
-  - Mantiene filtro de clientes.
+  Funciones:
+  - Crear cliente.
+  - Editar cliente.
+  - Ver detalle del cliente.
+  - Filtrar clientes.
+  - Desactivar cliente.
+  - Registrar logs de crear, editar y desactivar.
 */
 
 type PageProps = {
@@ -130,7 +131,7 @@ async function crearCliente(formData: FormData) {
     redirect("/admin/clientes?error=cliente-existente");
   }
 
-  await prisma.cliente.create({
+  const clienteCreado = await prisma.cliente.create({
     data: {
       nombres: nombres || null,
       apellidos: apellidos || null,
@@ -141,6 +142,17 @@ async function crearCliente(formData: FormData) {
       direccion: direccion || null,
       estado_cuenta: "activo",
     },
+  });
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "CREAR",
+    modulo: "Clientes",
+    sector: "Crear cliente",
+    descripcion: `Se creó el cliente con ID ${clienteCreado.id_cliente}.`,
+    registro_id: clienteCreado.id_cliente,
   });
 
   revalidatePath("/admin/clientes");
@@ -203,6 +215,57 @@ async function editarCliente(formData: FormData) {
       direccion: direccion || null,
       estado_cuenta,
     },
+  });
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "EDITAR",
+    modulo: "Clientes",
+    sector: "Editar cliente",
+    descripcion: `Se editó el cliente con ID ${id_cliente}.`,
+    registro_id: id_cliente,
+  });
+
+  revalidatePath("/admin/clientes");
+  redirect("/admin/clientes");
+}
+
+async function desactivarCliente(formData: FormData) {
+  "use server";
+
+  const user = await requireModule("clientes");
+  const roleName = getRoleName(user);
+
+  if (roleName !== "Administrador") {
+    redirect("/admin/clientes");
+  }
+
+  const id_cliente = Number(formData.get("id_cliente"));
+
+  if (!id_cliente) {
+    redirect("/admin/clientes?error=id-invalido");
+  }
+
+  await prisma.cliente.update({
+    where: {
+      id_cliente,
+    },
+    data: {
+      estado_cuenta: "inactivo",
+    },
+  });
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "DESACTIVAR",
+    modulo: "Clientes",
+    sector: "Desactivar cliente",
+    descripcion: `Se desactivó el cliente con ID ${id_cliente}.`,
+    registro_id: id_cliente,
   });
 
   revalidatePath("/admin/clientes");
@@ -735,7 +798,7 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                     </td>
 
                     <td className="border border-white/30 px-4 py-3">
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Link
                           href={`/admin/clientes?ver=${cliente.id_cliente}`}
                           scroll={false}
@@ -752,6 +815,23 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                           >
                             Editar
                           </Link>
+                        )}
+
+                        {isAdmin && cliente.estado_cuenta !== "inactivo" && (
+                          <form action={desactivarCliente}>
+                            <input
+                              type="hidden"
+                              name="id_cliente"
+                              value={cliente.id_cliente}
+                            />
+
+                            <button
+                              type="submit"
+                              className="rounded-lg bg-red-600 px-3 py-2 text-xs font-extrabold text-white shadow transition hover:bg-red-700"
+                            >
+                              Desactivar
+                            </button>
+                          </form>
                         )}
                       </div>
                     </td>

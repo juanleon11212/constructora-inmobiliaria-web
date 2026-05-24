@@ -354,3 +354,17 @@ model usuario {
   empleado           empleado?            @relation(fields: [id_empleado], references: [id_empleado], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_empleado")
   rol                rol                  @relation(fields: [id_rol], references: [id_rol], onUpdate: NoAction, map: "fk_usuario_rol")
 }
+model LogAuditoria {
+  id_log       Int      @id @default(autoincrement())
+  id_usuario  Int?
+  usuario     String?  @db.VarChar(100)
+  rol         String?  @db.VarChar(100)
+  accion      String   @db.VarChar(50)
+  modulo      String   @db.VarChar(100)
+  sector      String?  @db.VarChar(150)
+  descripcion String?  @db.VarChar(500)
+  registro_id Int?
+  fecha       DateTime @default(now())
+
+  @@map("logs_auditoria")
+}

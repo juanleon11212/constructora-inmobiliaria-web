@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { setSessionCookie } from "../../../../lib/auth/session";
+import { createAuditLog } from "../../../../lib/audit-log";
 
 /*
   LOGIN
@@ -20,13 +21,14 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     /*
-      Aceptamos ambos nombres por si tu formulario usa:
+      Aceptamos varios nombres por si tu formulario usa:
       - identifier/password
-      o:
       - nombre_usuario/contrasena
+      - usuario/contrasena
+      - correo/contrasena
     */
     const identifier = String(
-      body.identifier ?? body.nombre_usuario ?? ""
+      body.identifier ?? body.nombre_usuario ?? body.usuario ?? body.correo ?? ""
     ).trim();
 
     const password = String(
@@ -74,6 +76,19 @@ export async function POST(request: Request) {
           : empresaUser.nombre_usuario,
       });
 
+      await createAuditLog({
+        id_usuario: empresaUser.id_usuario ?? null,
+        usuario: empresaUser.nombre_usuario ?? empresaUser.correo ?? "Usuario",
+        rol: empresaUser.rol?.nombre_rol ?? "Usuario",
+        accion: "LOGIN",
+        modulo: "Autenticación",
+        sector: "Inicio de sesión",
+        descripcion: `El usuario ${
+          empresaUser.nombre_usuario ?? empresaUser.correo
+        } inició sesión en el sistema.`,
+        registro_id: empresaUser.id_usuario ?? null,
+      });
+
       return NextResponse.json({
         ok: true,
         redirectTo: "/admin",
@@ -114,6 +129,23 @@ export async function POST(request: Request) {
           `${cliente.nombres ?? ""} ${cliente.apellidos ?? ""}`.trim(),
       });
 
+      await createAuditLog({
+        id_usuario: cliente.id_cliente ?? null,
+        usuario:
+          cliente.nombre_usuario ??
+          cliente.correo ??
+          cliente.ci_nit ??
+          "Cliente",
+        rol: cliente.rol?.nombre_rol ?? "Cliente",
+        accion: "LOGIN",
+        modulo: "Autenticación",
+        sector: "Inicio de sesión",
+        descripcion: `El cliente ${
+          cliente.nombre_usuario ?? cliente.correo ?? cliente.ci_nit
+        } inició sesión en el sistema.`,
+        registro_id: cliente.id_cliente ?? null,
+      });
+
       return NextResponse.json({
         ok: true,
         redirectTo: "/admin",
@@ -125,7 +157,9 @@ export async function POST(request: Request) {
       { message: "Usuario o contraseña incorrectos." },
       { status: 401 }
     );
-  } catch {
+  } catch (error) {
+    console.error("Error en login:", error);
+
     return NextResponse.json(
       { message: "Error de conexión con el servidor." },
       { status: 500 }
