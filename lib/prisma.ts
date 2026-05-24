@@ -2,30 +2,27 @@ import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaMssql } from "@prisma/adapter-mssql";
 import { demoPrisma, isDemoMode } from "./demo-prisma";
 
-/*
-  CONEXIÓN DE PRISMA
-
-  Si DEMO_MODE=true:
-  - Usa datos demo.
-  - No necesita SQL Server.
-  - Sirve para tus amigos.
-
-  Si DEMO_MODE=false:
-  - Usa SQL Server real.
-  - Sirve para tu computadora.
-*/
-
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+function requiredEnv(name: string) {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`Falta la variable de entorno: ${name}`);
+  }
+
+  return value;
+}
+
 function createRealPrismaClient() {
   const adapter = new PrismaMssql({
-    server: process.env.DB_SERVER ?? "localhost",
+    server: requiredEnv("DB_SERVER"),
     port: Number(process.env.DB_PORT ?? 1433),
-    database: process.env.DB_NAME ?? "constructora_tbd",
-    user: process.env.DB_USER ?? "constructora_user",
-    password: process.env.DB_PASSWORD ?? "",
+    database: requiredEnv("DB_NAME"),
+    user: requiredEnv("DB_USER"),
+    password: requiredEnv("DB_PASSWORD"),
     options: {
       encrypt: true,
       trustServerCertificate: true,
