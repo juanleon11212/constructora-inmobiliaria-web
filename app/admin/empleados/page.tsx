@@ -8,7 +8,6 @@ import {
   type FilterOption,
 } from "../../../components/admin/TableFilter";
 import { containsText, equalsText, formatDate } from "../../../lib/table-filter";
-import { createAuditLog } from "../../../lib/audit-log";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -27,21 +26,43 @@ function getText(formData: FormData, field: string) {
 function getRoleName(user: { rol: unknown }) {
   if (typeof user.rol === "string") return user.rol;
 
-  if (user.rol && typeof user.rol === "object" && "nombre_rol" in user.rol) {
-    return String((user.rol as { nombre_rol?: string | null }).nombre_rol ?? "");
+  if (
+    user.rol &&
+    typeof user.rol === "object" &&
+    "nombre_rol" in user.rol
+  ) {
+    return String(
+      (user.rol as { nombre_rol?: string | null }).nombre_rol ?? ""
+    );
   }
 
   return "";
 }
 
-const inputClass =
-  "w-full rounded-xl border border-white/50 bg-white/80 px-4 py-3 text-sm font-bold text-slate-950 shadow-sm outline-none backdrop-blur placeholder:text-slate-500 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-200";
+function formatDateInput(value: Date | string | null | undefined) {
+  if (!value) return "";
 
-const tableHeaderClass =
-  "border border-white/30 px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wide text-slate-800";
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toISOString().slice(0, 10);
+}
+
+const inputClass =
+  "w-full rounded-xl border border-white/40 bg-white/75 px-4 py-3 text-sm font-bold text-slate-950 shadow-sm outline-none backdrop-blur placeholder:text-slate-500 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-200";
+
+const selectClass =
+  "w-full rounded-xl border border-white/40 bg-white/75 px-4 py-3 text-sm font-bold text-slate-950 shadow-sm outline-none backdrop-blur focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-200";
+
+const glassPanel =
+  "rounded-[2rem] border border-white/40 bg-white/20 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md";
+
+const tableHeadClass =
+  "border border-white/30 bg-slate-900/65 p-3 text-left text-xs font-extrabold uppercase tracking-wide text-white";
 
 const tableCellClass =
-  "border border-white/30 px-4 py-3 text-sm font-semibold text-slate-800";
+  "border border-white/30 p-3 text-sm font-semibold text-slate-950";
 
 async function crearEmpleado(formData: FormData) {
   "use server";
@@ -68,16 +89,14 @@ async function crearEmpleado(formData: FormData) {
   }
 
   const empleadoExistente = await prisma.empleado.findFirst({
-    where: {
-      ci,
-    },
+    where: { ci },
   });
 
   if (empleadoExistente) {
     redirect("/admin/empleados?error=ci-existente");
   }
 
-  const empleadoCreado = await prisma.empleado.create({
+  await prisma.empleado.create({
     data: {
       nombres,
       apellidos,
@@ -89,17 +108,6 @@ async function crearEmpleado(formData: FormData) {
       estado,
       id_cargo,
     },
-  });
-
-  await createAuditLog({
-    id_usuario: user.id_usuario ?? null,
-    usuario: user.nombre_usuario ?? null,
-    rol: roleName,
-    accion: "CREAR",
-    modulo: "Empleados",
-    sector: "Crear empleado",
-    descripcion: `Se creó el empleado ${nombres} ${apellidos}.`,
-    registro_id: empleadoCreado.id_empleado,
   });
 
   revalidatePath("/admin/empleados");
@@ -150,9 +158,7 @@ async function editarEmpleado(formData: FormData) {
   }
 
   await prisma.empleado.update({
-    where: {
-      id_empleado,
-    },
+    where: { id_empleado },
     data: {
       nombres,
       apellidos,
@@ -164,17 +170,6 @@ async function editarEmpleado(formData: FormData) {
       estado,
       id_cargo,
     },
-  });
-
-  await createAuditLog({
-    id_usuario: user.id_usuario ?? null,
-    usuario: user.nombre_usuario ?? null,
-    rol: roleName,
-    accion: "EDITAR",
-    modulo: "Empleados",
-    sector: "Editar empleado",
-    descripcion: `Se editó el empleado con ID ${id_empleado}.`,
-    registro_id: id_empleado,
   });
 
   revalidatePath("/admin/empleados");
@@ -198,32 +193,13 @@ async function eliminarEmpleado(formData: FormData) {
   }
 
   await prisma.usuario.updateMany({
-    where: {
-      id_empleado,
-    },
-    data: {
-      estado: "inactivo",
-    },
+    where: { id_empleado },
+    data: { estado: "inactivo" },
   });
 
   await prisma.empleado.update({
-    where: {
-      id_empleado,
-    },
-    data: {
-      estado: "inactivo",
-    },
-  });
-
-  await createAuditLog({
-    id_usuario: user.id_usuario ?? null,
-    usuario: user.nombre_usuario ?? null,
-    rol: roleName,
-    accion: "DESACTIVAR",
-    modulo: "Empleados",
-    sector: "Desactivar empleado",
-    descripcion: `Se desactivó el empleado con ID ${id_empleado}.`,
-    registro_id: id_empleado,
+    where: { id_empleado },
+    data: { estado: "inactivo" },
   });
 
   revalidatePath("/admin/empleados");
@@ -253,7 +229,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
     {
       value: "nombre",
       label: "Nombre completo",
-      placeholder: "Ejemplo: Juan",
+      placeholder: "Ejemplo: María",
     },
     {
       value: "ci",
@@ -261,14 +237,19 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
       placeholder: "Ejemplo: 123456",
     },
     {
+      value: "cargo",
+      label: "Cargo",
+      placeholder: "Ejemplo: Contador",
+    },
+    {
       value: "telefono",
       label: "Teléfono",
       placeholder: "Ejemplo: 70000000",
     },
     {
-      value: "cargo",
-      label: "Cargo",
-      placeholder: "Ejemplo: Arquitecto",
+      value: "fecha_ingreso",
+      label: "Fecha ingreso",
+      placeholder: "Ejemplo: 2026-05-20",
     },
     {
       value: "estado",
@@ -277,19 +258,17 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
     },
   ];
 
-  const [empleados, cargos] = await Promise.all([
-    prisma.empleado.findMany({
-      orderBy: {
-        id_empleado: "desc",
-      },
-    }),
+  const cargos = await prisma.cargo.findMany({
+    orderBy: {
+      nombre_cargo: "asc",
+    },
+  });
 
-    prisma.cargo.findMany({
-      orderBy: {
-        nombre_cargo: "asc",
-      },
-    }),
-  ]);
+  const empleados = await prisma.empleado.findMany({
+    orderBy: {
+      id_empleado: "desc",
+    },
+  });
 
   const cargoMap = new Map(
     cargos.map((cargo) => [cargo.id_cargo, cargo.nombre_cargo])
@@ -298,26 +277,30 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
   const empleadosFiltrados = empleados.filter((empleado) => {
     if (!hayFiltro) return true;
 
-    const nombreCompleto = `${empleado.nombres} ${empleado.apellidos}`;
+    const nombreEmpleado = `${empleado.nombres} ${empleado.apellidos}`.trim();
 
     if (campoFiltro === "id_empleado") {
       return equalsText(empleado.id_empleado, valorFiltro);
     }
 
     if (campoFiltro === "nombre") {
-      return containsText(nombreCompleto, valorFiltro);
+      return containsText(nombreEmpleado, valorFiltro);
     }
 
     if (campoFiltro === "ci") {
       return containsText(empleado.ci, valorFiltro);
     }
 
+    if (campoFiltro === "cargo") {
+      return containsText(cargoMap.get(empleado.id_cargo), valorFiltro);
+    }
+
     if (campoFiltro === "telefono") {
       return containsText(empleado.telefono, valorFiltro);
     }
 
-    if (campoFiltro === "cargo") {
-      return containsText(cargoMap.get(empleado.id_cargo), valorFiltro);
+    if (campoFiltro === "fecha_ingreso") {
+      return containsText(formatDate(empleado.fecha_ingreso), valorFiltro);
     }
 
     if (campoFiltro === "estado") {
@@ -341,39 +324,37 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
       className="min-h-screen bg-cover bg-center bg-fixed p-6"
       style={{
         backgroundImage:
-          "linear-gradient(90deg, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.62) 36%, rgba(255,255,255,0.12) 100%), url('/images/empleados.jpg')",
+          "linear-gradient(90deg, rgba(15,23,42,0.74) 0%, rgba(15,23,42,0.48) 45%, rgba(255,255,255,0.12) 100%), url('/images/empleados-fondo.jpg')",
       }}
     >
       <div className="mx-auto max-w-7xl">
-        <section className="rounded-[28px] border border-white/40 bg-white/25 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="text-white drop-shadow">
-              <p className="text-sm font-bold text-blue-100">
-                Módulo Empleados
-              </p>
+        <div className="flex flex-wrap items-center justify-between gap-4 text-white drop-shadow">
+          <div>
+            <p className="text-sm font-bold text-blue-200">
+              Módulo Empleados
+            </p>
 
-              <h1 className="text-4xl font-extrabold tracking-tight">
-                Empleados
-              </h1>
+            <h1 className="text-4xl font-extrabold tracking-tight">
+              Empleados
+            </h1>
 
-              <p className="mt-1 text-sm font-medium text-blue-100">
-                Administración del personal interno de la constructora.
-              </p>
-            </div>
-
-            <Link
-              href="/admin"
-              className="rounded-xl border border-white/40 bg-white/75 px-5 py-3 text-sm font-extrabold text-blue-900 shadow-xl shadow-slate-900/20 backdrop-blur transition hover:bg-white"
-            >
-              Volver al panel
-            </Link>
+            <p className="mt-1 text-base font-semibold text-white/90">
+              Administración del personal de la empresa.
+            </p>
           </div>
-        </section>
+
+          <Link
+            href="/admin"
+            className="rounded-xl border border-white/40 bg-white/20 px-5 py-3 text-sm font-extrabold text-white shadow-xl backdrop-blur transition hover:bg-white/30"
+          >
+            Volver al panel
+          </Link>
+        </div>
 
         {params?.error && (
           <div className="mt-5 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm font-bold text-red-700 shadow-lg backdrop-blur">
             {params.error === "datos-obligatorios" &&
-              "Nombres, apellidos, CI, cargo y fecha de ingreso son obligatorios."}
+              "Nombres, apellidos, CI, fecha de ingreso y cargo son obligatorios."}
 
             {params.error === "ci-existente" &&
               "Ya existe un empleado con ese CI."}
@@ -384,20 +365,24 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
         )}
 
         {isAdmin && !empleadoEditar && (
-          <section className="mt-6 rounded-[28px] border border-white/40 bg-white/30 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <section className={`mt-6 ${glassPanel}`}>
             <h2 className="text-2xl font-extrabold text-white drop-shadow">
               Crear empleado
             </h2>
 
-            <p className="mt-1 text-sm font-bold text-blue-100">
-              Registra un nuevo trabajador de la empresa.
+            <p className="mt-1 text-sm font-semibold text-white/90">
+              Este formulario guarda un trabajador en la tabla empleado.
             </p>
 
             <form
               action={crearEmpleado}
               className="mt-5 grid gap-4 md:grid-cols-2"
             >
-              <input name="nombres" placeholder="Nombres *" className={inputClass} />
+              <input
+                name="nombres"
+                placeholder="Nombres *"
+                className={inputClass}
+              />
 
               <input
                 name="apellidos"
@@ -416,22 +401,12 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <input
                 name="direccion"
                 placeholder="Dirección"
-                className={inputClass}
+                className={`${inputClass} md:col-span-2`}
               />
-
-              <select name="id_cargo" className={inputClass}>
-                <option value="">Seleccionar cargo *</option>
-
-                {cargos.map((cargo) => (
-                  <option key={cargo.id_cargo} value={cargo.id_cargo}>
-                    {cargo.nombre_cargo}
-                  </option>
-                ))}
-              </select>
 
               <div>
                 <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
-                  Fecha de nacimiento
+                  Fecha nacimiento
                 </label>
 
                 <input
@@ -443,13 +418,31 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
 
               <div>
                 <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
-                  Fecha de ingreso *
+                  Fecha ingreso *
                 </label>
 
-                <input type="date" name="fecha_ingreso" className={inputClass} />
+                <input
+                  type="date"
+                  name="fecha_ingreso"
+                  className={inputClass}
+                />
               </div>
 
-              <select name="estado" defaultValue="activo" className={inputClass}>
+              <select name="id_cargo" className={selectClass}>
+                <option value="">Selecciona cargo *</option>
+
+                {cargos.map((cargo) => (
+                  <option key={cargo.id_cargo} value={cargo.id_cargo}>
+                    {cargo.nombre_cargo}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                name="estado"
+                defaultValue="activo"
+                className={selectClass}
+              >
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
               </select>
@@ -457,7 +450,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/30 transition hover:from-blue-950 hover:to-sky-700"
+                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/40 transition hover:from-blue-950 hover:to-sky-700"
                 >
                   Crear empleado
                 </button>
@@ -467,14 +460,14 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
         )}
 
         {isAdmin && empleadoEditar && (
-          <section className="mt-6 rounded-[28px] border border-white/40 bg-white/30 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+          <section className={`mt-6 ${glassPanel}`}>
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-extrabold text-white drop-shadow">
                   Editar empleado
                 </h2>
 
-                <p className="mt-1 text-sm font-bold text-blue-100">
+                <p className="mt-1 text-sm font-semibold text-white/90">
                   Modifica los datos del empleado seleccionado.
                 </p>
               </div>
@@ -482,7 +475,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <Link
                 href="/admin/empleados"
                 scroll={false}
-                className="rounded-xl border border-white/40 bg-white/70 px-4 py-2 text-sm font-extrabold text-blue-900 transition hover:bg-white"
+                className="rounded-xl border border-white/40 bg-white/25 px-4 py-2 text-sm font-extrabold text-white shadow-lg transition hover:bg-white/35"
               >
                 Cancelar
               </Link>
@@ -530,13 +523,39 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                 name="direccion"
                 placeholder="Dirección"
                 defaultValue={empleadoEditar.direccion ?? ""}
-                className={inputClass}
+                className={`${inputClass} md:col-span-2`}
               />
+
+              <div>
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
+                  Fecha nacimiento
+                </label>
+
+                <input
+                  type="date"
+                  name="fecha_nacimiento"
+                  defaultValue={formatDateInput(empleadoEditar.fecha_nacimiento)}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
+                  Fecha ingreso *
+                </label>
+
+                <input
+                  type="date"
+                  name="fecha_ingreso"
+                  defaultValue={formatDateInput(empleadoEditar.fecha_ingreso)}
+                  className={inputClass}
+                />
+              </div>
 
               <select
                 name="id_cargo"
                 defaultValue={empleadoEditar.id_cargo}
-                className={inputClass}
+                className={selectClass}
               >
                 {cargos.map((cargo) => (
                   <option key={cargo.id_cargo} value={cargo.id_cargo}>
@@ -545,36 +564,10 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                 ))}
               </select>
 
-              <div>
-                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
-                  Fecha de nacimiento
-                </label>
-
-                <input
-                  type="date"
-                  name="fecha_nacimiento"
-                  defaultValue={formatDate(empleadoEditar.fecha_nacimiento)}
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-extrabold text-white drop-shadow">
-                  Fecha de ingreso *
-                </label>
-
-                <input
-                  type="date"
-                  name="fecha_ingreso"
-                  defaultValue={formatDate(empleadoEditar.fecha_ingreso)}
-                  className={inputClass}
-                />
-              </div>
-
               <select
                 name="estado"
                 defaultValue={empleadoEditar.estado}
-                className={inputClass}
+                className={selectClass}
               >
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
@@ -583,7 +576,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/30 transition hover:from-blue-950 hover:to-sky-700"
+                  className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/40 transition hover:from-blue-950 hover:to-sky-700"
                 >
                   Guardar cambios
                 </button>
@@ -592,7 +585,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
           </section>
         )}
 
-        <div className="mt-6 rounded-[28px] border border-white/40 bg-white/25 p-1 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+        <div className="mt-6 rounded-[2rem] border border-white/40 bg-white/25 p-4 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
           <TableFilter
             basePath="/admin/empleados"
             title="Filtro de empleados"
@@ -605,51 +598,38 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
           />
         </div>
 
-        <section className="mt-6 overflow-x-auto rounded-[28px] border border-white/40 bg-white/35 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
-          <div className="px-5 py-4">
-            <h2 className="text-2xl font-extrabold text-white drop-shadow">
-              Lista de empleados registrados
-            </h2>
-
-            <p className="mt-1 text-sm font-bold text-blue-100">
-              Registros visibles: {empleadosFiltrados.length}
-            </p>
-          </div>
-
+        <section className="mt-6 overflow-x-auto rounded-[2rem] border border-white/40 bg-white/55 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
           <table className="w-full border-collapse text-sm">
-            <thead className="bg-white/70 backdrop-blur">
+            <thead>
               <tr>
-                <th className={tableHeaderClass}>ID</th>
-                <th className={tableHeaderClass}>Empleado</th>
-                <th className={tableHeaderClass}>CI</th>
-                <th className={tableHeaderClass}>Teléfono</th>
-                <th className={tableHeaderClass}>Cargo</th>
-                <th className={tableHeaderClass}>Ingreso</th>
-                <th className={tableHeaderClass}>Estado</th>
-                <th className={tableHeaderClass}>Acciones</th>
+                <th className={tableHeadClass}>ID</th>
+                <th className={tableHeadClass}>Empleado</th>
+                <th className={tableHeadClass}>CI</th>
+                <th className={tableHeadClass}>Cargo</th>
+                <th className={tableHeadClass}>Teléfono</th>
+                <th className={tableHeadClass}>Ingreso</th>
+                <th className={tableHeadClass}>Estado</th>
+                <th className={tableHeadClass}>Acciones</th>
               </tr>
             </thead>
 
-            <tbody className="bg-white/40 backdrop-blur">
+            <tbody className="bg-white/45">
               {empleadosFiltrados.map((empleado) => (
-                <tr
-                  key={empleado.id_empleado}
-                  className="transition hover:bg-white/70"
-                >
+                <tr key={empleado.id_empleado} className="hover:bg-blue-50/80">
                   <td className={tableCellClass}>{empleado.id_empleado}</td>
 
-                  <td className="border border-white/30 px-4 py-3 text-sm font-extrabold text-slate-950">
+                  <td className="border border-white/30 p-3 text-sm font-extrabold text-blue-950">
                     {empleado.nombres} {empleado.apellidos}
                   </td>
 
                   <td className={tableCellClass}>{empleado.ci}</td>
 
                   <td className={tableCellClass}>
-                    {empleado.telefono ?? "-"}
+                    {cargoMap.get(empleado.id_cargo) ?? "-"}
                   </td>
 
                   <td className={tableCellClass}>
-                    {cargoMap.get(empleado.id_cargo) ?? "-"}
+                    {empleado.telefono ?? "-"}
                   </td>
 
                   <td className={tableCellClass}>
@@ -658,35 +638,39 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
 
                   <td className={tableCellClass}>{empleado.estado}</td>
 
-                  <td className="border border-white/30 px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      {isAdmin && (
+                  <td className={tableCellClass}>
+                    {isAdmin ? (
+                      <div className="flex flex-wrap gap-2">
                         <Link
                           href={`/admin/empleados?editar=${empleado.id_empleado}`}
                           scroll={false}
-                          className="rounded-lg bg-white/75 px-3 py-2 text-xs font-extrabold text-blue-900 shadow transition hover:bg-white"
+                          className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-extrabold text-white shadow transition hover:bg-blue-900"
                         >
                           Editar
                         </Link>
-                      )}
 
-                      {isAdmin && empleado.estado !== "inactivo" && (
-                        <form action={eliminarEmpleado}>
-                          <input
-                            type="hidden"
-                            name="id_empleado"
-                            value={empleado.id_empleado}
-                          />
+                        {empleado.estado !== "inactivo" && (
+                          <form action={eliminarEmpleado}>
+                            <input
+                              type="hidden"
+                              name="id_empleado"
+                              value={empleado.id_empleado}
+                            />
 
-                          <button
-                            type="submit"
-                            className="rounded-lg bg-red-600 px-3 py-2 text-xs font-extrabold text-white shadow transition hover:bg-red-700"
-                          >
-                            Desactivar
-                          </button>
-                        </form>
-                      )}
-                    </div>
+                            <button
+                              type="submit"
+                              className="rounded-lg bg-red-700 px-3 py-2 text-xs font-extrabold text-white shadow transition hover:bg-red-900"
+                            >
+                              Eliminar
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="font-semibold text-slate-500">
+                        Sin acciones
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
