@@ -1,9 +1,15 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
 import { canDo } from "../../../lib/auth/permissions";
+import {
+  getProjectMedia,
+  saveProjectCover,
+  validateProjectImage,
+} from "../../../lib/project-media";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -101,6 +107,13 @@ async function crearProyecto(formData: FormData) {
   const fecha_fin_estimada = getText(formData, "fecha_fin_estimada");
   const estado = getText(formData, "estado") || "pendiente";
   const id_cliente = Number(formData.get("id_cliente"));
+  let coverImage: File | null = null;
+
+  try {
+    coverImage = validateProjectImage(formData.get("imagen_principal"));
+  } catch {
+    redirect("/admin/proyectos?modo=crear&error=imagen");
+  }
 
   if (
     !nombre_proyecto ||
@@ -112,7 +125,7 @@ async function crearProyecto(formData: FormData) {
     redirect("/admin/proyectos?modo=crear&error=datos-obligatorios");
   }
 
-  await prisma.proyecto.create({
+  const createdProject = await prisma.proyecto.create({
     data: {
       nombre_proyecto,
       descripcion: descripcion || null,
@@ -125,6 +138,10 @@ async function crearProyecto(formData: FormData) {
       id_usuario_registro: user.id_usuario ?? null,
     },
   });
+
+  if (coverImage) {
+    await saveProjectCover(createdProject.id_proyecto, coverImage);
+  }
 
   revalidatePath("/admin/proyectos");
   redirect("/admin/proyectos");
@@ -196,10 +213,18 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
         `Cliente ${cliente.id_cliente}`,
     ])
   );
+  const projectMedia = new Map(
+    await Promise.all(
+      proyectos.map(async (proyecto) => [
+        proyecto.id_proyecto,
+        await getProjectMedia(proyecto.id_proyecto),
+      ] as const)
+    )
+  );
 
   return (
     <main
-      className="min-h-screen bg-cover bg-center bg-fixed p-6"
+      className="min-h-screen bg-cover bg-center bg-fixed p-3 sm:p-6"
       style={{
         backgroundImage:
           "linear-gradient(90deg, rgba(15,23,42,0.76) 0%, rgba(15,23,42,0.48) 38%, rgba(255,255,255,0.08) 100%), url('/images/proyectos-fondo.jpg')",
@@ -213,7 +238,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 Módulo Proyectos
               </p>
 
-              <h1 className="text-4xl font-extrabold tracking-tight">
+              <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
                 {isCliente ? "Mis proyectos" : "Proyectos"}
               </h1>
 
@@ -277,6 +302,8 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
           <div className="mt-5 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm font-bold text-red-700 shadow-lg backdrop-blur">
             {params.error === "datos-obligatorios" &&
               "Nombre, cliente, ubicación, fecha de inicio y fecha estimada son obligatorios."}
+            {params.error === "imagen" &&
+              "La imagen debe ser JPG, PNG o WEBP y no superar los 5 MB."}
           </div>
         )}
 
@@ -360,6 +387,21 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 className={`${inputClass} md:col-span-2`}
               />
 
+              <label className="rounded-2xl border border-dashed border-white/70 bg-white/20 p-5 text-white md:col-span-2">
+                <span className="block text-sm font-extrabold">
+                  Imagen inicial del proyecto
+                </span>
+                <span className="mb-3 mt-1 block text-xs font-medium text-blue-100">
+                  Muestra cómo se encuentra la obra al registrarla. JPG, PNG o WEBP, máximo 5 MB.
+                </span>
+                <input
+                  type="file"
+                  name="imagen_principal"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="block w-full rounded-xl bg-white/90 p-3 text-sm font-bold text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-700 file:px-4 file:py-2 file:font-bold file:text-white"
+                />
+              </label>
+
               <div className="md:col-span-2 flex flex-wrap gap-3">
                 <button
                   type="submit"
@@ -408,7 +450,9 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 clienteMap.get(proyecto.id_cliente) ??
                 `Cliente ${proyecto.id_cliente}`;
 
-              const imagenProyecto = getProyectoImagen(proyecto);
+              const imagenProyecto =
+                projectMedia.get(proyecto.id_proyecto)?.coverImage ??
+                getProyectoImagen(proyecto);
 
               return (
                 <article
@@ -416,9 +460,11 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                   className="overflow-hidden rounded-[28px] border border-white/50 bg-white/65 shadow-2xl shadow-slate-950/25 backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:bg-white/75"
                 >
                   <div className="relative h-52 overflow-hidden p-3">
-                    <img
+                    <Image
                       src={imagenProyecto}
                       alt={proyecto.nombre_proyecto}
+                      width={720}
+                      height={420}
                       className="h-full w-full rounded-2xl object-cover shadow-lg"
                     />
 

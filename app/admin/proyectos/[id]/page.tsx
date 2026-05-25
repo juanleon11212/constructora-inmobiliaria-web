@@ -1,10 +1,17 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "../../../../lib/prisma";
 import { requireModule } from "../../../../lib/auth/require-permission";
 import { canDo } from "../../../../lib/auth/permissions";
 import { createAuditLog } from "../../../../lib/audit-log";
+import {
+  addProjectProgress,
+  getProjectMedia,
+  saveProjectCover,
+  validateProjectImage,
+} from "../../../../lib/project-media";
 
 /*
   DETALLE DE PROYECTO
@@ -200,9 +207,11 @@ function GalleryCard({
   return (
     <article className="overflow-hidden rounded-[1.7rem] border border-white/45 bg-white/60 shadow-xl shadow-slate-950/20 backdrop-blur-md">
       <div className="relative h-52 overflow-hidden p-3">
-        <img
+        <Image
           src={src}
           alt={title}
+          width={720}
+          height={420}
           className="h-full w-full rounded-2xl object-cover shadow-lg"
         />
 
@@ -243,6 +252,13 @@ async function actualizarProyecto(formData: FormData) {
   const fecha_inicio_text = getText(formData, "fecha_inicio");
   const fecha_fin_estimada_text = getText(formData, "fecha_fin_estimada");
   const fecha_fin_real_text = getText(formData, "fecha_fin_real");
+  let coverImage: File | null = null;
+
+  try {
+    coverImage = validateProjectImage(formData.get("imagen_principal"));
+  } catch {
+    redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=imagen`);
+  }
 
   if (!nombre_proyecto || !ubicacion || !estado) {
     redirect(`/admin/proyectos/${id_proyecto}?modo=editar&error=datos`);
@@ -301,6 +317,10 @@ async function actualizarProyecto(formData: FormData) {
       data: dataUpdate,
     });
 
+    if (coverImage) {
+      await saveProjectCover(id_proyecto, coverImage);
+    }
+
     await createAuditLog({
       id_usuario: user.id_usuario ?? null,
       usuario: user.nombre_usuario ?? null,
@@ -328,6 +348,55 @@ async function actualizarProyecto(formData: FormData) {
   revalidatePath("/admin/proyectos");
   revalidatePath(`/admin/proyectos/${id_proyecto}`);
 
+  redirect(`/admin/proyectos/${id_proyecto}`);
+}
+
+async function registrarAvance(formData: FormData) {
+  "use server";
+
+  const user = await requireModule("proyectos");
+  const roleName = getRoleName(user);
+  const id_proyecto = Number(formData.get("id_proyecto"));
+
+  if (!canEditProjects(roleName) || !id_proyecto || Number.isNaN(id_proyecto)) {
+    redirect("/admin/proyectos");
+  }
+
+  const date = getText(formData, "fecha_avance");
+  const note = getText(formData, "detalle_avance");
+  const percentage = Number(formData.get("porcentaje"));
+  let image: File | null = null;
+
+  try {
+    image = validateProjectImage(formData.get("imagen_avance"));
+  } catch {
+    redirect(`/admin/proyectos/${id_proyecto}?error=imagen`);
+  }
+
+  if (!date || !note || !image || !Number.isFinite(percentage) || percentage < 0 || percentage > 100) {
+    redirect(`/admin/proyectos/${id_proyecto}?error=avance`);
+  }
+
+  await addProjectProgress(id_proyecto, {
+    date,
+    percentage,
+    note,
+    file: image,
+  });
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "EDITAR",
+    modulo: "Proyectos",
+    sector: "Avance fotográfico",
+    descripcion: `Se registró un avance del ${percentage}% en el proyecto con ID ${id_proyecto}.`,
+    registro_id: id_proyecto,
+  });
+
+  revalidatePath("/admin/proyectos");
+  revalidatePath(`/admin/proyectos/${id_proyecto}`);
   redirect(`/admin/proyectos/${id_proyecto}`);
 }
 
@@ -425,11 +494,14 @@ export default async function ProyectoDetallePage({
     redirect("/admin/proyectos");
   }
 
-  const cliente = await prisma.cliente.findUnique({
-    where: {
-      id_cliente: proyecto.id_cliente,
-    },
-  });
+  const [cliente, media] = await Promise.all([
+    prisma.cliente.findUnique({
+      where: {
+        id_cliente: proyecto.id_cliente,
+      },
+    }),
+    getProjectMedia(proyecto.id_proyecto),
+  ]);
 
   const clienteNombre =
     cliente?.razon_social ||
@@ -437,11 +509,11 @@ export default async function ProyectoDetallePage({
     `Cliente ${proyecto.id_cliente}`;
 
   const modoEditar = query?.modo === "editar" && canEditProject;
-  const imagenPrincipal = getProyectoImagen(proyecto);
+  const imagenPrincipal = media.coverImage ?? getProyectoImagen(proyecto);
 
   return (
     <main
-      className="min-h-screen bg-cover bg-center bg-fixed p-6"
+      className="min-h-screen bg-cover bg-center bg-fixed p-3 sm:p-6"
       style={{
         backgroundImage:
           "linear-gradient(90deg, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.58) 36%, rgba(255,255,255,0.12) 100%), url('/images/proyectos-fondo.jpg')",
@@ -455,7 +527,7 @@ export default async function ProyectoDetallePage({
                 Detalle de proyecto
               </p>
 
-              <h1 className="text-4xl font-extrabold tracking-tight">
+              <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
                 {proyecto.nombre_proyecto}
               </h1>
 
@@ -497,6 +569,12 @@ export default async function ProyectoDetallePage({
 
             {query.error === "solo-ejecucion" &&
               "Solo los proyectos que están en ejecución pueden marcarse como finalizados."}
+
+            {query.error === "imagen" &&
+              "La imagen debe ser JPG, PNG o WEBP y no superar los 5 MB."}
+
+            {query.error === "avance" &&
+              "Completa la fecha, porcentaje, descripción e imagen del avance."}
           </div>
         )}
 
@@ -504,16 +582,18 @@ export default async function ProyectoDetallePage({
           <>
             <section className="mt-6 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
               <article className="overflow-hidden rounded-[28px] border border-white/50 bg-white/55 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
-                <div className="relative h-[440px] overflow-hidden p-4">
-                  <img
+                <div className="relative h-[320px] overflow-hidden p-3 sm:h-[440px] sm:p-4">
+                  <Image
                     src={imagenPrincipal}
                     alt={proyecto.nombre_proyecto}
+                    width={1120}
+                    height={700}
                     className="h-full w-full rounded-[1.5rem] object-cover shadow-xl"
                   />
 
-                  <div className="absolute inset-4 rounded-[1.5rem] bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent" />
+                  <div className="absolute inset-3 rounded-[1.5rem] bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent sm:inset-4" />
 
-                  <div className="absolute bottom-8 left-8 right-8">
+                  <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-8 sm:right-8">
                     <span
                       className={`rounded-full px-4 py-2 text-xs font-extrabold shadow ${getEstadoClass(
                         proyecto.estado
@@ -522,7 +602,7 @@ export default async function ProyectoDetallePage({
                       {getEstadoLabel(proyecto.estado)}
                     </span>
 
-                    <h2 className="mt-4 text-3xl font-black text-white drop-shadow">
+                    <h2 className="mt-4 text-2xl font-black text-white drop-shadow sm:text-3xl">
                       {proyecto.nombre_proyecto}
                     </h2>
 
@@ -604,33 +684,82 @@ export default async function ProyectoDetallePage({
             <section className="mt-6">
               <div className="mb-4 rounded-[28px] border border-white/40 bg-white/25 p-5 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
                 <h2 className="text-2xl font-extrabold text-white drop-shadow">
-                  Galería del proyecto
+                  Avances fotográficos
                 </h2>
 
                 <p className="mt-1 text-sm font-bold text-blue-100">
-                  Imágenes referenciales para presentar mejor el avance y tipo
-                  de obra.
+                  Registra y comparte cómo va evolucionando la obra.
                 </p>
               </div>
 
+              {canEditProject && (
+                <form
+                  action={registrarAvance}
+                  className="mb-6 grid gap-4 rounded-[28px] border border-white/40 bg-white/25 p-5 shadow-xl backdrop-blur-md md:grid-cols-3"
+                >
+                  <input type="hidden" name="id_proyecto" value={proyecto.id_proyecto} />
+                  <div>
+                    <label className="mb-2 block text-sm font-extrabold text-white">
+                      Fecha del avance
+                    </label>
+                    <input type="date" name="fecha_avance" className={inputClass} required />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-extrabold text-white">
+                      Porcentaje completado
+                    </label>
+                    <input
+                      type="number"
+                      name="porcentaje"
+                      min="0"
+                      max="100"
+                      placeholder="Ej. 35"
+                      className={inputClass}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-extrabold text-white">
+                      Fotografía del avance
+                    </label>
+                    <input
+                      type="file"
+                      name="imagen_avance"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="block w-full rounded-xl bg-white/90 p-2 text-xs font-bold text-slate-700 file:mr-2 file:rounded-lg file:border-0 file:bg-blue-700 file:px-3 file:py-2 file:font-bold file:text-white"
+                      required
+                    />
+                  </div>
+                  <textarea
+                    name="detalle_avance"
+                    placeholder="Describe qué trabajos se realizaron en esta etapa..."
+                    rows={3}
+                    className={`${inputClass} md:col-span-3`}
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-lg md:col-span-3 md:justify-self-start"
+                  >
+                    Guardar avance con foto
+                  </button>
+                </form>
+              )}
+
               <div className="grid gap-5 md:grid-cols-3">
                 <GalleryCard
-                  title="Vista principal"
+                  title="Imagen inicial"
                   src={imagenPrincipal}
-                  description="Imagen principal del tipo de proyecto registrado."
+                  description="Estado registrado como portada principal del proyecto."
                 />
-
-                <GalleryCard
-                  title="Fachada referencial"
-                  src="/images/proyecto-edificio.jpg"
-                  description="Representación de fachada y presentación exterior."
-                />
-
-                <GalleryCard
-                  title="Vivienda referencial"
-                  src="/images/proyecto-vivienda.jpg"
-                  description="Referencia visual para proyectos habitacionales."
-                />
+                {media.progress.map((progress) => (
+                  <GalleryCard
+                    key={progress.id}
+                    title={`Avance ${progress.percentage}% · ${progress.date}`}
+                    src={progress.image}
+                    description={progress.note}
+                  />
+                ))}
               </div>
             </section>
           </>
@@ -729,6 +858,21 @@ export default async function ProyectoDetallePage({
                 rows={5}
                 className={`${inputClass} md:col-span-2`}
               />
+
+              <label className="rounded-2xl border border-dashed border-white/70 bg-white/20 p-5 text-white md:col-span-2">
+                <span className="block text-sm font-extrabold">
+                  Cambiar imagen principal
+                </span>
+                <span className="mb-3 mt-1 block text-xs font-medium text-blue-100">
+                  Sube una nueva foto si deseas actualizar la portada del proyecto.
+                </span>
+                <input
+                  type="file"
+                  name="imagen_principal"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="block w-full rounded-xl bg-white/90 p-3 text-sm font-bold text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-700 file:px-4 file:py-2 file:font-bold file:text-white"
+                />
+              </label>
 
               <div className="md:col-span-2 flex flex-wrap gap-3">
                 <button
