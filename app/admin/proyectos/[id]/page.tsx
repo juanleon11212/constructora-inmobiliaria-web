@@ -153,10 +153,21 @@ function getProyectoImagen(proyecto: {
     texto.includes("familiar") ||
     texto.includes("hogar")
   ) {
-    return "/images/proyecto-vivienda.jpg";
+    return "/images/portfolio-vivienda-cover.webp";
   }
 
-  return "/images/proyecto-edificio.jpg";
+  return "/images/portfolio-comercial-cover.webp";
+}
+
+function getProgressPercentage(
+  estado: string | null | undefined,
+  latestPercentage: number | undefined
+) {
+  if (estado === "terminado" || estado === "finalizado") {
+    return 100;
+  }
+
+  return latestPercentage ?? 0;
 }
 
 const inputClass =
@@ -175,9 +186,9 @@ function InfoCard({
   icon: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/40 bg-white/60 p-4 shadow-lg shadow-slate-950/10 backdrop-blur">
+    <div className="rounded-2xl border border-blue-100 bg-slate-50 p-4">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-900 text-lg text-white shadow">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-900 text-[11px] font-extrabold tracking-widest text-white shadow">
           {icon}
         </div>
 
@@ -205,21 +216,21 @@ function GalleryCard({
   description: string;
 }) {
   return (
-    <article className="overflow-hidden rounded-[1.7rem] border border-white/45 bg-white/60 shadow-xl shadow-slate-950/20 backdrop-blur-md">
-      <div className="relative h-52 overflow-hidden p-3">
+    <article className="overflow-hidden rounded-[1.7rem] border border-white/20 bg-white shadow-xl shadow-slate-950/20">
+      <div className="relative h-56 overflow-hidden bg-blue-950">
         <Image
           src={src}
           alt={title}
-          width={720}
-          height={420}
-          className="h-full w-full rounded-2xl object-cover shadow-lg"
+          fill
+          sizes="(min-width: 768px) 32vw, 100vw"
+          className="object-cover"
         />
 
-        <div className="absolute inset-3 rounded-2xl bg-gradient-to-t from-slate-950/45 via-slate-900/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-950/80 via-transparent to-transparent" />
       </div>
 
-      <div className="p-5 pt-2">
-        <h3 className="text-lg font-extrabold text-slate-950">{title}</h3>
+      <div className="p-5">
+        <h3 className="text-lg font-extrabold text-blue-950">{title}</h3>
 
         <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
           {description}
@@ -510,29 +521,35 @@ export default async function ProyectoDetallePage({
 
   const modoEditar = query?.modo === "editar" && canEditProject;
   const imagenPrincipal = media.coverImage ?? getProyectoImagen(proyecto);
+  const latestProgress = media.progress[0];
+  const progressPercentage = getProgressPercentage(
+    proyecto.estado,
+    latestProgress?.percentage
+  );
+  const galleryImages = 1 + media.progress.length;
 
   return (
     <main
       className="min-h-screen bg-cover bg-center bg-fixed p-3 sm:p-6"
       style={{
         backgroundImage:
-          "linear-gradient(90deg, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.58) 36%, rgba(255,255,255,0.12) 100%), url('/images/proyectos-fondo.jpg')",
+          "linear-gradient(110deg, rgba(2,12,32,0.94) 0%, rgba(8,36,79,0.87) 42%, rgba(15,23,42,0.64) 100%), url('/images/portfolio-proyectos-background.webp')",
       }}
     >
       <div className="mx-auto max-w-7xl">
-        <section className="rounded-[28px] border border-white/40 bg-white/25 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
+        <section className="rounded-[2rem] border border-white/20 bg-blue-950/40 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-md sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="text-white drop-shadow">
-              <p className="text-sm font-bold text-blue-100">
-                Detalle de proyecto
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-sky-200">
+                Ficha completa de obra
               </p>
 
-              <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-5xl">
                 {proyecto.nombre_proyecto}
               </h1>
 
-              <p className="mt-1 text-sm font-medium text-blue-100">
-                Cliente: {clienteNombre} · Rol actual: {roleName}
+              <p className="mt-3 text-sm font-medium text-blue-100">
+                Cliente: {clienteNombre} · Perfil: {roleName}
               </p>
             </div>
 
@@ -581,17 +598,18 @@ export default async function ProyectoDetallePage({
         {!modoEditar && (
           <>
             <section className="mt-6 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
-              <article className="overflow-hidden rounded-[28px] border border-white/50 bg-white/55 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
-                <div className="relative h-[320px] overflow-hidden p-3 sm:h-[440px] sm:p-4">
+              <article className="overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 p-3 shadow-2xl shadow-slate-950/30 backdrop-blur-md sm:p-4">
+                <div className="relative h-[360px] overflow-hidden rounded-[1.5rem] bg-blue-950 sm:h-[530px]">
                   <Image
                     src={imagenPrincipal}
                     alt={proyecto.nombre_proyecto}
-                    width={1120}
-                    height={700}
-                    className="h-full w-full rounded-[1.5rem] object-cover shadow-xl"
+                    fill
+                    priority
+                    sizes="(min-width: 1024px) 64vw, 100vw"
+                    className="object-cover"
                   />
 
-                  <div className="absolute inset-3 rounded-[1.5rem] bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent sm:inset-4" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-950 via-blue-950/25 to-transparent" />
 
                   <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-8 sm:right-8">
                     <span
@@ -606,49 +624,84 @@ export default async function ProyectoDetallePage({
                       {proyecto.nombre_proyecto}
                     </h2>
 
-                    <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-blue-50 drop-shadow">
+                    <p className="mt-3 max-w-3xl text-sm font-semibold leading-7 text-blue-50 drop-shadow sm:text-base">
                       {proyecto.descripcion ||
                         "Proyecto de construcción enfocado en seguridad, calidad de materiales y cumplimiento de tiempos de entrega."}
+                    </p>
+
+                    <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-sky-200">
+                      {media.coverImage
+                        ? "Fotografía principal registrada"
+                        : "Portada referencial del proyecto"}
                     </p>
                   </div>
                 </div>
               </article>
 
-              <aside className="rounded-[28px] border border-white/40 bg-white/35 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
-                <h2 className="text-2xl font-extrabold text-white drop-shadow">
-                  Información principal
+              <aside className="rounded-[2rem] border border-white/20 bg-white/95 p-6 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
+                <h2 className="text-2xl font-extrabold text-blue-950">
+                  Datos de la obra
                 </h2>
 
-                <p className="mt-1 text-sm font-bold text-blue-100">
-                  Datos generales del proyecto seleccionado.
+                <p className="mt-1 text-sm font-medium text-slate-600">
+                  Información principal y seguimiento fotográfico.
                 </p>
 
                 <div className="mt-5 grid gap-4">
-                  <InfoCard label="Cliente" value={clienteNombre} icon="👤" />
+                  <InfoCard label="Cliente" value={clienteNombre} icon="CL" />
 
                   <InfoCard
                     label="Ubicación"
                     value={proyecto.ubicacion ?? "-"}
-                    icon="📍"
+                    icon="UB"
                   />
 
                   <InfoCard
                     label="Fecha inicio"
                     value={formatDateText(proyecto.fecha_inicio)}
-                    icon="📅"
+                    icon="IN"
                   />
 
                   <InfoCard
                     label="Fin estimado"
                     value={formatDateText(proyecto.fecha_fin_estimada)}
-                    icon="🗓️"
+                    icon="FE"
                   />
 
                   <InfoCard
                     label="Fin real"
                     value={formatDateText(proyecto.fecha_fin_real)}
-                    icon="✅"
+                    icon="FR"
                   />
+                </div>
+
+                <div className="mt-5 rounded-2xl bg-blue-950 p-5 text-white">
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-200">
+                        Avance registrado
+                      </p>
+                      <p className="mt-2 text-4xl font-extrabold">
+                        {progressPercentage}%
+                      </p>
+                    </div>
+                    <p className="text-right text-xs font-semibold leading-5 text-blue-100">
+                      {galleryImages} imágenes
+                      <br />
+                      disponibles
+                    </p>
+                  </div>
+                  <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/15">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-sky-400 to-emerald-400"
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </div>
+                  <p className="mt-4 text-xs font-medium leading-5 text-blue-100">
+                    {latestProgress
+                      ? `Último avance registrado el ${latestProgress.date}.`
+                      : "Aún no se han agregado avances fotográficos."}
+                  </p>
                 </div>
 
                 {canEditProject && proyecto.estado === "en_ejecucion" && (
@@ -670,26 +723,38 @@ export default async function ProyectoDetallePage({
               </aside>
             </section>
 
-            <section className="mt-6 rounded-[28px] border border-white/40 bg-white/35 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-md">
-              <h2 className="text-2xl font-extrabold text-white drop-shadow">
+            <section className="mt-6 rounded-[2rem] border border-white/20 bg-white/95 p-6 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-blue-700">
+                Alcance
+              </p>
+              <h2 className="mt-2 text-2xl font-extrabold text-blue-950">
                 Descripción del proyecto
               </h2>
 
-              <p className="mt-3 rounded-2xl bg-white/65 p-5 text-sm font-semibold leading-7 text-slate-800 shadow backdrop-blur">
+              <p className="mt-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-5 text-sm font-medium leading-7 text-slate-700">
                 {proyecto.descripcion ||
                   "Este proyecto está enfocado en la construcción de espacios funcionales, seguros y cómodos, cuidando la calidad de materiales, tiempos de ejecución y necesidades del cliente."}
               </p>
             </section>
 
             <section className="mt-6">
-              <div className="mb-4 rounded-[28px] border border-white/40 bg-white/25 p-5 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
-                <h2 className="text-2xl font-extrabold text-white drop-shadow">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3 rounded-[2rem] border border-white/20 bg-white/95 p-6 shadow-2xl shadow-slate-950/25 backdrop-blur-md">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.24em] text-blue-700">
+                    Evidencia visual
+                  </p>
+                  <h2 className="mt-2 text-2xl font-extrabold text-blue-950">
                   Avances fotográficos
-                </h2>
+                  </h2>
 
-                <p className="mt-1 text-sm font-bold text-blue-100">
-                  Registra y comparte cómo va evolucionando la obra.
-                </p>
+                  <p className="mt-2 text-sm font-medium text-slate-600">
+                    Registra y consulta cómo evoluciona la obra.
+                  </p>
+                </div>
+
+                <span className="rounded-full bg-blue-950 px-4 py-2 text-sm font-extrabold text-white">
+                  {galleryImages} imágenes
+                </span>
               </div>
 
               {canEditProject && (

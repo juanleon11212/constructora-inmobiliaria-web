@@ -10,6 +10,11 @@ type Project = {
   status: string;
   detail: string;
   image: string;
+  location: string;
+  progress: number;
+  delivery: string;
+  summary: string;
+  features: string[];
 };
 
 const projects: Project[] = [
@@ -18,35 +23,65 @@ const projects: Project[] = [
     category: "Oficinas",
     status: "En construcción",
     detail: "Oficinas corporativas · 12,450 m²",
-    image: "/images/proyecto-edificio.jpg",
+    image: "/images/portfolio-comercial-cover.webp",
+    location: "Zona Empresarial Norte",
+    progress: 62,
+    delivery: "Diciembre 2026",
+    summary:
+      "Complejo corporativo con espacios flexibles, accesos controlados y áreas comerciales en planta baja.",
+    features: ["12 niveles de oficinas", "Parqueos cubiertos", "Control de avance"],
   },
   {
     name: "Residencial Alborada",
     category: "Vivienda",
     status: "En planificación",
     detail: "Residencias premium · 26 unidades",
-    image: "/images/proyecto-vivienda.jpg",
+    image: "/images/portfolio-vivienda-cover.webp",
+    location: "Zona Norte",
+    progress: 18,
+    delivery: "Junio 2027",
+    summary:
+      "Viviendas familiares contemporáneas con iluminación natural, jardines y planificación eficiente.",
+    features: ["26 viviendas", "Áreas verdes", "Diseño familiar"],
   },
   {
     name: "Centro Empresarial",
     category: "Comercial",
     status: "En construcción",
     detail: "Complejo empresarial · 8,300 m²",
-    image: "/images/proyecto-edificio.jpg",
+    image: "/images/portfolio-comercial-cover.webp",
+    location: "Centro de la ciudad",
+    progress: 47,
+    delivery: "Marzo 2027",
+    summary:
+      "Edificio comercial pensado para oficinas y servicios, con circulación cómoda y fachada moderna.",
+    features: ["Locales comerciales", "Oficinas modulares", "Acceso vehicular"],
   },
   {
     name: "Condominio Vista Azul",
     category: "Vivienda",
     status: "Finalizado",
     detail: "Condominio familiar · 42 viviendas",
-    image: "/images/proyecto-vivienda.jpg",
+    image: "/images/portfolio-vivienda-cover.webp",
+    location: "Distrito Jardín",
+    progress: 100,
+    delivery: "Entregado",
+    summary:
+      "Condominio entregado para familias, con viviendas amplias, calles internas y espacios recreativos.",
+    features: ["42 viviendas", "Obra entregada", "Espacios recreativos"],
   },
   {
     name: "Plaza Comercial del Sol",
     category: "Comercial",
     status: "En construcción",
     detail: "Centro de servicios · 5,100 m²",
-    image: "/images/proyecto-edificio.jpg",
+    image: "/images/portfolio-comercial-cover.webp",
+    location: "Avenida Central",
+    progress: 35,
+    delivery: "Septiembre 2027",
+    summary:
+      "Plaza de servicios con locales abiertos al público, terrazas y circulación peatonal accesible.",
+    features: ["Locales y terrazas", "Acceso universal", "5,100 m²"],
   },
 ];
 
@@ -84,25 +119,26 @@ const demoScenes = [
     year: "2016",
     title: "Los primeros grandes proyectos",
     text: "Sumamos profesionales, tecnología y planificación para entregar obras con calidad comprobable.",
-    image: "/images/proyecto-vivienda.jpg",
+    image: "/images/portfolio-vivienda-cover.webp",
   },
   {
     year: "2021",
     title: "Crecimos junto a nuestros clientes",
     text: "Viviendas y edificios corporativos nos impulsaron a gestionar cada avance con transparencia.",
-    image: "/images/proyecto-edificio.jpg",
+    image: "/images/portfolio-comercial-cover.webp",
   },
   {
     year: "HOY",
     title: "Construyendo el futuro juntos",
     text: "Una plataforma integral conecta proyectos, pagos, materiales y reportes en tiempo real.",
-    image: "/images/proyecto-edificio.jpg",
+    image: "/images/portfolio-proyectos-background.webp",
   },
 ];
 
 export default function LandingPage() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [carouselCycle, setCarouselCycle] = useState(0);
+  const [profileProject, setProfileProject] = useState<Project | null>(null);
   const [demoOpen, setDemoOpen] = useState(false);
   const [demoScene, setDemoScene] = useState(0);
   const [demoPlaying, setDemoPlaying] = useState(true);
@@ -153,7 +189,7 @@ export default function LandingPage() {
     <main className="min-h-screen overflow-hidden bg-[#eef4fc] text-[#09245b]">
       <section className="relative isolate overflow-hidden pb-28 text-white lg:pb-32">
         <Image
-          src="/images/proyecto-edificio.jpg"
+          src="/images/portfolio-proyectos-background.webp"
           alt=""
           fill
           priority
@@ -163,7 +199,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(5,33,89,0.98)_0%,rgba(6,42,101,0.93)_32%,rgba(6,43,105,0.67)_59%,rgba(6,35,86,0.36)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 -z-10 h-44 bg-gradient-to-t from-[#eaf2fc] via-[#eaf2fc]/60 to-transparent" />
 
-        <header className="mx-auto flex max-w-[1480px] items-center justify-between px-4 py-5 sm:px-8 sm:py-7 lg:px-12">
+        <header className="mx-auto flex max-w-[1480px] items-center justify-between gap-5 px-4 py-5 sm:px-8 sm:py-7 lg:px-12">
           <Link href="/" className="flex items-center gap-3 sm:gap-4" aria-label="Constructora Inmobiliaria">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0561ed] text-xl font-extrabold shadow-xl shadow-blue-950/20 sm:h-14 sm:w-14 sm:text-2xl">
               CI
@@ -176,16 +212,42 @@ export default function LandingPage() {
             </span>
           </Link>
 
-          <Link
-            href="/login"
-            aria-label="Iniciar sesión"
-            className="inline-flex items-center gap-2 rounded-full bg-[#063da9] px-4 py-3 text-sm font-bold shadow-xl shadow-blue-950/20 transition hover:bg-[#0759df] sm:gap-3 sm:px-7 sm:py-4"
-          >
-            <UserIcon />
-            <span className="hidden sm:inline">Iniciar sesión</span>
-            <ArrowRightIcon />
-          </Link>
+          <div className="flex items-center gap-3">
+            <nav className="hidden items-center gap-1 rounded-full border border-white/15 bg-white/10 p-1.5 backdrop-blur lg:flex">
+              <a href="#proyectos" className="rounded-full px-5 py-3 text-sm font-bold text-blue-50 transition hover:bg-white/15">
+                Proyectos
+              </a>
+              <a href="#perfil-proyectos" className="rounded-full px-5 py-3 text-sm font-bold text-blue-50 transition hover:bg-white/15">
+                Fichas públicas
+              </a>
+              <a href="#servicios" className="rounded-full px-5 py-3 text-sm font-bold text-blue-50 transition hover:bg-white/15">
+                Servicios
+              </a>
+            </nav>
+
+            <Link
+              href="/login"
+              aria-label="Iniciar sesión"
+              className="inline-flex items-center gap-2 rounded-full bg-[#063da9] px-4 py-3 text-sm font-bold shadow-xl shadow-blue-950/20 transition hover:bg-[#0759df] sm:gap-3 sm:px-7 sm:py-4"
+            >
+              <UserIcon />
+              <span className="hidden sm:inline">Iniciar sesión</span>
+              <ArrowRightIcon />
+            </Link>
+          </div>
         </header>
+
+        <nav className="mx-4 flex gap-2 overflow-x-auto rounded-2xl border border-white/15 bg-white/10 p-2 backdrop-blur sm:mx-8 lg:hidden">
+          <a href="#proyectos" className="whitespace-nowrap rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-blue-50">
+            Proyectos
+          </a>
+          <a href="#perfil-proyectos" className="whitespace-nowrap rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-blue-50">
+            Perfiles públicos
+          </a>
+          <a href="#servicios" className="whitespace-nowrap rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-blue-50">
+            Servicios
+          </a>
+        </nav>
 
         <div className="mx-auto grid max-w-[1480px] items-center gap-8 px-4 pb-8 pt-5 sm:px-8 sm:pt-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12 lg:px-12 lg:pb-12 lg:pt-6">
           <div className="max-w-xl">
@@ -203,10 +265,10 @@ export default function LandingPage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <a
-                href="#proyectos"
+                href="#perfil-proyectos"
                 className="inline-flex items-center gap-4 rounded-xl bg-[#0868f7] px-6 py-4 text-sm font-bold shadow-xl shadow-blue-950/20 transition hover:bg-blue-500"
               >
-                Conoce la plataforma
+                Ver proyectos públicos
                 <ArrowRightIcon />
               </a>
               <button
@@ -215,7 +277,7 @@ export default function LandingPage() {
                 className="inline-flex items-center gap-3 rounded-xl border border-blue-200/60 bg-blue-950/25 px-6 py-4 text-sm font-bold transition hover:bg-white/10"
               >
                 <PlayIcon />
-                Ver demo
+                Conocer la empresa
               </button>
             </div>
           </div>
@@ -249,13 +311,14 @@ export default function LandingPage() {
                   <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{activeProject.name}</h2>
                   <p className="mt-1 text-sm font-medium text-blue-50 sm:text-base">{activeProject.detail}</p>
                 </div>
-                <Link
-                  href="/login"
+                <button
+                  type="button"
+                  onClick={() => setProfileProject(activeProject)}
                   className="inline-flex shrink-0 items-center justify-center gap-4 rounded-xl border border-blue-300/40 bg-blue-950/55 px-6 py-3 text-sm font-bold backdrop-blur transition hover:bg-blue-800"
                 >
-                  Ver proyecto
+                  Ver ficha pública
                   <ArrowRightIcon />
-                </Link>
+                </button>
               </div>
             </article>
 
@@ -293,10 +356,10 @@ export default function LandingPage() {
               <BuildingIcon />
               Proyectos destacados
             </p>
-            <button type="button" onClick={selectNextProject} className="flex items-center gap-2 text-xs font-bold text-blue-700">
-              Ver todos
+            <a href="#perfil-proyectos" className="flex items-center gap-2 text-xs font-bold text-blue-700">
+              Ver fichas públicas
               <ChevronRightIcon />
-            </button>
+            </a>
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2 lg:grid lg:grid-cols-5 lg:overflow-visible">
             {projects.map((project, index) => (
@@ -324,7 +387,80 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_1.06fr]">
+        <section id="perfil-proyectos" className="mt-5 rounded-[2rem] border border-blue-100 bg-white p-6 shadow-xl shadow-blue-100/70 sm:p-8">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-2xl">
+              <p className="text-xs font-extrabold uppercase tracking-[0.26em] text-blue-700">
+                Consulta abierta
+              </p>
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-blue-950">
+                Conoce nuestros proyectos sin iniciar sesión
+              </h2>
+              <p className="mt-3 text-sm font-medium leading-7 text-slate-600 sm:text-base">
+                Revisa ubicación, etapa, avance y características principales.
+                El acceso privado se utiliza únicamente para administrar la obra.
+              </p>
+            </div>
+            <Link
+              href="/registro"
+              className="inline-flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 px-5 py-3 text-sm font-extrabold text-blue-800 transition hover:bg-blue-100"
+            >
+              Crear cuenta de cliente
+              <ArrowRightIcon />
+            </Link>
+          </div>
+
+          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {projects.slice(0, 3).map((project) => (
+              <article
+                key={project.name}
+                className="group overflow-hidden rounded-[1.7rem] border border-blue-100 bg-white shadow-lg shadow-blue-100/70 transition hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="relative h-52 overflow-hidden">
+                  <Image
+                    src={project.image}
+                    alt={project.name}
+                    fill
+                    sizes="(min-width: 1280px) 30vw, (min-width: 768px) 46vw, 100vw"
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-950/85 via-transparent to-transparent" />
+                  <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-extrabold text-blue-800">
+                    {project.status}
+                  </span>
+                  <p className="absolute bottom-4 left-4 text-lg font-extrabold text-white">
+                    {project.name}
+                  </p>
+                </div>
+                <div className="p-5">
+                  <div className="flex justify-between gap-3 text-xs font-bold text-slate-500">
+                    <span>{project.category}</span>
+                    <span>{project.progress}% avance</span>
+                  </div>
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-blue-100">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-blue-600 to-sky-400"
+                      style={{ width: `${project.progress}%` }}
+                    />
+                  </div>
+                  <p className="mt-4 line-clamp-2 text-sm font-medium leading-6 text-slate-600">
+                    {project.summary}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setProfileProject(project)}
+                    className="mt-5 inline-flex w-full items-center justify-center gap-3 rounded-xl bg-blue-700 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-blue-950"
+                  >
+                    Ver perfil del proyecto
+                    <ArrowRightIcon />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <div id="servicios" className="mt-5 grid scroll-mt-6 gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_1.06fr]">
           <MetricCard
             icon={<TrendIcon />}
             title="Obras en ejecución"
@@ -364,10 +500,10 @@ export default function LandingPage() {
                 Todo lo que necesitas para gestionar tus proyectos con eficiencia y transparencia.
               </p>
             </div>
-            <Link href="/login" className="flex items-center gap-3 text-sm font-bold">
-              Explorar servicios
+            <a href="#perfil-proyectos" className="flex items-center gap-3 text-sm font-bold">
+              Explorar proyectos
               <ArrowRightIcon />
-            </Link>
+            </a>
           </aside>
         </div>
 
@@ -386,6 +522,13 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {profileProject && (
+        <PublicProjectProfile
+          project={profileProject}
+          onClose={() => setProfileProject(null)}
+        />
+      )}
+
       {demoOpen && (
         <DemoStory
           scene={demoScene}
@@ -396,6 +539,133 @@ export default function LandingPage() {
         />
       )}
     </main>
+  );
+}
+
+function PublicProjectProfile({
+  project,
+  onClose,
+}: {
+  project: Project;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#03102d]/90 p-3 backdrop-blur-md sm:p-8"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Perfil público de ${project.name}`}
+    >
+      <article className="relative grid w-full max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-2xl lg:grid-cols-[1.02fr_0.98fr]">
+        <div className="relative min-h-[290px] bg-blue-950 lg:min-h-[630px]">
+          <Image
+            src={project.image}
+            alt={project.name}
+            fill
+            sizes="(min-width: 1024px) 500px, 100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-blue-950/95 via-blue-950/10 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
+            <span className="rounded-full bg-sky-500/90 px-4 py-2 text-xs font-extrabold">
+              {project.status}
+            </span>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-tight">
+              {project.name}
+            </h2>
+            <p className="mt-2 text-sm font-semibold text-blue-100">
+              {project.category} · {project.detail}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col p-6 text-blue-950 sm:p-8">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar perfil del proyecto"
+            className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl font-bold text-blue-950 shadow-lg transition hover:bg-blue-50"
+          >
+            ×
+          </button>
+
+          <p className="text-xs font-extrabold uppercase tracking-[0.26em] text-blue-700">
+            Perfil público
+          </p>
+          <h3 className="mt-3 text-2xl font-extrabold">
+            Información del proyecto
+          </h3>
+          <p className="mt-4 text-sm font-medium leading-7 text-slate-600">
+            {project.summary}
+          </p>
+
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <PublicDataCard label="Ubicación" value={project.location} />
+            <PublicDataCard label="Entrega estimada" value={project.delivery} />
+          </div>
+
+          <div className="mt-5 rounded-2xl bg-blue-950 p-5 text-white">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-blue-200">
+                  Avance general
+                </p>
+                <p className="mt-2 text-4xl font-extrabold">{project.progress}%</p>
+              </div>
+              <span className="rounded-full bg-white/15 px-3 py-2 text-xs font-bold">
+                {project.status}
+              </span>
+            </div>
+            <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/20">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-sky-400 to-emerald-400"
+                style={{ width: `${project.progress}%` }}
+              />
+            </div>
+          </div>
+
+          <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.22em] text-blue-700">
+            Características
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {project.features.map((feature) => (
+              <span
+                key={feature}
+                className="rounded-full bg-blue-50 px-3 py-2 text-xs font-bold text-blue-800"
+              >
+                {feature}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-auto flex flex-wrap gap-3 pt-8">
+            <Link
+              href="/registro"
+              className="flex-1 rounded-xl bg-blue-700 px-5 py-3 text-center text-sm font-extrabold text-white transition hover:bg-blue-950"
+            >
+              Registrarme como cliente
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-xl border border-blue-100 bg-blue-50 px-5 py-3 text-center text-sm font-extrabold text-blue-900 transition hover:bg-blue-100"
+            >
+              Iniciar sesión
+            </Link>
+          </div>
+        </div>
+      </article>
+    </div>
+  );
+}
+
+function PublicDataCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-blue-700">
+        {label}
+      </p>
+      <p className="mt-2 text-sm font-extrabold text-blue-950">{value}</p>
+    </div>
   );
 }
 

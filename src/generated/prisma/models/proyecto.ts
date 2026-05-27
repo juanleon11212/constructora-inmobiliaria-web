@@ -266,6 +266,7 @@ export type proyectoWhereInput = {
   id_usuario_registro?: Prisma.IntNullableFilter<"proyecto"> | number | null
   asignacion_obra?: Prisma.Asignacion_obraListRelationFilter
   compra_material?: Prisma.Compra_materialListRelationFilter
+  orden_compra?: Prisma.Orden_compraListRelationFilter
   consumo_material_obra?: Prisma.Consumo_material_obraListRelationFilter
   contrato?: Prisma.ContratoListRelationFilter
   control_diario_trabajo?: Prisma.Control_diario_trabajoListRelationFilter
@@ -289,6 +290,7 @@ export type proyectoOrderByWithRelationInput = {
   id_usuario_registro?: Prisma.SortOrderInput | Prisma.SortOrder
   asignacion_obra?: Prisma.asignacion_obraOrderByRelationAggregateInput
   compra_material?: Prisma.compra_materialOrderByRelationAggregateInput
+  orden_compra?: Prisma.orden_compraOrderByRelationAggregateInput
   consumo_material_obra?: Prisma.consumo_material_obraOrderByRelationAggregateInput
   contrato?: Prisma.contratoOrderByRelationAggregateInput
   control_diario_trabajo?: Prisma.control_diario_trabajoOrderByRelationAggregateInput
@@ -315,6 +317,7 @@ export type proyectoWhereUniqueInput = Prisma.AtLeast<{
   id_usuario_registro?: Prisma.IntNullableFilter<"proyecto"> | number | null
   asignacion_obra?: Prisma.Asignacion_obraListRelationFilter
   compra_material?: Prisma.Compra_materialListRelationFilter
+  orden_compra?: Prisma.Orden_compraListRelationFilter
   consumo_material_obra?: Prisma.Consumo_material_obraListRelationFilter
   contrato?: Prisma.ContratoListRelationFilter
   control_diario_trabajo?: Prisma.Control_diario_trabajoListRelationFilter
@@ -369,6 +372,7 @@ export type proyectoCreateInput = {
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
@@ -392,6 +396,7 @@ export type proyectoUncheckedCreateInput = {
   id_usuario_registro?: number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
@@ -410,6 +415,7 @@ export type proyectoUpdateInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
@@ -433,6 +439,7 @@ export type proyectoUncheckedUpdateInput = {
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
@@ -703,6 +710,20 @@ export type proyectoUpdateOneRequiredWithoutPresupuestoNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.proyectoUpdateToOneWithWhereWithoutPresupuestoInput, Prisma.proyectoUpdateWithoutPresupuestoInput>, Prisma.proyectoUncheckedUpdateWithoutPresupuestoInput>
 }
 
+export type proyectoCreateNestedOneWithoutOrden_compraInput = {
+  create?: Prisma.XOR<Prisma.proyectoCreateWithoutOrden_compraInput, Prisma.proyectoUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.proyectoCreateOrConnectWithoutOrden_compraInput
+  connect?: Prisma.proyectoWhereUniqueInput
+}
+
+export type proyectoUpdateOneRequiredWithoutOrden_compraNestedInput = {
+  create?: Prisma.XOR<Prisma.proyectoCreateWithoutOrden_compraInput, Prisma.proyectoUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.proyectoCreateOrConnectWithoutOrden_compraInput
+  upsert?: Prisma.proyectoUpsertWithoutOrden_compraInput
+  connect?: Prisma.proyectoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.proyectoUpdateToOneWithWhereWithoutOrden_compraInput, Prisma.proyectoUpdateWithoutOrden_compraInput>, Prisma.proyectoUncheckedUpdateWithoutOrden_compraInput>
+}
+
 export type proyectoCreateNestedManyWithoutUsuarioInput = {
   create?: Prisma.XOR<Prisma.proyectoCreateWithoutUsuarioInput, Prisma.proyectoUncheckedCreateWithoutUsuarioInput> | Prisma.proyectoCreateWithoutUsuarioInput[] | Prisma.proyectoUncheckedCreateWithoutUsuarioInput[]
   connectOrCreate?: Prisma.proyectoCreateOrConnectWithoutUsuarioInput | Prisma.proyectoCreateOrConnectWithoutUsuarioInput[]
@@ -754,6 +775,7 @@ export type proyectoCreateWithoutAsignacion_obraInput = {
   fecha_fin_real?: Date | string | null
   estado?: string
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
@@ -776,6 +798,7 @@ export type proyectoUncheckedCreateWithoutAsignacion_obraInput = {
   id_cliente: number
   id_usuario_registro?: number | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
@@ -809,6 +832,7 @@ export type proyectoUpdateWithoutAsignacion_obraInput = {
   fecha_fin_real?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
@@ -831,6 +855,7 @@ export type proyectoUncheckedUpdateWithoutAsignacion_obraInput = {
   id_cliente?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
@@ -849,6 +874,7 @@ export type proyectoCreateWithoutClienteInput = {
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
@@ -870,6 +896,7 @@ export type proyectoUncheckedCreateWithoutClienteInput = {
   id_usuario_registro?: number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
@@ -928,6 +955,7 @@ export type proyectoCreateWithoutCompra_materialInput = {
   fecha_fin_real?: Date | string | null
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
@@ -950,6 +978,7 @@ export type proyectoUncheckedCreateWithoutCompra_materialInput = {
   id_cliente: number
   id_usuario_registro?: number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
@@ -983,6 +1012,7 @@ export type proyectoUpdateWithoutCompra_materialInput = {
   fecha_fin_real?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
@@ -1005,6 +1035,7 @@ export type proyectoUncheckedUpdateWithoutCompra_materialInput = {
   id_cliente?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
@@ -1023,6 +1054,7 @@ export type proyectoCreateWithoutConsumo_material_obraInput = {
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutProyectoInput
@@ -1045,6 +1077,7 @@ export type proyectoUncheckedCreateWithoutConsumo_material_obraInput = {
   id_usuario_registro?: number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutProyectoInput
@@ -1078,6 +1111,7 @@ export type proyectoUpdateWithoutConsumo_material_obraInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutProyectoNestedInput
@@ -1100,6 +1134,7 @@ export type proyectoUncheckedUpdateWithoutConsumo_material_obraInput = {
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutProyectoNestedInput
@@ -1117,6 +1152,7 @@ export type proyectoCreateWithoutContratoInput = {
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutProyectoInput
@@ -1139,6 +1175,7 @@ export type proyectoUncheckedCreateWithoutContratoInput = {
   id_usuario_registro?: number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutProyectoInput
@@ -1172,6 +1209,7 @@ export type proyectoUpdateWithoutContratoInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutProyectoNestedInput
@@ -1194,6 +1232,7 @@ export type proyectoUncheckedUpdateWithoutContratoInput = {
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutProyectoNestedInput
@@ -1211,6 +1250,7 @@ export type proyectoCreateWithoutControl_diario_trabajoInput = {
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutProyectoInput
@@ -1233,6 +1273,7 @@ export type proyectoUncheckedCreateWithoutControl_diario_trabajoInput = {
   id_usuario_registro?: number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutProyectoInput
@@ -1266,6 +1307,7 @@ export type proyectoUpdateWithoutControl_diario_trabajoInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutProyectoNestedInput
@@ -1288,6 +1330,7 @@ export type proyectoUncheckedUpdateWithoutControl_diario_trabajoInput = {
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutProyectoNestedInput
@@ -1305,6 +1348,7 @@ export type proyectoCreateWithoutCotizacion_clienteInput = {
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
@@ -1327,6 +1371,7 @@ export type proyectoUncheckedCreateWithoutCotizacion_clienteInput = {
   id_usuario_registro?: number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
@@ -1360,6 +1405,7 @@ export type proyectoUpdateWithoutCotizacion_clienteInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
@@ -1382,6 +1428,7 @@ export type proyectoUncheckedUpdateWithoutCotizacion_clienteInput = {
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
@@ -1399,6 +1446,7 @@ export type proyectoCreateWithoutPagoInput = {
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
@@ -1421,6 +1469,7 @@ export type proyectoUncheckedCreateWithoutPagoInput = {
   id_usuario_registro?: number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
@@ -1454,6 +1503,7 @@ export type proyectoUpdateWithoutPagoInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
@@ -1476,6 +1526,7 @@ export type proyectoUncheckedUpdateWithoutPagoInput = {
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
@@ -1493,6 +1544,7 @@ export type proyectoCreateWithoutPresupuestoInput = {
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
@@ -1515,6 +1567,7 @@ export type proyectoUncheckedCreateWithoutPresupuestoInput = {
   id_usuario_registro?: number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
@@ -1548,6 +1601,7 @@ export type proyectoUpdateWithoutPresupuestoInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
@@ -1570,11 +1624,110 @@ export type proyectoUncheckedUpdateWithoutPresupuestoInput = {
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutProyectoNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutProyectoNestedInput
+}
+
+export type proyectoCreateWithoutOrden_compraInput = {
+  nombre_proyecto: string
+  descripcion?: string | null
+  ubicacion: string
+  fecha_inicio: Date | string
+  fecha_fin_estimada?: Date | string | null
+  fecha_fin_real?: Date | string | null
+  estado?: string
+  asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
+  compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
+  contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
+  control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutProyectoInput
+  pago?: Prisma.pagoCreateNestedManyWithoutProyectoInput
+  presupuesto?: Prisma.presupuestoCreateNestedManyWithoutProyectoInput
+  cliente: Prisma.clienteCreateNestedOneWithoutProyectoInput
+  usuario?: Prisma.usuarioCreateNestedOneWithoutProyectoInput
+}
+
+export type proyectoUncheckedCreateWithoutOrden_compraInput = {
+  id_proyecto?: number
+  nombre_proyecto: string
+  descripcion?: string | null
+  ubicacion: string
+  fecha_inicio: Date | string
+  fecha_fin_estimada?: Date | string | null
+  fecha_fin_real?: Date | string | null
+  estado?: string
+  id_cliente: number
+  id_usuario_registro?: number | null
+  asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
+  compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
+  contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
+  control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutProyectoInput
+  pago?: Prisma.pagoUncheckedCreateNestedManyWithoutProyectoInput
+  presupuesto?: Prisma.presupuestoUncheckedCreateNestedManyWithoutProyectoInput
+}
+
+export type proyectoCreateOrConnectWithoutOrden_compraInput = {
+  where: Prisma.proyectoWhereUniqueInput
+  create: Prisma.XOR<Prisma.proyectoCreateWithoutOrden_compraInput, Prisma.proyectoUncheckedCreateWithoutOrden_compraInput>
+}
+
+export type proyectoUpsertWithoutOrden_compraInput = {
+  update: Prisma.XOR<Prisma.proyectoUpdateWithoutOrden_compraInput, Prisma.proyectoUncheckedUpdateWithoutOrden_compraInput>
+  create: Prisma.XOR<Prisma.proyectoCreateWithoutOrden_compraInput, Prisma.proyectoUncheckedCreateWithoutOrden_compraInput>
+  where?: Prisma.proyectoWhereInput
+}
+
+export type proyectoUpdateToOneWithWhereWithoutOrden_compraInput = {
+  where?: Prisma.proyectoWhereInput
+  data: Prisma.XOR<Prisma.proyectoUpdateWithoutOrden_compraInput, Prisma.proyectoUncheckedUpdateWithoutOrden_compraInput>
+}
+
+export type proyectoUpdateWithoutOrden_compraInput = {
+  nombre_proyecto?: Prisma.StringFieldUpdateOperationsInput | string
+  descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicacion?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_fin_estimada?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fecha_fin_real?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
+  compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
+  contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
+  control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutProyectoNestedInput
+  pago?: Prisma.pagoUpdateManyWithoutProyectoNestedInput
+  presupuesto?: Prisma.presupuestoUpdateManyWithoutProyectoNestedInput
+  cliente?: Prisma.clienteUpdateOneRequiredWithoutProyectoNestedInput
+  usuario?: Prisma.usuarioUpdateOneWithoutProyectoNestedInput
+}
+
+export type proyectoUncheckedUpdateWithoutOrden_compraInput = {
+  id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
+  nombre_proyecto?: Prisma.StringFieldUpdateOperationsInput | string
+  descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicacion?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_fin_estimada?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fecha_fin_real?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  id_cliente?: Prisma.IntFieldUpdateOperationsInput | number
+  id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
+  compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
+  contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
+  control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutProyectoNestedInput
+  pago?: Prisma.pagoUncheckedUpdateManyWithoutProyectoNestedInput
+  presupuesto?: Prisma.presupuestoUncheckedUpdateManyWithoutProyectoNestedInput
 }
 
 export type proyectoCreateWithoutUsuarioInput = {
@@ -1587,6 +1740,7 @@ export type proyectoCreateWithoutUsuarioInput = {
   estado?: string
   asignacion_obra?: Prisma.asignacion_obraCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoCreateNestedManyWithoutProyectoInput
@@ -1608,6 +1762,7 @@ export type proyectoUncheckedCreateWithoutUsuarioInput = {
   id_cliente: number
   asignacion_obra?: Prisma.asignacion_obraUncheckedCreateNestedManyWithoutProyectoInput
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProyectoInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProyectoInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutProyectoInput
   contrato?: Prisma.contratoUncheckedCreateNestedManyWithoutProyectoInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedCreateNestedManyWithoutProyectoInput
@@ -1662,6 +1817,7 @@ export type proyectoUpdateWithoutClienteInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
@@ -1683,6 +1839,7 @@ export type proyectoUncheckedUpdateWithoutClienteInput = {
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
@@ -1724,6 +1881,7 @@ export type proyectoUpdateWithoutUsuarioInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   asignacion_obra?: Prisma.asignacion_obraUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUpdateManyWithoutProyectoNestedInput
@@ -1745,6 +1903,7 @@ export type proyectoUncheckedUpdateWithoutUsuarioInput = {
   id_cliente?: Prisma.IntFieldUpdateOperationsInput | number
   asignacion_obra?: Prisma.asignacion_obraUncheckedUpdateManyWithoutProyectoNestedInput
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProyectoNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProyectoNestedInput
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutProyectoNestedInput
   contrato?: Prisma.contratoUncheckedUpdateManyWithoutProyectoNestedInput
   control_diario_trabajo?: Prisma.control_diario_trabajoUncheckedUpdateManyWithoutProyectoNestedInput
@@ -1773,6 +1932,7 @@ export type proyectoUncheckedUpdateManyWithoutUsuarioInput = {
 export type ProyectoCountOutputType = {
   asignacion_obra: number
   compra_material: number
+  orden_compra: number
   consumo_material_obra: number
   contrato: number
   control_diario_trabajo: number
@@ -1784,6 +1944,7 @@ export type ProyectoCountOutputType = {
 export type ProyectoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asignacion_obra?: boolean | ProyectoCountOutputTypeCountAsignacion_obraArgs
   compra_material?: boolean | ProyectoCountOutputTypeCountCompra_materialArgs
+  orden_compra?: boolean | ProyectoCountOutputTypeCountOrden_compraArgs
   consumo_material_obra?: boolean | ProyectoCountOutputTypeCountConsumo_material_obraArgs
   contrato?: boolean | ProyectoCountOutputTypeCountContratoArgs
   control_diario_trabajo?: boolean | ProyectoCountOutputTypeCountControl_diario_trabajoArgs
@@ -1814,6 +1975,13 @@ export type ProyectoCountOutputTypeCountAsignacion_obraArgs<ExtArgs extends runt
  */
 export type ProyectoCountOutputTypeCountCompra_materialArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.compra_materialWhereInput
+}
+
+/**
+ * ProyectoCountOutputType without action
+ */
+export type ProyectoCountOutputTypeCountOrden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.orden_compraWhereInput
 }
 
 /**
@@ -1872,6 +2040,7 @@ export type proyectoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id_usuario_registro?: boolean
   asignacion_obra?: boolean | Prisma.proyecto$asignacion_obraArgs<ExtArgs>
   compra_material?: boolean | Prisma.proyecto$compra_materialArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.proyecto$orden_compraArgs<ExtArgs>
   consumo_material_obra?: boolean | Prisma.proyecto$consumo_material_obraArgs<ExtArgs>
   contrato?: boolean | Prisma.proyecto$contratoArgs<ExtArgs>
   control_diario_trabajo?: boolean | Prisma.proyecto$control_diario_trabajoArgs<ExtArgs>
@@ -1902,6 +2071,7 @@ export type proyectoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type proyectoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asignacion_obra?: boolean | Prisma.proyecto$asignacion_obraArgs<ExtArgs>
   compra_material?: boolean | Prisma.proyecto$compra_materialArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.proyecto$orden_compraArgs<ExtArgs>
   consumo_material_obra?: boolean | Prisma.proyecto$consumo_material_obraArgs<ExtArgs>
   contrato?: boolean | Prisma.proyecto$contratoArgs<ExtArgs>
   control_diario_trabajo?: boolean | Prisma.proyecto$control_diario_trabajoArgs<ExtArgs>
@@ -1918,6 +2088,7 @@ export type $proyectoPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     asignacion_obra: Prisma.$asignacion_obraPayload<ExtArgs>[]
     compra_material: Prisma.$compra_materialPayload<ExtArgs>[]
+    orden_compra: Prisma.$orden_compraPayload<ExtArgs>[]
     consumo_material_obra: Prisma.$consumo_material_obraPayload<ExtArgs>[]
     contrato: Prisma.$contratoPayload<ExtArgs>[]
     control_diario_trabajo: Prisma.$control_diario_trabajoPayload<ExtArgs>[]
@@ -2280,6 +2451,7 @@ export interface Prisma__proyectoClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   asignacion_obra<T extends Prisma.proyecto$asignacion_obraArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proyecto$asignacion_obraArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$asignacion_obraPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   compra_material<T extends Prisma.proyecto$compra_materialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proyecto$compra_materialArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$compra_materialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orden_compra<T extends Prisma.proyecto$orden_compraArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proyecto$orden_compraArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$orden_compraPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   consumo_material_obra<T extends Prisma.proyecto$consumo_material_obraArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proyecto$consumo_material_obraArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$consumo_material_obraPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contrato<T extends Prisma.proyecto$contratoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proyecto$contratoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$contratoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   control_diario_trabajo<T extends Prisma.proyecto$control_diario_trabajoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proyecto$control_diario_trabajoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$control_diario_trabajoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2719,6 +2891,30 @@ export type proyecto$compra_materialArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.Compra_materialScalarFieldEnum | Prisma.Compra_materialScalarFieldEnum[]
+}
+
+/**
+ * proyecto.orden_compra
+ */
+export type proyecto$orden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the orden_compra
+   */
+  select?: Prisma.orden_compraSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the orden_compra
+   */
+  omit?: Prisma.orden_compraOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.orden_compraInclude<ExtArgs> | null
+  where?: Prisma.orden_compraWhereInput
+  orderBy?: Prisma.orden_compraOrderByWithRelationInput | Prisma.orden_compraOrderByWithRelationInput[]
+  cursor?: Prisma.orden_compraWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Orden_compraScalarFieldEnum | Prisma.Orden_compraScalarFieldEnum[]
 }
 
 /**

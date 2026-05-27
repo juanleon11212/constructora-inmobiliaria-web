@@ -15,6 +15,7 @@ model almacen {
   descripcion     String?           @db.VarChar(150)
   compra_material compra_material[]
   inventario      inventario[]
+  orden_compra    orden_compra[]
 }
 
 model asignacion_obra {
@@ -75,10 +76,12 @@ model compra_material {
   id_proyecto             Int
   id_almacen              Int
   id_usuario_registro     Int?
+  id_orden                Int?                      @unique(map: "uq_compra_orden")
   almacen                 almacen                   @relation(fields: [id_almacen], references: [id_almacen], onUpdate: NoAction, map: "fk_compra_almacen")
   proveedor               proveedor                 @relation(fields: [id_proveedor], references: [id_proveedor], onUpdate: NoAction, map: "fk_compra_proveedor")
   proyecto                proyecto                  @relation(fields: [id_proyecto], references: [id_proyecto], onUpdate: NoAction, map: "fk_compra_proyecto")
   usuario                 usuario?                  @relation(fields: [id_usuario_registro], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_compra_usuario")
+  orden_compra            orden_compra?             @relation(fields: [id_orden], references: [id_orden], onDelete: NoAction, onUpdate: NoAction, map: "fk_compra_orden")
   detalle_compra_material detalle_compra_material[]
 
   @@index([fecha_compra, id_proyecto], map: "idx_compra_fecha_proyecto")
@@ -163,6 +166,19 @@ model detalle_compra_material {
   @@index([id_material], map: "idx_detalle_compra_material")
 }
 
+model detalle_orden_compra {
+  id_detalle_orden Int          @id(map: "PK_detalle_orden") @default(autoincrement())
+  cantidad         Decimal      @db.Decimal(10, 2)
+  precio_unitario  Decimal      @db.Decimal(10, 2)
+  subtotal         Decimal      @db.Decimal(12, 2)
+  id_orden         Int
+  id_material      Int
+  orden_compra     orden_compra @relation(fields: [id_orden], references: [id_orden], onUpdate: NoAction, map: "fk_detalle_orden")
+  material         material     @relation(fields: [id_material], references: [id_material], onUpdate: NoAction, map: "fk_detalle_orden_material")
+
+  @@index([id_material], map: "idx_detalle_orden_material")
+}
+
 model detalle_cotizacion_cliente {
   id_detalle_cotizacion Int                @id(map: "PK__detalle___F3679436AC8F9C8D") @default(autoincrement())
   id_cotizacion         Int
@@ -227,6 +243,7 @@ model material {
   id_categoria_material   Int
   consumo_material_obra   consumo_material_obra[]
   detalle_compra_material detalle_compra_material[]
+  detalle_orden_compra    detalle_orden_compra[]
   inventario              inventario[]
   categoria_material      categoria_material        @relation(fields: [id_categoria_material], references: [id_categoria_material], onUpdate: NoAction, map: "fk_material_categoria")
 }
@@ -283,6 +300,7 @@ model proveedor {
   correo           String?           @db.VarChar(100)
   direccion        String?           @db.VarChar(200)
   compra_material  compra_material[]
+  orden_compra     orden_compra[]
   pago             pago[]
 }
 
@@ -299,6 +317,7 @@ model proyecto {
   id_usuario_registro    Int?
   asignacion_obra        asignacion_obra[]
   compra_material        compra_material[]
+  orden_compra           orden_compra[]
   consumo_material_obra  consumo_material_obra[]
   contrato               contrato[]
   control_diario_trabajo control_diario_trabajo[]
@@ -317,6 +336,27 @@ model rol {
   rol_modulo  rol_modulo[]
   rol_permiso rol_permiso[]
   usuario     usuario[]
+}
+
+model orden_compra {
+  id_orden            Int                    @id(map: "PK_orden_compra") @default(autoincrement())
+  numero_orden        String                 @unique(map: "uq_orden_numero") @db.VarChar(30)
+  fecha_orden         DateTime               @db.Date
+  total_estimado      Decimal                @default(0, map: "df_orden_total") @db.Decimal(12, 2)
+  estado              String                 @default("solicitada", map: "df_orden_estado") @db.VarChar(30)
+  observacion         String?                @db.VarChar(200)
+  id_proveedor        Int
+  id_proyecto         Int
+  id_almacen          Int
+  id_usuario_registro Int?
+  proveedor           proveedor              @relation(fields: [id_proveedor], references: [id_proveedor], onUpdate: NoAction, map: "fk_orden_proveedor")
+  proyecto            proyecto               @relation(fields: [id_proyecto], references: [id_proyecto], onUpdate: NoAction, map: "fk_orden_proyecto")
+  almacen             almacen                @relation(fields: [id_almacen], references: [id_almacen], onUpdate: NoAction, map: "fk_orden_almacen")
+  usuario             usuario?               @relation(fields: [id_usuario_registro], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_orden_usuario")
+  detalle_orden       detalle_orden_compra[]
+  compra_material     compra_material?
+
+  @@index([fecha_orden, id_proyecto], map: "idx_orden_fecha_proyecto")
 }
 
 model rol_modulo {
@@ -348,14 +388,16 @@ model usuario {
   id_rol             Int
   id_empleado        Int?                 @unique(map: "UQ__usuario__88B51395CFD505A4")
   compra_material    compra_material[]
+  orden_compra       orden_compra[]
   cotizacion_cliente cotizacion_cliente[]
   pago               pago[]
   proyecto           proyecto[]
   empleado           empleado?            @relation(fields: [id_empleado], references: [id_empleado], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_empleado")
   rol                rol                  @relation(fields: [id_rol], references: [id_rol], onUpdate: NoAction, map: "fk_usuario_rol")
 }
+
 model LogAuditoria {
-  id_log       Int      @id @default(autoincrement())
+  id_log      Int      @id @default(autoincrement())
   id_usuario  Int?
   usuario     String?  @db.VarChar(100)
   rol         String?  @db.VarChar(100)

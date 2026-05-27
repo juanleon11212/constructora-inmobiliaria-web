@@ -249,6 +249,7 @@ export type usuarioWhereInput = {
   id_rol?: Prisma.IntFilter<"usuario"> | number
   id_empleado?: Prisma.IntNullableFilter<"usuario"> | number | null
   compra_material?: Prisma.Compra_materialListRelationFilter
+  orden_compra?: Prisma.Orden_compraListRelationFilter
   cotizacion_cliente?: Prisma.Cotizacion_clienteListRelationFilter
   pago?: Prisma.PagoListRelationFilter
   proyecto?: Prisma.ProyectoListRelationFilter
@@ -266,6 +267,7 @@ export type usuarioOrderByWithRelationInput = {
   id_rol?: Prisma.SortOrder
   id_empleado?: Prisma.SortOrderInput | Prisma.SortOrder
   compra_material?: Prisma.compra_materialOrderByRelationAggregateInput
+  orden_compra?: Prisma.orden_compraOrderByRelationAggregateInput
   cotizacion_cliente?: Prisma.cotizacion_clienteOrderByRelationAggregateInput
   pago?: Prisma.pagoOrderByRelationAggregateInput
   proyecto?: Prisma.proyectoOrderByRelationAggregateInput
@@ -286,6 +288,7 @@ export type usuarioWhereUniqueInput = Prisma.AtLeast<{
   fecha_creacion?: Prisma.DateTimeFilter<"usuario"> | Date | string
   id_rol?: Prisma.IntFilter<"usuario"> | number
   compra_material?: Prisma.Compra_materialListRelationFilter
+  orden_compra?: Prisma.Orden_compraListRelationFilter
   cotizacion_cliente?: Prisma.Cotizacion_clienteListRelationFilter
   pago?: Prisma.PagoListRelationFilter
   proyecto?: Prisma.ProyectoListRelationFilter
@@ -330,6 +333,7 @@ export type usuarioCreateInput = {
   estado?: string
   fecha_creacion?: Date | string
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoCreateNestedManyWithoutUsuarioInput
@@ -347,6 +351,7 @@ export type usuarioUncheckedCreateInput = {
   id_rol: number
   id_empleado?: number | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutUsuarioInput
@@ -359,6 +364,7 @@ export type usuarioUpdateInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compra_material?: Prisma.compra_materialUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUpdateManyWithoutUsuarioNestedInput
@@ -376,6 +382,7 @@ export type usuarioUncheckedUpdateInput = {
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   id_empleado?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutUsuarioNestedInput
@@ -608,12 +615,29 @@ export type usuarioUncheckedUpdateManyWithoutRolNestedInput = {
   deleteMany?: Prisma.usuarioScalarWhereInput | Prisma.usuarioScalarWhereInput[]
 }
 
+export type usuarioCreateNestedOneWithoutOrden_compraInput = {
+  create?: Prisma.XOR<Prisma.usuarioCreateWithoutOrden_compraInput, Prisma.usuarioUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.usuarioCreateOrConnectWithoutOrden_compraInput
+  connect?: Prisma.usuarioWhereUniqueInput
+}
+
+export type usuarioUpdateOneWithoutOrden_compraNestedInput = {
+  create?: Prisma.XOR<Prisma.usuarioCreateWithoutOrden_compraInput, Prisma.usuarioUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.usuarioCreateOrConnectWithoutOrden_compraInput
+  upsert?: Prisma.usuarioUpsertWithoutOrden_compraInput
+  disconnect?: Prisma.usuarioWhereInput | boolean
+  delete?: Prisma.usuarioWhereInput | boolean
+  connect?: Prisma.usuarioWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usuarioUpdateToOneWithWhereWithoutOrden_compraInput, Prisma.usuarioUpdateWithoutOrden_compraInput>, Prisma.usuarioUncheckedUpdateWithoutOrden_compraInput>
+}
+
 export type usuarioCreateWithoutCompra_materialInput = {
   nombre_usuario: string
   correo: string
   contrasena: string
   estado?: string
   fecha_creacion?: Date | string
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoCreateNestedManyWithoutUsuarioInput
@@ -630,6 +654,7 @@ export type usuarioUncheckedCreateWithoutCompra_materialInput = {
   fecha_creacion?: Date | string
   id_rol: number
   id_empleado?: number | null
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutUsuarioInput
@@ -657,6 +682,7 @@ export type usuarioUpdateWithoutCompra_materialInput = {
   contrasena?: Prisma.StringFieldUpdateOperationsInput | string
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUpdateManyWithoutUsuarioNestedInput
@@ -673,6 +699,7 @@ export type usuarioUncheckedUpdateWithoutCompra_materialInput = {
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   id_empleado?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutUsuarioNestedInput
@@ -685,6 +712,7 @@ export type usuarioCreateWithoutCotizacion_clienteInput = {
   estado?: string
   fecha_creacion?: Date | string
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoCreateNestedManyWithoutUsuarioInput
   empleado?: Prisma.empleadoCreateNestedOneWithoutUsuarioInput
@@ -701,6 +729,7 @@ export type usuarioUncheckedCreateWithoutCotizacion_clienteInput = {
   id_rol: number
   id_empleado?: number | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutUsuarioInput
 }
@@ -728,6 +757,7 @@ export type usuarioUpdateWithoutCotizacion_clienteInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compra_material?: Prisma.compra_materialUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUpdateManyWithoutUsuarioNestedInput
   empleado?: Prisma.empleadoUpdateOneWithoutUsuarioNestedInput
@@ -744,6 +774,7 @@ export type usuarioUncheckedUpdateWithoutCotizacion_clienteInput = {
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   id_empleado?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutUsuarioNestedInput
 }
@@ -755,6 +786,7 @@ export type usuarioCreateWithoutEmpleadoInput = {
   estado?: string
   fecha_creacion?: Date | string
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoCreateNestedManyWithoutUsuarioInput
@@ -770,6 +802,7 @@ export type usuarioUncheckedCreateWithoutEmpleadoInput = {
   fecha_creacion?: Date | string
   id_rol: number
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutUsuarioInput
@@ -798,6 +831,7 @@ export type usuarioUpdateWithoutEmpleadoInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compra_material?: Prisma.compra_materialUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUpdateManyWithoutUsuarioNestedInput
@@ -813,6 +847,7 @@ export type usuarioUncheckedUpdateWithoutEmpleadoInput = {
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutUsuarioNestedInput
@@ -825,6 +860,7 @@ export type usuarioCreateWithoutPagoInput = {
   estado?: string
   fecha_creacion?: Date | string
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoCreateNestedManyWithoutUsuarioInput
   empleado?: Prisma.empleadoCreateNestedOneWithoutUsuarioInput
@@ -841,6 +877,7 @@ export type usuarioUncheckedCreateWithoutPagoInput = {
   id_rol: number
   id_empleado?: number | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutUsuarioInput
 }
@@ -868,6 +905,7 @@ export type usuarioUpdateWithoutPagoInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compra_material?: Prisma.compra_materialUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUpdateManyWithoutUsuarioNestedInput
   empleado?: Prisma.empleadoUpdateOneWithoutUsuarioNestedInput
@@ -884,6 +922,7 @@ export type usuarioUncheckedUpdateWithoutPagoInput = {
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   id_empleado?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutUsuarioNestedInput
 }
@@ -895,6 +934,7 @@ export type usuarioCreateWithoutProyectoInput = {
   estado?: string
   fecha_creacion?: Date | string
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoCreateNestedManyWithoutUsuarioInput
   empleado?: Prisma.empleadoCreateNestedOneWithoutUsuarioInput
@@ -911,6 +951,7 @@ export type usuarioUncheckedCreateWithoutProyectoInput = {
   id_rol: number
   id_empleado?: number | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutUsuarioInput
 }
@@ -938,6 +979,7 @@ export type usuarioUpdateWithoutProyectoInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compra_material?: Prisma.compra_materialUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUpdateManyWithoutUsuarioNestedInput
   empleado?: Prisma.empleadoUpdateOneWithoutUsuarioNestedInput
@@ -954,6 +996,7 @@ export type usuarioUncheckedUpdateWithoutProyectoInput = {
   id_rol?: Prisma.IntFieldUpdateOperationsInput | number
   id_empleado?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutUsuarioNestedInput
 }
@@ -965,6 +1008,7 @@ export type usuarioCreateWithoutRolInput = {
   estado?: string
   fecha_creacion?: Date | string
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoCreateNestedManyWithoutUsuarioInput
@@ -980,6 +1024,7 @@ export type usuarioUncheckedCreateWithoutRolInput = {
   fecha_creacion?: Date | string
   id_empleado?: number | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutUsuarioInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutUsuarioInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutUsuarioInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutUsuarioInput
   proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutUsuarioInput
@@ -1024,6 +1069,80 @@ export type usuarioScalarWhereInput = {
   id_empleado?: Prisma.IntNullableFilter<"usuario"> | number | null
 }
 
+export type usuarioCreateWithoutOrden_compraInput = {
+  nombre_usuario: string
+  correo: string
+  contrasena: string
+  estado?: string
+  fecha_creacion?: Date | string
+  compra_material?: Prisma.compra_materialCreateNestedManyWithoutUsuarioInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteCreateNestedManyWithoutUsuarioInput
+  pago?: Prisma.pagoCreateNestedManyWithoutUsuarioInput
+  proyecto?: Prisma.proyectoCreateNestedManyWithoutUsuarioInput
+  empleado?: Prisma.empleadoCreateNestedOneWithoutUsuarioInput
+  rol: Prisma.rolCreateNestedOneWithoutUsuarioInput
+}
+
+export type usuarioUncheckedCreateWithoutOrden_compraInput = {
+  id_usuario?: number
+  nombre_usuario: string
+  correo: string
+  contrasena: string
+  estado?: string
+  fecha_creacion?: Date | string
+  id_rol: number
+  id_empleado?: number | null
+  compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutUsuarioInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedCreateNestedManyWithoutUsuarioInput
+  pago?: Prisma.pagoUncheckedCreateNestedManyWithoutUsuarioInput
+  proyecto?: Prisma.proyectoUncheckedCreateNestedManyWithoutUsuarioInput
+}
+
+export type usuarioCreateOrConnectWithoutOrden_compraInput = {
+  where: Prisma.usuarioWhereUniqueInput
+  create: Prisma.XOR<Prisma.usuarioCreateWithoutOrden_compraInput, Prisma.usuarioUncheckedCreateWithoutOrden_compraInput>
+}
+
+export type usuarioUpsertWithoutOrden_compraInput = {
+  update: Prisma.XOR<Prisma.usuarioUpdateWithoutOrden_compraInput, Prisma.usuarioUncheckedUpdateWithoutOrden_compraInput>
+  create: Prisma.XOR<Prisma.usuarioCreateWithoutOrden_compraInput, Prisma.usuarioUncheckedCreateWithoutOrden_compraInput>
+  where?: Prisma.usuarioWhereInput
+}
+
+export type usuarioUpdateToOneWithWhereWithoutOrden_compraInput = {
+  where?: Prisma.usuarioWhereInput
+  data: Prisma.XOR<Prisma.usuarioUpdateWithoutOrden_compraInput, Prisma.usuarioUncheckedUpdateWithoutOrden_compraInput>
+}
+
+export type usuarioUpdateWithoutOrden_compraInput = {
+  nombre_usuario?: Prisma.StringFieldUpdateOperationsInput | string
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  contrasena?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  compra_material?: Prisma.compra_materialUpdateManyWithoutUsuarioNestedInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutUsuarioNestedInput
+  pago?: Prisma.pagoUpdateManyWithoutUsuarioNestedInput
+  proyecto?: Prisma.proyectoUpdateManyWithoutUsuarioNestedInput
+  empleado?: Prisma.empleadoUpdateOneWithoutUsuarioNestedInput
+  rol?: Prisma.rolUpdateOneRequiredWithoutUsuarioNestedInput
+}
+
+export type usuarioUncheckedUpdateWithoutOrden_compraInput = {
+  id_usuario?: Prisma.IntFieldUpdateOperationsInput | number
+  nombre_usuario?: Prisma.StringFieldUpdateOperationsInput | string
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  contrasena?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  id_rol?: Prisma.IntFieldUpdateOperationsInput | number
+  id_empleado?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutUsuarioNestedInput
+  cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutUsuarioNestedInput
+  pago?: Prisma.pagoUncheckedUpdateManyWithoutUsuarioNestedInput
+  proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutUsuarioNestedInput
+}
+
 export type usuarioCreateManyRolInput = {
   nombre_usuario: string
   correo: string
@@ -1040,6 +1159,7 @@ export type usuarioUpdateWithoutRolInput = {
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compra_material?: Prisma.compra_materialUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUpdateManyWithoutUsuarioNestedInput
@@ -1055,6 +1175,7 @@ export type usuarioUncheckedUpdateWithoutRolInput = {
   fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id_empleado?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutUsuarioNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutUsuarioNestedInput
   cotizacion_cliente?: Prisma.cotizacion_clienteUncheckedUpdateManyWithoutUsuarioNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutUsuarioNestedInput
   proyecto?: Prisma.proyectoUncheckedUpdateManyWithoutUsuarioNestedInput
@@ -1077,6 +1198,7 @@ export type usuarioUncheckedUpdateManyWithoutRolInput = {
 
 export type UsuarioCountOutputType = {
   compra_material: number
+  orden_compra: number
   cotizacion_cliente: number
   pago: number
   proyecto: number
@@ -1084,6 +1206,7 @@ export type UsuarioCountOutputType = {
 
 export type UsuarioCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   compra_material?: boolean | UsuarioCountOutputTypeCountCompra_materialArgs
+  orden_compra?: boolean | UsuarioCountOutputTypeCountOrden_compraArgs
   cotizacion_cliente?: boolean | UsuarioCountOutputTypeCountCotizacion_clienteArgs
   pago?: boolean | UsuarioCountOutputTypeCountPagoArgs
   proyecto?: boolean | UsuarioCountOutputTypeCountProyectoArgs
@@ -1104,6 +1227,13 @@ export type UsuarioCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exte
  */
 export type UsuarioCountOutputTypeCountCompra_materialArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.compra_materialWhereInput
+}
+
+/**
+ * UsuarioCountOutputType without action
+ */
+export type UsuarioCountOutputTypeCountOrden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.orden_compraWhereInput
 }
 
 /**
@@ -1138,6 +1268,7 @@ export type usuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   id_rol?: boolean
   id_empleado?: boolean
   compra_material?: boolean | Prisma.usuario$compra_materialArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.usuario$orden_compraArgs<ExtArgs>
   cotizacion_cliente?: boolean | Prisma.usuario$cotizacion_clienteArgs<ExtArgs>
   pago?: boolean | Prisma.usuario$pagoArgs<ExtArgs>
   proyecto?: boolean | Prisma.usuario$proyectoArgs<ExtArgs>
@@ -1162,6 +1293,7 @@ export type usuarioSelectScalar = {
 export type usuarioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_usuario" | "nombre_usuario" | "correo" | "contrasena" | "estado" | "fecha_creacion" | "id_rol" | "id_empleado", ExtArgs["result"]["usuario"]>
 export type usuarioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   compra_material?: boolean | Prisma.usuario$compra_materialArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.usuario$orden_compraArgs<ExtArgs>
   cotizacion_cliente?: boolean | Prisma.usuario$cotizacion_clienteArgs<ExtArgs>
   pago?: boolean | Prisma.usuario$pagoArgs<ExtArgs>
   proyecto?: boolean | Prisma.usuario$proyectoArgs<ExtArgs>
@@ -1174,6 +1306,7 @@ export type $usuarioPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   name: "usuario"
   objects: {
     compra_material: Prisma.$compra_materialPayload<ExtArgs>[]
+    orden_compra: Prisma.$orden_compraPayload<ExtArgs>[]
     cotizacion_cliente: Prisma.$cotizacion_clientePayload<ExtArgs>[]
     pago: Prisma.$pagoPayload<ExtArgs>[]
     proyecto: Prisma.$proyectoPayload<ExtArgs>[]
@@ -1530,6 +1663,7 @@ readonly fields: usuarioFieldRefs;
 export interface Prisma__usuarioClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   compra_material<T extends Prisma.usuario$compra_materialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usuario$compra_materialArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$compra_materialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orden_compra<T extends Prisma.usuario$orden_compraArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usuario$orden_compraArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$orden_compraPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cotizacion_cliente<T extends Prisma.usuario$cotizacion_clienteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usuario$cotizacion_clienteArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$cotizacion_clientePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pago<T extends Prisma.usuario$pagoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usuario$pagoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$pagoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   proyecto<T extends Prisma.usuario$proyectoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usuario$proyectoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$proyectoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1940,6 +2074,30 @@ export type usuario$compra_materialArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.Compra_materialScalarFieldEnum | Prisma.Compra_materialScalarFieldEnum[]
+}
+
+/**
+ * usuario.orden_compra
+ */
+export type usuario$orden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the orden_compra
+   */
+  select?: Prisma.orden_compraSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the orden_compra
+   */
+  omit?: Prisma.orden_compraOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.orden_compraInclude<ExtArgs> | null
+  where?: Prisma.orden_compraWhereInput
+  orderBy?: Prisma.orden_compraOrderByWithRelationInput | Prisma.orden_compraOrderByWithRelationInput[]
+  cursor?: Prisma.orden_compraWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Orden_compraScalarFieldEnum | Prisma.Orden_compraScalarFieldEnum[]
 }
 
 /**

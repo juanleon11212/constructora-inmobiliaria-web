@@ -395,6 +395,7 @@ export const ModelName = {
   control_diario_trabajo: 'control_diario_trabajo',
   cotizacion_cliente: 'cotizacion_cliente',
   detalle_compra_material: 'detalle_compra_material',
+  detalle_orden_compra: 'detalle_orden_compra',
   detalle_cotizacion_cliente: 'detalle_cotizacion_cliente',
   empleado: 'empleado',
   historial_pago_hora: 'historial_pago_hora',
@@ -407,6 +408,7 @@ export const ModelName = {
   proveedor: 'proveedor',
   proyecto: 'proyecto',
   rol: 'rol',
+  orden_compra: 'orden_compra',
   rol_modulo: 'rol_modulo',
   rol_permiso: 'rol_permiso',
   usuario: 'usuario',
@@ -426,7 +428,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "almacen" | "asignacion_obra" | "cargo" | "categoria_material" | "cliente" | "compra_material" | "consumo_material_obra" | "contrato" | "control_diario_trabajo" | "cotizacion_cliente" | "detalle_compra_material" | "detalle_cotizacion_cliente" | "empleado" | "historial_pago_hora" | "inventario" | "material" | "modulo" | "pago" | "permiso" | "presupuesto" | "proveedor" | "proyecto" | "rol" | "rol_modulo" | "rol_permiso" | "usuario" | "logAuditoria"
+    modelProps: "almacen" | "asignacion_obra" | "cargo" | "categoria_material" | "cliente" | "compra_material" | "consumo_material_obra" | "contrato" | "control_diario_trabajo" | "cotizacion_cliente" | "detalle_compra_material" | "detalle_orden_compra" | "detalle_cotizacion_cliente" | "empleado" | "historial_pago_hora" | "inventario" | "material" | "modulo" | "pago" | "permiso" | "presupuesto" | "proveedor" | "proyecto" | "rol" | "orden_compra" | "rol_modulo" | "rol_permiso" | "usuario" | "logAuditoria"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1153,6 +1155,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.detalle_compra_materialCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Detalle_compra_materialCountAggregateOutputType> | number
+        }
+      }
+    }
+    detalle_orden_compra: {
+      payload: Prisma.$detalle_orden_compraPayload<ExtArgs>
+      fields: Prisma.detalle_orden_compraFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.detalle_orden_compraFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$detalle_orden_compraPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.detalle_orden_compraFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$detalle_orden_compraPayload>
+        }
+        findFirst: {
+          args: Prisma.detalle_orden_compraFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$detalle_orden_compraPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.detalle_orden_compraFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$detalle_orden_compraPayload>
+        }
+        findMany: {
+          args: Prisma.detalle_orden_compraFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$detalle_orden_compraPayload>[]
+        }
+        create: {
+          args: Prisma.detalle_orden_compraCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$detalle_orden_compraPayload>
+        }
+        createMany: {
+          args: Prisma.detalle_orden_compraCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.detalle_orden_compraDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$detalle_orden_compraPayload>
+        }
+        update: {
+          args: Prisma.detalle_orden_compraUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$detalle_orden_compraPayload>
+        }
+        deleteMany: {
+          args: Prisma.detalle_orden_compraDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.detalle_orden_compraUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.detalle_orden_compraUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$detalle_orden_compraPayload>
+        }
+        aggregate: {
+          args: Prisma.Detalle_orden_compraAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDetalle_orden_compra>
+        }
+        groupBy: {
+          args: Prisma.detalle_orden_compraGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Detalle_orden_compraGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.detalle_orden_compraCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Detalle_orden_compraCountAggregateOutputType> | number
         }
       }
     }
@@ -1948,6 +2016,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    orden_compra: {
+      payload: Prisma.$orden_compraPayload<ExtArgs>
+      fields: Prisma.orden_compraFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.orden_compraFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$orden_compraPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.orden_compraFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$orden_compraPayload>
+        }
+        findFirst: {
+          args: Prisma.orden_compraFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$orden_compraPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.orden_compraFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$orden_compraPayload>
+        }
+        findMany: {
+          args: Prisma.orden_compraFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$orden_compraPayload>[]
+        }
+        create: {
+          args: Prisma.orden_compraCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$orden_compraPayload>
+        }
+        createMany: {
+          args: Prisma.orden_compraCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.orden_compraDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$orden_compraPayload>
+        }
+        update: {
+          args: Prisma.orden_compraUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$orden_compraPayload>
+        }
+        deleteMany: {
+          args: Prisma.orden_compraDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.orden_compraUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.orden_compraUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$orden_compraPayload>
+        }
+        aggregate: {
+          args: Prisma.Orden_compraAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrden_compra>
+        }
+        groupBy: {
+          args: Prisma.orden_compraGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Orden_compraGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.orden_compraCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Orden_compraCountAggregateOutputType> | number
+        }
+      }
+    }
     rol_modulo: {
       payload: Prisma.$rol_moduloPayload<ExtArgs>
       fields: Prisma.rol_moduloFieldRefs
@@ -2320,7 +2454,8 @@ export const Compra_materialScalarFieldEnum = {
   id_proveedor: 'id_proveedor',
   id_proyecto: 'id_proyecto',
   id_almacen: 'id_almacen',
-  id_usuario_registro: 'id_usuario_registro'
+  id_usuario_registro: 'id_usuario_registro',
+  id_orden: 'id_orden'
 } as const
 
 export type Compra_materialScalarFieldEnum = (typeof Compra_materialScalarFieldEnum)[keyof typeof Compra_materialScalarFieldEnum]
@@ -2401,6 +2536,18 @@ export const Detalle_compra_materialScalarFieldEnum = {
 } as const
 
 export type Detalle_compra_materialScalarFieldEnum = (typeof Detalle_compra_materialScalarFieldEnum)[keyof typeof Detalle_compra_materialScalarFieldEnum]
+
+
+export const Detalle_orden_compraScalarFieldEnum = {
+  id_detalle_orden: 'id_detalle_orden',
+  cantidad: 'cantidad',
+  precio_unitario: 'precio_unitario',
+  subtotal: 'subtotal',
+  id_orden: 'id_orden',
+  id_material: 'id_material'
+} as const
+
+export type Detalle_orden_compraScalarFieldEnum = (typeof Detalle_orden_compraScalarFieldEnum)[keyof typeof Detalle_orden_compraScalarFieldEnum]
 
 
 export const Detalle_cotizacion_clienteScalarFieldEnum = {
@@ -2551,6 +2698,22 @@ export const RolScalarFieldEnum = {
 } as const
 
 export type RolScalarFieldEnum = (typeof RolScalarFieldEnum)[keyof typeof RolScalarFieldEnum]
+
+
+export const Orden_compraScalarFieldEnum = {
+  id_orden: 'id_orden',
+  numero_orden: 'numero_orden',
+  fecha_orden: 'fecha_orden',
+  total_estimado: 'total_estimado',
+  estado: 'estado',
+  observacion: 'observacion',
+  id_proveedor: 'id_proveedor',
+  id_proyecto: 'id_proyecto',
+  id_almacen: 'id_almacen',
+  id_usuario_registro: 'id_usuario_registro'
+} as const
+
+export type Orden_compraScalarFieldEnum = (typeof Orden_compraScalarFieldEnum)[keyof typeof Orden_compraScalarFieldEnum]
 
 
 export const Rol_moduloScalarFieldEnum = {
@@ -2777,6 +2940,7 @@ export type GlobalOmitConfig = {
   control_diario_trabajo?: Prisma.control_diario_trabajoOmit
   cotizacion_cliente?: Prisma.cotizacion_clienteOmit
   detalle_compra_material?: Prisma.detalle_compra_materialOmit
+  detalle_orden_compra?: Prisma.detalle_orden_compraOmit
   detalle_cotizacion_cliente?: Prisma.detalle_cotizacion_clienteOmit
   empleado?: Prisma.empleadoOmit
   historial_pago_hora?: Prisma.historial_pago_horaOmit
@@ -2789,6 +2953,7 @@ export type GlobalOmitConfig = {
   proveedor?: Prisma.proveedorOmit
   proyecto?: Prisma.proyectoOmit
   rol?: Prisma.rolOmit
+  orden_compra?: Prisma.orden_compraOmit
   rol_modulo?: Prisma.rol_moduloOmit
   rol_permiso?: Prisma.rol_permisoOmit
   usuario?: Prisma.usuarioOmit

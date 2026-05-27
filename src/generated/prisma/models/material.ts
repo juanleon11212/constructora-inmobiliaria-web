@@ -246,6 +246,7 @@ export type materialWhereInput = {
   id_categoria_material?: Prisma.IntFilter<"material"> | number
   consumo_material_obra?: Prisma.Consumo_material_obraListRelationFilter
   detalle_compra_material?: Prisma.Detalle_compra_materialListRelationFilter
+  detalle_orden_compra?: Prisma.Detalle_orden_compraListRelationFilter
   inventario?: Prisma.InventarioListRelationFilter
   categoria_material?: Prisma.XOR<Prisma.Categoria_materialScalarRelationFilter, Prisma.categoria_materialWhereInput>
 }
@@ -260,6 +261,7 @@ export type materialOrderByWithRelationInput = {
   id_categoria_material?: Prisma.SortOrder
   consumo_material_obra?: Prisma.consumo_material_obraOrderByRelationAggregateInput
   detalle_compra_material?: Prisma.detalle_compra_materialOrderByRelationAggregateInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraOrderByRelationAggregateInput
   inventario?: Prisma.inventarioOrderByRelationAggregateInput
   categoria_material?: Prisma.categoria_materialOrderByWithRelationInput
 }
@@ -277,6 +279,7 @@ export type materialWhereUniqueInput = Prisma.AtLeast<{
   id_categoria_material?: Prisma.IntFilter<"material"> | number
   consumo_material_obra?: Prisma.Consumo_material_obraListRelationFilter
   detalle_compra_material?: Prisma.Detalle_compra_materialListRelationFilter
+  detalle_orden_compra?: Prisma.Detalle_orden_compraListRelationFilter
   inventario?: Prisma.InventarioListRelationFilter
   categoria_material?: Prisma.XOR<Prisma.Categoria_materialScalarRelationFilter, Prisma.categoria_materialWhereInput>
 }, "id_material">
@@ -317,6 +320,7 @@ export type materialCreateInput = {
   stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutMaterialInput
   detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraCreateNestedManyWithoutMaterialInput
   inventario?: Prisma.inventarioCreateNestedManyWithoutMaterialInput
   categoria_material: Prisma.categoria_materialCreateNestedOneWithoutMaterialInput
 }
@@ -331,6 +335,7 @@ export type materialUncheckedCreateInput = {
   id_categoria_material: number
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutMaterialInput
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedCreateNestedManyWithoutMaterialInput
   inventario?: Prisma.inventarioUncheckedCreateNestedManyWithoutMaterialInput
 }
 
@@ -342,6 +347,7 @@ export type materialUpdateInput = {
   stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutMaterialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUpdateManyWithoutMaterialNestedInput
   inventario?: Prisma.inventarioUpdateManyWithoutMaterialNestedInput
   categoria_material?: Prisma.categoria_materialUpdateOneRequiredWithoutMaterialNestedInput
 }
@@ -356,6 +362,7 @@ export type materialUncheckedUpdateInput = {
   id_categoria_material?: Prisma.IntFieldUpdateOperationsInput | number
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutMaterialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedUpdateManyWithoutMaterialNestedInput
   inventario?: Prisma.inventarioUncheckedUpdateManyWithoutMaterialNestedInput
 }
 
@@ -515,6 +522,20 @@ export type materialUpdateOneRequiredWithoutDetalle_compra_materialNestedInput =
   update?: Prisma.XOR<Prisma.XOR<Prisma.materialUpdateToOneWithWhereWithoutDetalle_compra_materialInput, Prisma.materialUpdateWithoutDetalle_compra_materialInput>, Prisma.materialUncheckedUpdateWithoutDetalle_compra_materialInput>
 }
 
+export type materialCreateNestedOneWithoutDetalle_orden_compraInput = {
+  create?: Prisma.XOR<Prisma.materialCreateWithoutDetalle_orden_compraInput, Prisma.materialUncheckedCreateWithoutDetalle_orden_compraInput>
+  connectOrCreate?: Prisma.materialCreateOrConnectWithoutDetalle_orden_compraInput
+  connect?: Prisma.materialWhereUniqueInput
+}
+
+export type materialUpdateOneRequiredWithoutDetalle_orden_compraNestedInput = {
+  create?: Prisma.XOR<Prisma.materialCreateWithoutDetalle_orden_compraInput, Prisma.materialUncheckedCreateWithoutDetalle_orden_compraInput>
+  connectOrCreate?: Prisma.materialCreateOrConnectWithoutDetalle_orden_compraInput
+  upsert?: Prisma.materialUpsertWithoutDetalle_orden_compraInput
+  connect?: Prisma.materialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.materialUpdateToOneWithWhereWithoutDetalle_orden_compraInput, Prisma.materialUpdateWithoutDetalle_orden_compraInput>, Prisma.materialUncheckedUpdateWithoutDetalle_orden_compraInput>
+}
+
 export type materialCreateNestedOneWithoutInventarioInput = {
   create?: Prisma.XOR<Prisma.materialCreateWithoutInventarioInput, Prisma.materialUncheckedCreateWithoutInventarioInput>
   connectOrCreate?: Prisma.materialCreateOrConnectWithoutInventarioInput
@@ -537,6 +558,7 @@ export type materialCreateWithoutCategoria_materialInput = {
   stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutMaterialInput
   detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraCreateNestedManyWithoutMaterialInput
   inventario?: Prisma.inventarioCreateNestedManyWithoutMaterialInput
 }
 
@@ -549,6 +571,7 @@ export type materialUncheckedCreateWithoutCategoria_materialInput = {
   stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutMaterialInput
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedCreateNestedManyWithoutMaterialInput
   inventario?: Prisma.inventarioUncheckedCreateNestedManyWithoutMaterialInput
 }
 
@@ -597,6 +620,7 @@ export type materialCreateWithoutConsumo_material_obraInput = {
   precio_unitario: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
   detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraCreateNestedManyWithoutMaterialInput
   inventario?: Prisma.inventarioCreateNestedManyWithoutMaterialInput
   categoria_material: Prisma.categoria_materialCreateNestedOneWithoutMaterialInput
 }
@@ -610,6 +634,7 @@ export type materialUncheckedCreateWithoutConsumo_material_obraInput = {
   stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
   id_categoria_material: number
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedCreateNestedManyWithoutMaterialInput
   inventario?: Prisma.inventarioUncheckedCreateNestedManyWithoutMaterialInput
 }
 
@@ -636,6 +661,7 @@ export type materialUpdateWithoutConsumo_material_obraInput = {
   precio_unitario?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUpdateManyWithoutMaterialNestedInput
   inventario?: Prisma.inventarioUpdateManyWithoutMaterialNestedInput
   categoria_material?: Prisma.categoria_materialUpdateOneRequiredWithoutMaterialNestedInput
 }
@@ -649,6 +675,7 @@ export type materialUncheckedUpdateWithoutConsumo_material_obraInput = {
   stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   id_categoria_material?: Prisma.IntFieldUpdateOperationsInput | number
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedUpdateManyWithoutMaterialNestedInput
   inventario?: Prisma.inventarioUncheckedUpdateManyWithoutMaterialNestedInput
 }
 
@@ -659,6 +686,7 @@ export type materialCreateWithoutDetalle_compra_materialInput = {
   precio_unitario: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraCreateNestedManyWithoutMaterialInput
   inventario?: Prisma.inventarioCreateNestedManyWithoutMaterialInput
   categoria_material: Prisma.categoria_materialCreateNestedOneWithoutMaterialInput
 }
@@ -672,6 +700,7 @@ export type materialUncheckedCreateWithoutDetalle_compra_materialInput = {
   stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
   id_categoria_material: number
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedCreateNestedManyWithoutMaterialInput
   inventario?: Prisma.inventarioUncheckedCreateNestedManyWithoutMaterialInput
 }
 
@@ -698,6 +727,7 @@ export type materialUpdateWithoutDetalle_compra_materialInput = {
   precio_unitario?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUpdateManyWithoutMaterialNestedInput
   inventario?: Prisma.inventarioUpdateManyWithoutMaterialNestedInput
   categoria_material?: Prisma.categoria_materialUpdateOneRequiredWithoutMaterialNestedInput
 }
@@ -711,6 +741,73 @@ export type materialUncheckedUpdateWithoutDetalle_compra_materialInput = {
   stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   id_categoria_material?: Prisma.IntFieldUpdateOperationsInput | number
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedUpdateManyWithoutMaterialNestedInput
+  inventario?: Prisma.inventarioUncheckedUpdateManyWithoutMaterialNestedInput
+}
+
+export type materialCreateWithoutDetalle_orden_compraInput = {
+  nombre_material: string
+  descripcion?: string | null
+  unidad_medida: string
+  precio_unitario: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutMaterialInput
+  detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutMaterialInput
+  inventario?: Prisma.inventarioCreateNestedManyWithoutMaterialInput
+  categoria_material: Prisma.categoria_materialCreateNestedOneWithoutMaterialInput
+}
+
+export type materialUncheckedCreateWithoutDetalle_orden_compraInput = {
+  id_material?: number
+  nombre_material: string
+  descripcion?: string | null
+  unidad_medida: string
+  precio_unitario: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  id_categoria_material: number
+  consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutMaterialInput
+  detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutMaterialInput
+  inventario?: Prisma.inventarioUncheckedCreateNestedManyWithoutMaterialInput
+}
+
+export type materialCreateOrConnectWithoutDetalle_orden_compraInput = {
+  where: Prisma.materialWhereUniqueInput
+  create: Prisma.XOR<Prisma.materialCreateWithoutDetalle_orden_compraInput, Prisma.materialUncheckedCreateWithoutDetalle_orden_compraInput>
+}
+
+export type materialUpsertWithoutDetalle_orden_compraInput = {
+  update: Prisma.XOR<Prisma.materialUpdateWithoutDetalle_orden_compraInput, Prisma.materialUncheckedUpdateWithoutDetalle_orden_compraInput>
+  create: Prisma.XOR<Prisma.materialCreateWithoutDetalle_orden_compraInput, Prisma.materialUncheckedCreateWithoutDetalle_orden_compraInput>
+  where?: Prisma.materialWhereInput
+}
+
+export type materialUpdateToOneWithWhereWithoutDetalle_orden_compraInput = {
+  where?: Prisma.materialWhereInput
+  data: Prisma.XOR<Prisma.materialUpdateWithoutDetalle_orden_compraInput, Prisma.materialUncheckedUpdateWithoutDetalle_orden_compraInput>
+}
+
+export type materialUpdateWithoutDetalle_orden_compraInput = {
+  nombre_material?: Prisma.StringFieldUpdateOperationsInput | string
+  descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unidad_medida?: Prisma.StringFieldUpdateOperationsInput | string
+  precio_unitario?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutMaterialNestedInput
+  detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutMaterialNestedInput
+  inventario?: Prisma.inventarioUpdateManyWithoutMaterialNestedInput
+  categoria_material?: Prisma.categoria_materialUpdateOneRequiredWithoutMaterialNestedInput
+}
+
+export type materialUncheckedUpdateWithoutDetalle_orden_compraInput = {
+  id_material?: Prisma.IntFieldUpdateOperationsInput | number
+  nombre_material?: Prisma.StringFieldUpdateOperationsInput | string
+  descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unidad_medida?: Prisma.StringFieldUpdateOperationsInput | string
+  precio_unitario?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  id_categoria_material?: Prisma.IntFieldUpdateOperationsInput | number
+  consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutMaterialNestedInput
+  detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutMaterialNestedInput
   inventario?: Prisma.inventarioUncheckedUpdateManyWithoutMaterialNestedInput
 }
 
@@ -722,6 +819,7 @@ export type materialCreateWithoutInventarioInput = {
   stock_minimo?: runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraCreateNestedManyWithoutMaterialInput
   detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraCreateNestedManyWithoutMaterialInput
   categoria_material: Prisma.categoria_materialCreateNestedOneWithoutMaterialInput
 }
 
@@ -735,6 +833,7 @@ export type materialUncheckedCreateWithoutInventarioInput = {
   id_categoria_material: number
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedCreateNestedManyWithoutMaterialInput
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutMaterialInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedCreateNestedManyWithoutMaterialInput
 }
 
 export type materialCreateOrConnectWithoutInventarioInput = {
@@ -761,6 +860,7 @@ export type materialUpdateWithoutInventarioInput = {
   stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutMaterialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUpdateManyWithoutMaterialNestedInput
   categoria_material?: Prisma.categoria_materialUpdateOneRequiredWithoutMaterialNestedInput
 }
 
@@ -774,6 +874,7 @@ export type materialUncheckedUpdateWithoutInventarioInput = {
   id_categoria_material?: Prisma.IntFieldUpdateOperationsInput | number
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutMaterialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedUpdateManyWithoutMaterialNestedInput
 }
 
 export type materialCreateManyCategoria_materialInput = {
@@ -792,6 +893,7 @@ export type materialUpdateWithoutCategoria_materialInput = {
   stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraUpdateManyWithoutMaterialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUpdateManyWithoutMaterialNestedInput
   inventario?: Prisma.inventarioUpdateManyWithoutMaterialNestedInput
 }
 
@@ -804,6 +906,7 @@ export type materialUncheckedUpdateWithoutCategoria_materialInput = {
   stock_minimo?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   consumo_material_obra?: Prisma.consumo_material_obraUncheckedUpdateManyWithoutMaterialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutMaterialNestedInput
+  detalle_orden_compra?: Prisma.detalle_orden_compraUncheckedUpdateManyWithoutMaterialNestedInput
   inventario?: Prisma.inventarioUncheckedUpdateManyWithoutMaterialNestedInput
 }
 
@@ -824,12 +927,14 @@ export type materialUncheckedUpdateManyWithoutCategoria_materialInput = {
 export type MaterialCountOutputType = {
   consumo_material_obra: number
   detalle_compra_material: number
+  detalle_orden_compra: number
   inventario: number
 }
 
 export type MaterialCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   consumo_material_obra?: boolean | MaterialCountOutputTypeCountConsumo_material_obraArgs
   detalle_compra_material?: boolean | MaterialCountOutputTypeCountDetalle_compra_materialArgs
+  detalle_orden_compra?: boolean | MaterialCountOutputTypeCountDetalle_orden_compraArgs
   inventario?: boolean | MaterialCountOutputTypeCountInventarioArgs
 }
 
@@ -860,6 +965,13 @@ export type MaterialCountOutputTypeCountDetalle_compra_materialArgs<ExtArgs exte
 /**
  * MaterialCountOutputType without action
  */
+export type MaterialCountOutputTypeCountDetalle_orden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.detalle_orden_compraWhereInput
+}
+
+/**
+ * MaterialCountOutputType without action
+ */
 export type MaterialCountOutputTypeCountInventarioArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.inventarioWhereInput
 }
@@ -875,6 +987,7 @@ export type materialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id_categoria_material?: boolean
   consumo_material_obra?: boolean | Prisma.material$consumo_material_obraArgs<ExtArgs>
   detalle_compra_material?: boolean | Prisma.material$detalle_compra_materialArgs<ExtArgs>
+  detalle_orden_compra?: boolean | Prisma.material$detalle_orden_compraArgs<ExtArgs>
   inventario?: boolean | Prisma.material$inventarioArgs<ExtArgs>
   categoria_material?: boolean | Prisma.categoria_materialDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.MaterialCountOutputTypeDefaultArgs<ExtArgs>
@@ -896,6 +1009,7 @@ export type materialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type materialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   consumo_material_obra?: boolean | Prisma.material$consumo_material_obraArgs<ExtArgs>
   detalle_compra_material?: boolean | Prisma.material$detalle_compra_materialArgs<ExtArgs>
+  detalle_orden_compra?: boolean | Prisma.material$detalle_orden_compraArgs<ExtArgs>
   inventario?: boolean | Prisma.material$inventarioArgs<ExtArgs>
   categoria_material?: boolean | Prisma.categoria_materialDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.MaterialCountOutputTypeDefaultArgs<ExtArgs>
@@ -906,6 +1020,7 @@ export type $materialPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     consumo_material_obra: Prisma.$consumo_material_obraPayload<ExtArgs>[]
     detalle_compra_material: Prisma.$detalle_compra_materialPayload<ExtArgs>[]
+    detalle_orden_compra: Prisma.$detalle_orden_compraPayload<ExtArgs>[]
     inventario: Prisma.$inventarioPayload<ExtArgs>[]
     categoria_material: Prisma.$categoria_materialPayload<ExtArgs>
   }
@@ -1259,6 +1374,7 @@ export interface Prisma__materialClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   consumo_material_obra<T extends Prisma.material$consumo_material_obraArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.material$consumo_material_obraArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$consumo_material_obraPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   detalle_compra_material<T extends Prisma.material$detalle_compra_materialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.material$detalle_compra_materialArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$detalle_compra_materialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  detalle_orden_compra<T extends Prisma.material$detalle_orden_compraArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.material$detalle_orden_compraArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$detalle_orden_compraPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inventario<T extends Prisma.material$inventarioArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.material$inventarioArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$inventarioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categoria_material<T extends Prisma.categoria_materialDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.categoria_materialDefaultArgs<ExtArgs>>): Prisma.Prisma__categoria_materialClient<runtime.Types.Result.GetResult<Prisma.$categoria_materialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1689,6 +1805,30 @@ export type material$detalle_compra_materialArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.Detalle_compra_materialScalarFieldEnum | Prisma.Detalle_compra_materialScalarFieldEnum[]
+}
+
+/**
+ * material.detalle_orden_compra
+ */
+export type material$detalle_orden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the detalle_orden_compra
+   */
+  select?: Prisma.detalle_orden_compraSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the detalle_orden_compra
+   */
+  omit?: Prisma.detalle_orden_compraOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.detalle_orden_compraInclude<ExtArgs> | null
+  where?: Prisma.detalle_orden_compraWhereInput
+  orderBy?: Prisma.detalle_orden_compraOrderByWithRelationInput | Prisma.detalle_orden_compraOrderByWithRelationInput[]
+  cursor?: Prisma.detalle_orden_compraWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Detalle_orden_compraScalarFieldEnum | Prisma.Detalle_orden_compraScalarFieldEnum[]
 }
 
 /**

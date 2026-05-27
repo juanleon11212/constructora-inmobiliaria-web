@@ -33,6 +33,7 @@ export type Compra_materialAvgAggregateOutputType = {
   id_proyecto: number | null
   id_almacen: number | null
   id_usuario_registro: number | null
+  id_orden: number | null
 }
 
 export type Compra_materialSumAggregateOutputType = {
@@ -42,6 +43,7 @@ export type Compra_materialSumAggregateOutputType = {
   id_proyecto: number | null
   id_almacen: number | null
   id_usuario_registro: number | null
+  id_orden: number | null
 }
 
 export type Compra_materialMinAggregateOutputType = {
@@ -55,6 +57,7 @@ export type Compra_materialMinAggregateOutputType = {
   id_proyecto: number | null
   id_almacen: number | null
   id_usuario_registro: number | null
+  id_orden: number | null
 }
 
 export type Compra_materialMaxAggregateOutputType = {
@@ -68,6 +71,7 @@ export type Compra_materialMaxAggregateOutputType = {
   id_proyecto: number | null
   id_almacen: number | null
   id_usuario_registro: number | null
+  id_orden: number | null
 }
 
 export type Compra_materialCountAggregateOutputType = {
@@ -81,6 +85,7 @@ export type Compra_materialCountAggregateOutputType = {
   id_proyecto: number
   id_almacen: number
   id_usuario_registro: number
+  id_orden: number
   _all: number
 }
 
@@ -92,6 +97,7 @@ export type Compra_materialAvgAggregateInputType = {
   id_proyecto?: true
   id_almacen?: true
   id_usuario_registro?: true
+  id_orden?: true
 }
 
 export type Compra_materialSumAggregateInputType = {
@@ -101,6 +107,7 @@ export type Compra_materialSumAggregateInputType = {
   id_proyecto?: true
   id_almacen?: true
   id_usuario_registro?: true
+  id_orden?: true
 }
 
 export type Compra_materialMinAggregateInputType = {
@@ -114,6 +121,7 @@ export type Compra_materialMinAggregateInputType = {
   id_proyecto?: true
   id_almacen?: true
   id_usuario_registro?: true
+  id_orden?: true
 }
 
 export type Compra_materialMaxAggregateInputType = {
@@ -127,6 +135,7 @@ export type Compra_materialMaxAggregateInputType = {
   id_proyecto?: true
   id_almacen?: true
   id_usuario_registro?: true
+  id_orden?: true
 }
 
 export type Compra_materialCountAggregateInputType = {
@@ -140,6 +149,7 @@ export type Compra_materialCountAggregateInputType = {
   id_proyecto?: true
   id_almacen?: true
   id_usuario_registro?: true
+  id_orden?: true
   _all?: true
 }
 
@@ -240,6 +250,7 @@ export type Compra_materialGroupByOutputType = {
   id_proyecto: number
   id_almacen: number
   id_usuario_registro: number | null
+  id_orden: number | null
   _count: Compra_materialCountAggregateOutputType | null
   _avg: Compra_materialAvgAggregateOutputType | null
   _sum: Compra_materialSumAggregateOutputType | null
@@ -276,10 +287,12 @@ export type compra_materialWhereInput = {
   id_proyecto?: Prisma.IntFilter<"compra_material"> | number
   id_almacen?: Prisma.IntFilter<"compra_material"> | number
   id_usuario_registro?: Prisma.IntNullableFilter<"compra_material"> | number | null
+  id_orden?: Prisma.IntNullableFilter<"compra_material"> | number | null
   almacen?: Prisma.XOR<Prisma.AlmacenScalarRelationFilter, Prisma.almacenWhereInput>
   proveedor?: Prisma.XOR<Prisma.ProveedorScalarRelationFilter, Prisma.proveedorWhereInput>
   proyecto?: Prisma.XOR<Prisma.ProyectoScalarRelationFilter, Prisma.proyectoWhereInput>
   usuario?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.usuarioWhereInput> | null
+  orden_compra?: Prisma.XOR<Prisma.Orden_compraNullableScalarRelationFilter, Prisma.orden_compraWhereInput> | null
   detalle_compra_material?: Prisma.Detalle_compra_materialListRelationFilter
 }
 
@@ -294,16 +307,19 @@ export type compra_materialOrderByWithRelationInput = {
   id_proyecto?: Prisma.SortOrder
   id_almacen?: Prisma.SortOrder
   id_usuario_registro?: Prisma.SortOrderInput | Prisma.SortOrder
+  id_orden?: Prisma.SortOrderInput | Prisma.SortOrder
   almacen?: Prisma.almacenOrderByWithRelationInput
   proveedor?: Prisma.proveedorOrderByWithRelationInput
   proyecto?: Prisma.proyectoOrderByWithRelationInput
   usuario?: Prisma.usuarioOrderByWithRelationInput
+  orden_compra?: Prisma.orden_compraOrderByWithRelationInput
   detalle_compra_material?: Prisma.detalle_compra_materialOrderByRelationAggregateInput
 }
 
 export type compra_materialWhereUniqueInput = Prisma.AtLeast<{
   id_compra?: number
   numero_factura?: string
+  id_orden?: number
   AND?: Prisma.compra_materialWhereInput | Prisma.compra_materialWhereInput[]
   OR?: Prisma.compra_materialWhereInput[]
   NOT?: Prisma.compra_materialWhereInput | Prisma.compra_materialWhereInput[]
@@ -319,8 +335,9 @@ export type compra_materialWhereUniqueInput = Prisma.AtLeast<{
   proveedor?: Prisma.XOR<Prisma.ProveedorScalarRelationFilter, Prisma.proveedorWhereInput>
   proyecto?: Prisma.XOR<Prisma.ProyectoScalarRelationFilter, Prisma.proyectoWhereInput>
   usuario?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.usuarioWhereInput> | null
+  orden_compra?: Prisma.XOR<Prisma.Orden_compraNullableScalarRelationFilter, Prisma.orden_compraWhereInput> | null
   detalle_compra_material?: Prisma.Detalle_compra_materialListRelationFilter
-}, "id_compra" | "numero_factura">
+}, "id_compra" | "numero_factura" | "id_orden">
 
 export type compra_materialOrderByWithAggregationInput = {
   id_compra?: Prisma.SortOrder
@@ -333,6 +350,7 @@ export type compra_materialOrderByWithAggregationInput = {
   id_proyecto?: Prisma.SortOrder
   id_almacen?: Prisma.SortOrder
   id_usuario_registro?: Prisma.SortOrderInput | Prisma.SortOrder
+  id_orden?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.compra_materialCountOrderByAggregateInput
   _avg?: Prisma.compra_materialAvgOrderByAggregateInput
   _max?: Prisma.compra_materialMaxOrderByAggregateInput
@@ -354,6 +372,7 @@ export type compra_materialScalarWhereWithAggregatesInput = {
   id_proyecto?: Prisma.IntWithAggregatesFilter<"compra_material"> | number
   id_almacen?: Prisma.IntWithAggregatesFilter<"compra_material"> | number
   id_usuario_registro?: Prisma.IntNullableWithAggregatesFilter<"compra_material"> | number | null
+  id_orden?: Prisma.IntNullableWithAggregatesFilter<"compra_material"> | number | null
 }
 
 export type compra_materialCreateInput = {
@@ -366,6 +385,7 @@ export type compra_materialCreateInput = {
   proveedor: Prisma.proveedorCreateNestedOneWithoutCompra_materialInput
   proyecto: Prisma.proyectoCreateNestedOneWithoutCompra_materialInput
   usuario?: Prisma.usuarioCreateNestedOneWithoutCompra_materialInput
+  orden_compra?: Prisma.orden_compraCreateNestedOneWithoutCompra_materialInput
   detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -380,6 +400,7 @@ export type compra_materialUncheckedCreateInput = {
   id_proyecto: number
   id_almacen: number
   id_usuario_registro?: number | null
+  id_orden?: number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -393,6 +414,7 @@ export type compra_materialUpdateInput = {
   proveedor?: Prisma.proveedorUpdateOneRequiredWithoutCompra_materialNestedInput
   proyecto?: Prisma.proyectoUpdateOneRequiredWithoutCompra_materialNestedInput
   usuario?: Prisma.usuarioUpdateOneWithoutCompra_materialNestedInput
+  orden_compra?: Prisma.orden_compraUpdateOneWithoutCompra_materialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -407,6 +429,7 @@ export type compra_materialUncheckedUpdateInput = {
   id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
   id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -420,6 +443,7 @@ export type compra_materialCreateManyInput = {
   id_proyecto: number
   id_almacen: number
   id_usuario_registro?: number | null
+  id_orden?: number | null
 }
 
 export type compra_materialUpdateManyMutationInput = {
@@ -441,6 +465,7 @@ export type compra_materialUncheckedUpdateManyInput = {
   id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
   id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type Compra_materialListRelationFilter = {
@@ -464,6 +489,7 @@ export type compra_materialCountOrderByAggregateInput = {
   id_proyecto?: Prisma.SortOrder
   id_almacen?: Prisma.SortOrder
   id_usuario_registro?: Prisma.SortOrder
+  id_orden?: Prisma.SortOrder
 }
 
 export type compra_materialAvgOrderByAggregateInput = {
@@ -473,6 +499,7 @@ export type compra_materialAvgOrderByAggregateInput = {
   id_proyecto?: Prisma.SortOrder
   id_almacen?: Prisma.SortOrder
   id_usuario_registro?: Prisma.SortOrder
+  id_orden?: Prisma.SortOrder
 }
 
 export type compra_materialMaxOrderByAggregateInput = {
@@ -486,6 +513,7 @@ export type compra_materialMaxOrderByAggregateInput = {
   id_proyecto?: Prisma.SortOrder
   id_almacen?: Prisma.SortOrder
   id_usuario_registro?: Prisma.SortOrder
+  id_orden?: Prisma.SortOrder
 }
 
 export type compra_materialMinOrderByAggregateInput = {
@@ -499,6 +527,7 @@ export type compra_materialMinOrderByAggregateInput = {
   id_proyecto?: Prisma.SortOrder
   id_almacen?: Prisma.SortOrder
   id_usuario_registro?: Prisma.SortOrder
+  id_orden?: Prisma.SortOrder
 }
 
 export type compra_materialSumOrderByAggregateInput = {
@@ -508,11 +537,17 @@ export type compra_materialSumOrderByAggregateInput = {
   id_proyecto?: Prisma.SortOrder
   id_almacen?: Prisma.SortOrder
   id_usuario_registro?: Prisma.SortOrder
+  id_orden?: Prisma.SortOrder
 }
 
 export type Compra_materialScalarRelationFilter = {
   is?: Prisma.compra_materialWhereInput
   isNot?: Prisma.compra_materialWhereInput
+}
+
+export type Compra_materialNullableScalarRelationFilter = {
+  is?: Prisma.compra_materialWhereInput | null
+  isNot?: Prisma.compra_materialWhereInput | null
 }
 
 export type compra_materialCreateNestedManyWithoutAlmacenInput = {
@@ -663,6 +698,38 @@ export type compra_materialUncheckedUpdateManyWithoutProyectoNestedInput = {
   deleteMany?: Prisma.compra_materialScalarWhereInput | Prisma.compra_materialScalarWhereInput[]
 }
 
+export type compra_materialCreateNestedOneWithoutOrden_compraInput = {
+  create?: Prisma.XOR<Prisma.compra_materialCreateWithoutOrden_compraInput, Prisma.compra_materialUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.compra_materialCreateOrConnectWithoutOrden_compraInput
+  connect?: Prisma.compra_materialWhereUniqueInput
+}
+
+export type compra_materialUncheckedCreateNestedOneWithoutOrden_compraInput = {
+  create?: Prisma.XOR<Prisma.compra_materialCreateWithoutOrden_compraInput, Prisma.compra_materialUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.compra_materialCreateOrConnectWithoutOrden_compraInput
+  connect?: Prisma.compra_materialWhereUniqueInput
+}
+
+export type compra_materialUpdateOneWithoutOrden_compraNestedInput = {
+  create?: Prisma.XOR<Prisma.compra_materialCreateWithoutOrden_compraInput, Prisma.compra_materialUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.compra_materialCreateOrConnectWithoutOrden_compraInput
+  upsert?: Prisma.compra_materialUpsertWithoutOrden_compraInput
+  disconnect?: Prisma.compra_materialWhereInput | boolean
+  delete?: Prisma.compra_materialWhereInput | boolean
+  connect?: Prisma.compra_materialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.compra_materialUpdateToOneWithWhereWithoutOrden_compraInput, Prisma.compra_materialUpdateWithoutOrden_compraInput>, Prisma.compra_materialUncheckedUpdateWithoutOrden_compraInput>
+}
+
+export type compra_materialUncheckedUpdateOneWithoutOrden_compraNestedInput = {
+  create?: Prisma.XOR<Prisma.compra_materialCreateWithoutOrden_compraInput, Prisma.compra_materialUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.compra_materialCreateOrConnectWithoutOrden_compraInput
+  upsert?: Prisma.compra_materialUpsertWithoutOrden_compraInput
+  disconnect?: Prisma.compra_materialWhereInput | boolean
+  delete?: Prisma.compra_materialWhereInput | boolean
+  connect?: Prisma.compra_materialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.compra_materialUpdateToOneWithWhereWithoutOrden_compraInput, Prisma.compra_materialUpdateWithoutOrden_compraInput>, Prisma.compra_materialUncheckedUpdateWithoutOrden_compraInput>
+}
+
 export type compra_materialCreateNestedManyWithoutUsuarioInput = {
   create?: Prisma.XOR<Prisma.compra_materialCreateWithoutUsuarioInput, Prisma.compra_materialUncheckedCreateWithoutUsuarioInput> | Prisma.compra_materialCreateWithoutUsuarioInput[] | Prisma.compra_materialUncheckedCreateWithoutUsuarioInput[]
   connectOrCreate?: Prisma.compra_materialCreateOrConnectWithoutUsuarioInput | Prisma.compra_materialCreateOrConnectWithoutUsuarioInput[]
@@ -714,6 +781,7 @@ export type compra_materialCreateWithoutAlmacenInput = {
   proveedor: Prisma.proveedorCreateNestedOneWithoutCompra_materialInput
   proyecto: Prisma.proyectoCreateNestedOneWithoutCompra_materialInput
   usuario?: Prisma.usuarioCreateNestedOneWithoutCompra_materialInput
+  orden_compra?: Prisma.orden_compraCreateNestedOneWithoutCompra_materialInput
   detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -727,6 +795,7 @@ export type compra_materialUncheckedCreateWithoutAlmacenInput = {
   id_proveedor: number
   id_proyecto: number
   id_usuario_registro?: number | null
+  id_orden?: number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -769,6 +838,7 @@ export type compra_materialScalarWhereInput = {
   id_proyecto?: Prisma.IntFilter<"compra_material"> | number
   id_almacen?: Prisma.IntFilter<"compra_material"> | number
   id_usuario_registro?: Prisma.IntNullableFilter<"compra_material"> | number | null
+  id_orden?: Prisma.IntNullableFilter<"compra_material"> | number | null
 }
 
 export type compra_materialCreateWithoutDetalle_compra_materialInput = {
@@ -781,6 +851,7 @@ export type compra_materialCreateWithoutDetalle_compra_materialInput = {
   proveedor: Prisma.proveedorCreateNestedOneWithoutCompra_materialInput
   proyecto: Prisma.proyectoCreateNestedOneWithoutCompra_materialInput
   usuario?: Prisma.usuarioCreateNestedOneWithoutCompra_materialInput
+  orden_compra?: Prisma.orden_compraCreateNestedOneWithoutCompra_materialInput
 }
 
 export type compra_materialUncheckedCreateWithoutDetalle_compra_materialInput = {
@@ -794,6 +865,7 @@ export type compra_materialUncheckedCreateWithoutDetalle_compra_materialInput = 
   id_proyecto: number
   id_almacen: number
   id_usuario_registro?: number | null
+  id_orden?: number | null
 }
 
 export type compra_materialCreateOrConnectWithoutDetalle_compra_materialInput = {
@@ -822,6 +894,7 @@ export type compra_materialUpdateWithoutDetalle_compra_materialInput = {
   proveedor?: Prisma.proveedorUpdateOneRequiredWithoutCompra_materialNestedInput
   proyecto?: Prisma.proyectoUpdateOneRequiredWithoutCompra_materialNestedInput
   usuario?: Prisma.usuarioUpdateOneWithoutCompra_materialNestedInput
+  orden_compra?: Prisma.orden_compraUpdateOneWithoutCompra_materialNestedInput
 }
 
 export type compra_materialUncheckedUpdateWithoutDetalle_compra_materialInput = {
@@ -835,6 +908,7 @@ export type compra_materialUncheckedUpdateWithoutDetalle_compra_materialInput = 
   id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
   id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type compra_materialCreateWithoutProveedorInput = {
@@ -846,6 +920,7 @@ export type compra_materialCreateWithoutProveedorInput = {
   almacen: Prisma.almacenCreateNestedOneWithoutCompra_materialInput
   proyecto: Prisma.proyectoCreateNestedOneWithoutCompra_materialInput
   usuario?: Prisma.usuarioCreateNestedOneWithoutCompra_materialInput
+  orden_compra?: Prisma.orden_compraCreateNestedOneWithoutCompra_materialInput
   detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -859,6 +934,7 @@ export type compra_materialUncheckedCreateWithoutProveedorInput = {
   id_proyecto: number
   id_almacen: number
   id_usuario_registro?: number | null
+  id_orden?: number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -896,6 +972,7 @@ export type compra_materialCreateWithoutProyectoInput = {
   almacen: Prisma.almacenCreateNestedOneWithoutCompra_materialInput
   proveedor: Prisma.proveedorCreateNestedOneWithoutCompra_materialInput
   usuario?: Prisma.usuarioCreateNestedOneWithoutCompra_materialInput
+  orden_compra?: Prisma.orden_compraCreateNestedOneWithoutCompra_materialInput
   detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -909,6 +986,7 @@ export type compra_materialUncheckedCreateWithoutProyectoInput = {
   id_proveedor: number
   id_almacen: number
   id_usuario_registro?: number | null
+  id_orden?: number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -937,6 +1015,76 @@ export type compra_materialUpdateManyWithWhereWithoutProyectoInput = {
   data: Prisma.XOR<Prisma.compra_materialUpdateManyMutationInput, Prisma.compra_materialUncheckedUpdateManyWithoutProyectoInput>
 }
 
+export type compra_materialCreateWithoutOrden_compraInput = {
+  numero_factura: string
+  fecha_compra: Date | string
+  total_compra?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  estado_pago?: string
+  observacion?: string | null
+  almacen: Prisma.almacenCreateNestedOneWithoutCompra_materialInput
+  proveedor: Prisma.proveedorCreateNestedOneWithoutCompra_materialInput
+  proyecto: Prisma.proyectoCreateNestedOneWithoutCompra_materialInput
+  usuario?: Prisma.usuarioCreateNestedOneWithoutCompra_materialInput
+  detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutCompra_materialInput
+}
+
+export type compra_materialUncheckedCreateWithoutOrden_compraInput = {
+  id_compra?: number
+  numero_factura: string
+  fecha_compra: Date | string
+  total_compra?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  estado_pago?: string
+  observacion?: string | null
+  id_proveedor: number
+  id_proyecto: number
+  id_almacen: number
+  id_usuario_registro?: number | null
+  detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutCompra_materialInput
+}
+
+export type compra_materialCreateOrConnectWithoutOrden_compraInput = {
+  where: Prisma.compra_materialWhereUniqueInput
+  create: Prisma.XOR<Prisma.compra_materialCreateWithoutOrden_compraInput, Prisma.compra_materialUncheckedCreateWithoutOrden_compraInput>
+}
+
+export type compra_materialUpsertWithoutOrden_compraInput = {
+  update: Prisma.XOR<Prisma.compra_materialUpdateWithoutOrden_compraInput, Prisma.compra_materialUncheckedUpdateWithoutOrden_compraInput>
+  create: Prisma.XOR<Prisma.compra_materialCreateWithoutOrden_compraInput, Prisma.compra_materialUncheckedCreateWithoutOrden_compraInput>
+  where?: Prisma.compra_materialWhereInput
+}
+
+export type compra_materialUpdateToOneWithWhereWithoutOrden_compraInput = {
+  where?: Prisma.compra_materialWhereInput
+  data: Prisma.XOR<Prisma.compra_materialUpdateWithoutOrden_compraInput, Prisma.compra_materialUncheckedUpdateWithoutOrden_compraInput>
+}
+
+export type compra_materialUpdateWithoutOrden_compraInput = {
+  numero_factura?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_compra?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  total_compra?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  estado_pago?: Prisma.StringFieldUpdateOperationsInput | string
+  observacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  almacen?: Prisma.almacenUpdateOneRequiredWithoutCompra_materialNestedInput
+  proveedor?: Prisma.proveedorUpdateOneRequiredWithoutCompra_materialNestedInput
+  proyecto?: Prisma.proyectoUpdateOneRequiredWithoutCompra_materialNestedInput
+  usuario?: Prisma.usuarioUpdateOneWithoutCompra_materialNestedInput
+  detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutCompra_materialNestedInput
+}
+
+export type compra_materialUncheckedUpdateWithoutOrden_compraInput = {
+  id_compra?: Prisma.IntFieldUpdateOperationsInput | number
+  numero_factura?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_compra?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  total_compra?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  estado_pago?: Prisma.StringFieldUpdateOperationsInput | string
+  observacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id_proveedor?: Prisma.IntFieldUpdateOperationsInput | number
+  id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
+  id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
+  id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutCompra_materialNestedInput
+}
+
 export type compra_materialCreateWithoutUsuarioInput = {
   numero_factura: string
   fecha_compra: Date | string
@@ -946,6 +1094,7 @@ export type compra_materialCreateWithoutUsuarioInput = {
   almacen: Prisma.almacenCreateNestedOneWithoutCompra_materialInput
   proveedor: Prisma.proveedorCreateNestedOneWithoutCompra_materialInput
   proyecto: Prisma.proyectoCreateNestedOneWithoutCompra_materialInput
+  orden_compra?: Prisma.orden_compraCreateNestedOneWithoutCompra_materialInput
   detalle_compra_material?: Prisma.detalle_compra_materialCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -959,6 +1108,7 @@ export type compra_materialUncheckedCreateWithoutUsuarioInput = {
   id_proveedor: number
   id_proyecto: number
   id_almacen: number
+  id_orden?: number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedCreateNestedManyWithoutCompra_materialInput
 }
 
@@ -996,6 +1146,7 @@ export type compra_materialCreateManyAlmacenInput = {
   id_proveedor: number
   id_proyecto: number
   id_usuario_registro?: number | null
+  id_orden?: number | null
 }
 
 export type compra_materialUpdateWithoutAlmacenInput = {
@@ -1007,6 +1158,7 @@ export type compra_materialUpdateWithoutAlmacenInput = {
   proveedor?: Prisma.proveedorUpdateOneRequiredWithoutCompra_materialNestedInput
   proyecto?: Prisma.proyectoUpdateOneRequiredWithoutCompra_materialNestedInput
   usuario?: Prisma.usuarioUpdateOneWithoutCompra_materialNestedInput
+  orden_compra?: Prisma.orden_compraUpdateOneWithoutCompra_materialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -1020,6 +1172,7 @@ export type compra_materialUncheckedUpdateWithoutAlmacenInput = {
   id_proveedor?: Prisma.IntFieldUpdateOperationsInput | number
   id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -1033,6 +1186,7 @@ export type compra_materialUncheckedUpdateManyWithoutAlmacenInput = {
   id_proveedor?: Prisma.IntFieldUpdateOperationsInput | number
   id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type compra_materialCreateManyProveedorInput = {
@@ -1044,6 +1198,7 @@ export type compra_materialCreateManyProveedorInput = {
   id_proyecto: number
   id_almacen: number
   id_usuario_registro?: number | null
+  id_orden?: number | null
 }
 
 export type compra_materialUpdateWithoutProveedorInput = {
@@ -1055,6 +1210,7 @@ export type compra_materialUpdateWithoutProveedorInput = {
   almacen?: Prisma.almacenUpdateOneRequiredWithoutCompra_materialNestedInput
   proyecto?: Prisma.proyectoUpdateOneRequiredWithoutCompra_materialNestedInput
   usuario?: Prisma.usuarioUpdateOneWithoutCompra_materialNestedInput
+  orden_compra?: Prisma.orden_compraUpdateOneWithoutCompra_materialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -1068,6 +1224,7 @@ export type compra_materialUncheckedUpdateWithoutProveedorInput = {
   id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
   id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -1081,6 +1238,7 @@ export type compra_materialUncheckedUpdateManyWithoutProveedorInput = {
   id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
   id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type compra_materialCreateManyProyectoInput = {
@@ -1092,6 +1250,7 @@ export type compra_materialCreateManyProyectoInput = {
   id_proveedor: number
   id_almacen: number
   id_usuario_registro?: number | null
+  id_orden?: number | null
 }
 
 export type compra_materialUpdateWithoutProyectoInput = {
@@ -1103,6 +1262,7 @@ export type compra_materialUpdateWithoutProyectoInput = {
   almacen?: Prisma.almacenUpdateOneRequiredWithoutCompra_materialNestedInput
   proveedor?: Prisma.proveedorUpdateOneRequiredWithoutCompra_materialNestedInput
   usuario?: Prisma.usuarioUpdateOneWithoutCompra_materialNestedInput
+  orden_compra?: Prisma.orden_compraUpdateOneWithoutCompra_materialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -1116,6 +1276,7 @@ export type compra_materialUncheckedUpdateWithoutProyectoInput = {
   id_proveedor?: Prisma.IntFieldUpdateOperationsInput | number
   id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -1129,6 +1290,7 @@ export type compra_materialUncheckedUpdateManyWithoutProyectoInput = {
   id_proveedor?: Prisma.IntFieldUpdateOperationsInput | number
   id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
   id_usuario_registro?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type compra_materialCreateManyUsuarioInput = {
@@ -1140,6 +1302,7 @@ export type compra_materialCreateManyUsuarioInput = {
   id_proveedor: number
   id_proyecto: number
   id_almacen: number
+  id_orden?: number | null
 }
 
 export type compra_materialUpdateWithoutUsuarioInput = {
@@ -1151,6 +1314,7 @@ export type compra_materialUpdateWithoutUsuarioInput = {
   almacen?: Prisma.almacenUpdateOneRequiredWithoutCompra_materialNestedInput
   proveedor?: Prisma.proveedorUpdateOneRequiredWithoutCompra_materialNestedInput
   proyecto?: Prisma.proyectoUpdateOneRequiredWithoutCompra_materialNestedInput
+  orden_compra?: Prisma.orden_compraUpdateOneWithoutCompra_materialNestedInput
   detalle_compra_material?: Prisma.detalle_compra_materialUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -1164,6 +1328,7 @@ export type compra_materialUncheckedUpdateWithoutUsuarioInput = {
   id_proveedor?: Prisma.IntFieldUpdateOperationsInput | number
   id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
   id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   detalle_compra_material?: Prisma.detalle_compra_materialUncheckedUpdateManyWithoutCompra_materialNestedInput
 }
 
@@ -1177,6 +1342,7 @@ export type compra_materialUncheckedUpdateManyWithoutUsuarioInput = {
   id_proveedor?: Prisma.IntFieldUpdateOperationsInput | number
   id_proyecto?: Prisma.IntFieldUpdateOperationsInput | number
   id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
+  id_orden?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 
@@ -1221,10 +1387,12 @@ export type compra_materialSelect<ExtArgs extends runtime.Types.Extensions.Inter
   id_proyecto?: boolean
   id_almacen?: boolean
   id_usuario_registro?: boolean
+  id_orden?: boolean
   almacen?: boolean | Prisma.almacenDefaultArgs<ExtArgs>
   proveedor?: boolean | Prisma.proveedorDefaultArgs<ExtArgs>
   proyecto?: boolean | Prisma.proyectoDefaultArgs<ExtArgs>
   usuario?: boolean | Prisma.compra_material$usuarioArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.compra_material$orden_compraArgs<ExtArgs>
   detalle_compra_material?: boolean | Prisma.compra_material$detalle_compra_materialArgs<ExtArgs>
   _count?: boolean | Prisma.Compra_materialCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["compra_material"]>
@@ -1242,14 +1410,16 @@ export type compra_materialSelectScalar = {
   id_proyecto?: boolean
   id_almacen?: boolean
   id_usuario_registro?: boolean
+  id_orden?: boolean
 }
 
-export type compra_materialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_compra" | "numero_factura" | "fecha_compra" | "total_compra" | "estado_pago" | "observacion" | "id_proveedor" | "id_proyecto" | "id_almacen" | "id_usuario_registro", ExtArgs["result"]["compra_material"]>
+export type compra_materialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_compra" | "numero_factura" | "fecha_compra" | "total_compra" | "estado_pago" | "observacion" | "id_proveedor" | "id_proyecto" | "id_almacen" | "id_usuario_registro" | "id_orden", ExtArgs["result"]["compra_material"]>
 export type compra_materialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   almacen?: boolean | Prisma.almacenDefaultArgs<ExtArgs>
   proveedor?: boolean | Prisma.proveedorDefaultArgs<ExtArgs>
   proyecto?: boolean | Prisma.proyectoDefaultArgs<ExtArgs>
   usuario?: boolean | Prisma.compra_material$usuarioArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.compra_material$orden_compraArgs<ExtArgs>
   detalle_compra_material?: boolean | Prisma.compra_material$detalle_compra_materialArgs<ExtArgs>
   _count?: boolean | Prisma.Compra_materialCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1261,6 +1431,7 @@ export type $compra_materialPayload<ExtArgs extends runtime.Types.Extensions.Int
     proveedor: Prisma.$proveedorPayload<ExtArgs>
     proyecto: Prisma.$proyectoPayload<ExtArgs>
     usuario: Prisma.$usuarioPayload<ExtArgs> | null
+    orden_compra: Prisma.$orden_compraPayload<ExtArgs> | null
     detalle_compra_material: Prisma.$detalle_compra_materialPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1274,6 +1445,7 @@ export type $compra_materialPayload<ExtArgs extends runtime.Types.Extensions.Int
     id_proyecto: number
     id_almacen: number
     id_usuario_registro: number | null
+    id_orden: number | null
   }, ExtArgs["result"]["compra_material"]>
   composites: {}
 }
@@ -1618,6 +1790,7 @@ export interface Prisma__compra_materialClient<T, Null = never, ExtArgs extends 
   proveedor<T extends Prisma.proveedorDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proveedorDefaultArgs<ExtArgs>>): Prisma.Prisma__proveedorClient<runtime.Types.Result.GetResult<Prisma.$proveedorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   proyecto<T extends Prisma.proyectoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proyectoDefaultArgs<ExtArgs>>): Prisma.Prisma__proyectoClient<runtime.Types.Result.GetResult<Prisma.$proyectoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   usuario<T extends Prisma.compra_material$usuarioArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.compra_material$usuarioArgs<ExtArgs>>): Prisma.Prisma__usuarioClient<runtime.Types.Result.GetResult<Prisma.$usuarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  orden_compra<T extends Prisma.compra_material$orden_compraArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.compra_material$orden_compraArgs<ExtArgs>>): Prisma.Prisma__orden_compraClient<runtime.Types.Result.GetResult<Prisma.$orden_compraPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   detalle_compra_material<T extends Prisma.compra_material$detalle_compra_materialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.compra_material$detalle_compra_materialArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$detalle_compra_materialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1658,6 +1831,7 @@ export interface compra_materialFieldRefs {
   readonly id_proyecto: Prisma.FieldRef<"compra_material", 'Int'>
   readonly id_almacen: Prisma.FieldRef<"compra_material", 'Int'>
   readonly id_usuario_registro: Prisma.FieldRef<"compra_material", 'Int'>
+  readonly id_orden: Prisma.FieldRef<"compra_material", 'Int'>
 }
     
 
@@ -2021,6 +2195,25 @@ export type compra_material$usuarioArgs<ExtArgs extends runtime.Types.Extensions
    */
   include?: Prisma.usuarioInclude<ExtArgs> | null
   where?: Prisma.usuarioWhereInput
+}
+
+/**
+ * compra_material.orden_compra
+ */
+export type compra_material$orden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the orden_compra
+   */
+  select?: Prisma.orden_compraSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the orden_compra
+   */
+  omit?: Prisma.orden_compraOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.orden_compraInclude<ExtArgs> | null
+  where?: Prisma.orden_compraWhereInput
 }
 
 /**

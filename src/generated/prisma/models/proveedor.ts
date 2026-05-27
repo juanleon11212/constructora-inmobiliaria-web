@@ -225,6 +225,7 @@ export type proveedorWhereInput = {
   correo?: Prisma.StringNullableFilter<"proveedor"> | string | null
   direccion?: Prisma.StringNullableFilter<"proveedor"> | string | null
   compra_material?: Prisma.Compra_materialListRelationFilter
+  orden_compra?: Prisma.Orden_compraListRelationFilter
   pago?: Prisma.PagoListRelationFilter
 }
 
@@ -236,6 +237,7 @@ export type proveedorOrderByWithRelationInput = {
   correo?: Prisma.SortOrderInput | Prisma.SortOrder
   direccion?: Prisma.SortOrderInput | Prisma.SortOrder
   compra_material?: Prisma.compra_materialOrderByRelationAggregateInput
+  orden_compra?: Prisma.orden_compraOrderByRelationAggregateInput
   pago?: Prisma.pagoOrderByRelationAggregateInput
 }
 
@@ -250,6 +252,7 @@ export type proveedorWhereUniqueInput = Prisma.AtLeast<{
   correo?: Prisma.StringNullableFilter<"proveedor"> | string | null
   direccion?: Prisma.StringNullableFilter<"proveedor"> | string | null
   compra_material?: Prisma.Compra_materialListRelationFilter
+  orden_compra?: Prisma.Orden_compraListRelationFilter
   pago?: Prisma.PagoListRelationFilter
 }, "id_proveedor" | "nit">
 
@@ -286,6 +289,7 @@ export type proveedorCreateInput = {
   correo?: string | null
   direccion?: string | null
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProveedorInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProveedorInput
   pago?: Prisma.pagoCreateNestedManyWithoutProveedorInput
 }
 
@@ -297,6 +301,7 @@ export type proveedorUncheckedCreateInput = {
   correo?: string | null
   direccion?: string | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProveedorInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProveedorInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutProveedorInput
 }
 
@@ -307,6 +312,7 @@ export type proveedorUpdateInput = {
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   compra_material?: Prisma.compra_materialUpdateManyWithoutProveedorNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProveedorNestedInput
   pago?: Prisma.pagoUpdateManyWithoutProveedorNestedInput
 }
 
@@ -318,6 +324,7 @@ export type proveedorUncheckedUpdateInput = {
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProveedorNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProveedorNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutProveedorNestedInput
 }
 
@@ -421,12 +428,27 @@ export type proveedorUpdateOneWithoutPagoNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.proveedorUpdateToOneWithWhereWithoutPagoInput, Prisma.proveedorUpdateWithoutPagoInput>, Prisma.proveedorUncheckedUpdateWithoutPagoInput>
 }
 
+export type proveedorCreateNestedOneWithoutOrden_compraInput = {
+  create?: Prisma.XOR<Prisma.proveedorCreateWithoutOrden_compraInput, Prisma.proveedorUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.proveedorCreateOrConnectWithoutOrden_compraInput
+  connect?: Prisma.proveedorWhereUniqueInput
+}
+
+export type proveedorUpdateOneRequiredWithoutOrden_compraNestedInput = {
+  create?: Prisma.XOR<Prisma.proveedorCreateWithoutOrden_compraInput, Prisma.proveedorUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.proveedorCreateOrConnectWithoutOrden_compraInput
+  upsert?: Prisma.proveedorUpsertWithoutOrden_compraInput
+  connect?: Prisma.proveedorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.proveedorUpdateToOneWithWhereWithoutOrden_compraInput, Prisma.proveedorUpdateWithoutOrden_compraInput>, Prisma.proveedorUncheckedUpdateWithoutOrden_compraInput>
+}
+
 export type proveedorCreateWithoutCompra_materialInput = {
   nombre_proveedor: string
   nit: string
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProveedorInput
   pago?: Prisma.pagoCreateNestedManyWithoutProveedorInput
 }
 
@@ -437,6 +459,7 @@ export type proveedorUncheckedCreateWithoutCompra_materialInput = {
   telefono?: string | null
   correo?: string | null
   direccion?: string | null
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProveedorInput
   pago?: Prisma.pagoUncheckedCreateNestedManyWithoutProveedorInput
 }
 
@@ -462,6 +485,7 @@ export type proveedorUpdateWithoutCompra_materialInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProveedorNestedInput
   pago?: Prisma.pagoUpdateManyWithoutProveedorNestedInput
 }
 
@@ -472,6 +496,7 @@ export type proveedorUncheckedUpdateWithoutCompra_materialInput = {
   telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProveedorNestedInput
   pago?: Prisma.pagoUncheckedUpdateManyWithoutProveedorNestedInput
 }
 
@@ -482,6 +507,7 @@ export type proveedorCreateWithoutPagoInput = {
   correo?: string | null
   direccion?: string | null
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutProveedorInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutProveedorInput
 }
 
 export type proveedorUncheckedCreateWithoutPagoInput = {
@@ -492,6 +518,7 @@ export type proveedorUncheckedCreateWithoutPagoInput = {
   correo?: string | null
   direccion?: string | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProveedorInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutProveedorInput
 }
 
 export type proveedorCreateOrConnectWithoutPagoInput = {
@@ -517,6 +544,7 @@ export type proveedorUpdateWithoutPagoInput = {
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   compra_material?: Prisma.compra_materialUpdateManyWithoutProveedorNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutProveedorNestedInput
 }
 
 export type proveedorUncheckedUpdateWithoutPagoInput = {
@@ -527,6 +555,65 @@ export type proveedorUncheckedUpdateWithoutPagoInput = {
   correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProveedorNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutProveedorNestedInput
+}
+
+export type proveedorCreateWithoutOrden_compraInput = {
+  nombre_proveedor: string
+  nit: string
+  telefono?: string | null
+  correo?: string | null
+  direccion?: string | null
+  compra_material?: Prisma.compra_materialCreateNestedManyWithoutProveedorInput
+  pago?: Prisma.pagoCreateNestedManyWithoutProveedorInput
+}
+
+export type proveedorUncheckedCreateWithoutOrden_compraInput = {
+  id_proveedor?: number
+  nombre_proveedor: string
+  nit: string
+  telefono?: string | null
+  correo?: string | null
+  direccion?: string | null
+  compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutProveedorInput
+  pago?: Prisma.pagoUncheckedCreateNestedManyWithoutProveedorInput
+}
+
+export type proveedorCreateOrConnectWithoutOrden_compraInput = {
+  where: Prisma.proveedorWhereUniqueInput
+  create: Prisma.XOR<Prisma.proveedorCreateWithoutOrden_compraInput, Prisma.proveedorUncheckedCreateWithoutOrden_compraInput>
+}
+
+export type proveedorUpsertWithoutOrden_compraInput = {
+  update: Prisma.XOR<Prisma.proveedorUpdateWithoutOrden_compraInput, Prisma.proveedorUncheckedUpdateWithoutOrden_compraInput>
+  create: Prisma.XOR<Prisma.proveedorCreateWithoutOrden_compraInput, Prisma.proveedorUncheckedCreateWithoutOrden_compraInput>
+  where?: Prisma.proveedorWhereInput
+}
+
+export type proveedorUpdateToOneWithWhereWithoutOrden_compraInput = {
+  where?: Prisma.proveedorWhereInput
+  data: Prisma.XOR<Prisma.proveedorUpdateWithoutOrden_compraInput, Prisma.proveedorUncheckedUpdateWithoutOrden_compraInput>
+}
+
+export type proveedorUpdateWithoutOrden_compraInput = {
+  nombre_proveedor?: Prisma.StringFieldUpdateOperationsInput | string
+  nit?: Prisma.StringFieldUpdateOperationsInput | string
+  telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  compra_material?: Prisma.compra_materialUpdateManyWithoutProveedorNestedInput
+  pago?: Prisma.pagoUpdateManyWithoutProveedorNestedInput
+}
+
+export type proveedorUncheckedUpdateWithoutOrden_compraInput = {
+  id_proveedor?: Prisma.IntFieldUpdateOperationsInput | number
+  nombre_proveedor?: Prisma.StringFieldUpdateOperationsInput | string
+  nit?: Prisma.StringFieldUpdateOperationsInput | string
+  telefono?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutProveedorNestedInput
+  pago?: Prisma.pagoUncheckedUpdateManyWithoutProveedorNestedInput
 }
 
 
@@ -536,11 +623,13 @@ export type proveedorUncheckedUpdateWithoutPagoInput = {
 
 export type ProveedorCountOutputType = {
   compra_material: number
+  orden_compra: number
   pago: number
 }
 
 export type ProveedorCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   compra_material?: boolean | ProveedorCountOutputTypeCountCompra_materialArgs
+  orden_compra?: boolean | ProveedorCountOutputTypeCountOrden_compraArgs
   pago?: boolean | ProveedorCountOutputTypeCountPagoArgs
 }
 
@@ -564,6 +653,13 @@ export type ProveedorCountOutputTypeCountCompra_materialArgs<ExtArgs extends run
 /**
  * ProveedorCountOutputType without action
  */
+export type ProveedorCountOutputTypeCountOrden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.orden_compraWhereInput
+}
+
+/**
+ * ProveedorCountOutputType without action
+ */
 export type ProveedorCountOutputTypeCountPagoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.pagoWhereInput
 }
@@ -577,6 +673,7 @@ export type proveedorSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   correo?: boolean
   direccion?: boolean
   compra_material?: boolean | Prisma.proveedor$compra_materialArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.proveedor$orden_compraArgs<ExtArgs>
   pago?: boolean | Prisma.proveedor$pagoArgs<ExtArgs>
   _count?: boolean | Prisma.ProveedorCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["proveedor"]>
@@ -595,6 +692,7 @@ export type proveedorSelectScalar = {
 export type proveedorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_proveedor" | "nombre_proveedor" | "nit" | "telefono" | "correo" | "direccion", ExtArgs["result"]["proveedor"]>
 export type proveedorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   compra_material?: boolean | Prisma.proveedor$compra_materialArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.proveedor$orden_compraArgs<ExtArgs>
   pago?: boolean | Prisma.proveedor$pagoArgs<ExtArgs>
   _count?: boolean | Prisma.ProveedorCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -603,6 +701,7 @@ export type $proveedorPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   name: "proveedor"
   objects: {
     compra_material: Prisma.$compra_materialPayload<ExtArgs>[]
+    orden_compra: Prisma.$orden_compraPayload<ExtArgs>[]
     pago: Prisma.$pagoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -953,6 +1052,7 @@ readonly fields: proveedorFieldRefs;
 export interface Prisma__proveedorClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   compra_material<T extends Prisma.proveedor$compra_materialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proveedor$compra_materialArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$compra_materialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orden_compra<T extends Prisma.proveedor$orden_compraArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proveedor$orden_compraArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$orden_compraPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pago<T extends Prisma.proveedor$pagoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.proveedor$pagoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$pagoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1357,6 +1457,30 @@ export type proveedor$compra_materialArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.Compra_materialScalarFieldEnum | Prisma.Compra_materialScalarFieldEnum[]
+}
+
+/**
+ * proveedor.orden_compra
+ */
+export type proveedor$orden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the orden_compra
+   */
+  select?: Prisma.orden_compraSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the orden_compra
+   */
+  omit?: Prisma.orden_compraOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.orden_compraInclude<ExtArgs> | null
+  where?: Prisma.orden_compraWhereInput
+  orderBy?: Prisma.orden_compraOrderByWithRelationInput | Prisma.orden_compraOrderByWithRelationInput[]
+  cursor?: Prisma.orden_compraWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Orden_compraScalarFieldEnum | Prisma.Orden_compraScalarFieldEnum[]
 }
 
 /**

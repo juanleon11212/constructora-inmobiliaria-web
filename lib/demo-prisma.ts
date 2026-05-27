@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- In-memory Prisma mock accepts dynamic model arguments. */
 /*
   BASE DE DATOS DEMO
 
@@ -385,6 +386,7 @@ const compras = [
     id_proyecto: 1,
     id_almacen: 1,
     id_usuario_registro: 1,
+    id_orden: null,
   },
 ];
 
@@ -396,6 +398,32 @@ const detalleCompras = [
     cantidad: 50,
     precio_unitario: 50,
     subtotal: 2500,
+  },
+];
+
+const ordenes = [
+  {
+    id_orden: 1,
+    numero_orden: "OC-001",
+    fecha_orden: new Date("2026-05-20"),
+    total_estimado: 4800,
+    estado: "solicitada",
+    observacion: "Pedido pendiente de recepcion",
+    id_proveedor: 2,
+    id_proyecto: 1,
+    id_almacen: 1,
+    id_usuario_registro: 6,
+  },
+];
+
+const detalleOrdenes = [
+  {
+    id_detalle_orden: 1,
+    id_orden: 1,
+    id_material: 2,
+    cantidad: 40,
+    precio_unitario: 120,
+    subtotal: 4800,
   },
 ];
 
@@ -415,6 +443,8 @@ function getIdField(modelName: string) {
     pago: "id_pago",
     compra_material: "id_compra",
     detalle_compra_material: "id_detalle_compra",
+    orden_compra: "id_orden",
+    detalle_orden_compra: "id_detalle_orden",
   };
 
   return ids[modelName];
@@ -639,6 +669,8 @@ export const demoPrisma = {
     "detalle_compra_material",
     detalleCompras
   ),
+  orden_compra: createModel("orden_compra", ordenes),
+  detalle_orden_compra: createModel("detalle_orden_compra", detalleOrdenes),
 
   async $transaction(callback: any) {
     if (typeof callback === "function") {

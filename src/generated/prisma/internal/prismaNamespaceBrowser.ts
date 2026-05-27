@@ -62,6 +62,7 @@ export const ModelName = {
   control_diario_trabajo: 'control_diario_trabajo',
   cotizacion_cliente: 'cotizacion_cliente',
   detalle_compra_material: 'detalle_compra_material',
+  detalle_orden_compra: 'detalle_orden_compra',
   detalle_cotizacion_cliente: 'detalle_cotizacion_cliente',
   empleado: 'empleado',
   historial_pago_hora: 'historial_pago_hora',
@@ -74,6 +75,7 @@ export const ModelName = {
   proveedor: 'proveedor',
   proyecto: 'proyecto',
   rol: 'rol',
+  orden_compra: 'orden_compra',
   rol_modulo: 'rol_modulo',
   rol_permiso: 'rol_permiso',
   usuario: 'usuario',
@@ -165,7 +167,8 @@ export const Compra_materialScalarFieldEnum = {
   id_proveedor: 'id_proveedor',
   id_proyecto: 'id_proyecto',
   id_almacen: 'id_almacen',
-  id_usuario_registro: 'id_usuario_registro'
+  id_usuario_registro: 'id_usuario_registro',
+  id_orden: 'id_orden'
 } as const
 
 export type Compra_materialScalarFieldEnum = (typeof Compra_materialScalarFieldEnum)[keyof typeof Compra_materialScalarFieldEnum]
@@ -246,6 +249,18 @@ export const Detalle_compra_materialScalarFieldEnum = {
 } as const
 
 export type Detalle_compra_materialScalarFieldEnum = (typeof Detalle_compra_materialScalarFieldEnum)[keyof typeof Detalle_compra_materialScalarFieldEnum]
+
+
+export const Detalle_orden_compraScalarFieldEnum = {
+  id_detalle_orden: 'id_detalle_orden',
+  cantidad: 'cantidad',
+  precio_unitario: 'precio_unitario',
+  subtotal: 'subtotal',
+  id_orden: 'id_orden',
+  id_material: 'id_material'
+} as const
+
+export type Detalle_orden_compraScalarFieldEnum = (typeof Detalle_orden_compraScalarFieldEnum)[keyof typeof Detalle_orden_compraScalarFieldEnum]
 
 
 export const Detalle_cotizacion_clienteScalarFieldEnum = {
@@ -396,6 +411,22 @@ export const RolScalarFieldEnum = {
 } as const
 
 export type RolScalarFieldEnum = (typeof RolScalarFieldEnum)[keyof typeof RolScalarFieldEnum]
+
+
+export const Orden_compraScalarFieldEnum = {
+  id_orden: 'id_orden',
+  numero_orden: 'numero_orden',
+  fecha_orden: 'fecha_orden',
+  total_estimado: 'total_estimado',
+  estado: 'estado',
+  observacion: 'observacion',
+  id_proveedor: 'id_proveedor',
+  id_proyecto: 'id_proyecto',
+  id_almacen: 'id_almacen',
+  id_usuario_registro: 'id_usuario_registro'
+} as const
+
+export type Orden_compraScalarFieldEnum = (typeof Orden_compraScalarFieldEnum)[keyof typeof Orden_compraScalarFieldEnum]
 
 
 export const Rol_moduloScalarFieldEnum = {

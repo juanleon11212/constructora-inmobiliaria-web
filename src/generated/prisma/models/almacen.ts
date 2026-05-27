@@ -210,6 +210,7 @@ export type almacenWhereInput = {
   descripcion?: Prisma.StringNullableFilter<"almacen"> | string | null
   compra_material?: Prisma.Compra_materialListRelationFilter
   inventario?: Prisma.InventarioListRelationFilter
+  orden_compra?: Prisma.Orden_compraListRelationFilter
 }
 
 export type almacenOrderByWithRelationInput = {
@@ -219,6 +220,7 @@ export type almacenOrderByWithRelationInput = {
   descripcion?: Prisma.SortOrderInput | Prisma.SortOrder
   compra_material?: Prisma.compra_materialOrderByRelationAggregateInput
   inventario?: Prisma.inventarioOrderByRelationAggregateInput
+  orden_compra?: Prisma.orden_compraOrderByRelationAggregateInput
 }
 
 export type almacenWhereUniqueInput = Prisma.AtLeast<{
@@ -231,6 +233,7 @@ export type almacenWhereUniqueInput = Prisma.AtLeast<{
   descripcion?: Prisma.StringNullableFilter<"almacen"> | string | null
   compra_material?: Prisma.Compra_materialListRelationFilter
   inventario?: Prisma.InventarioListRelationFilter
+  orden_compra?: Prisma.Orden_compraListRelationFilter
 }, "id_almacen">
 
 export type almacenOrderByWithAggregationInput = {
@@ -261,6 +264,7 @@ export type almacenCreateInput = {
   descripcion?: string | null
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutAlmacenInput
   inventario?: Prisma.inventarioCreateNestedManyWithoutAlmacenInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutAlmacenInput
 }
 
 export type almacenUncheckedCreateInput = {
@@ -270,6 +274,7 @@ export type almacenUncheckedCreateInput = {
   descripcion?: string | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutAlmacenInput
   inventario?: Prisma.inventarioUncheckedCreateNestedManyWithoutAlmacenInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutAlmacenInput
 }
 
 export type almacenUpdateInput = {
@@ -278,6 +283,7 @@ export type almacenUpdateInput = {
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   compra_material?: Prisma.compra_materialUpdateManyWithoutAlmacenNestedInput
   inventario?: Prisma.inventarioUpdateManyWithoutAlmacenNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutAlmacenNestedInput
 }
 
 export type almacenUncheckedUpdateInput = {
@@ -287,6 +293,7 @@ export type almacenUncheckedUpdateInput = {
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutAlmacenNestedInput
   inventario?: Prisma.inventarioUncheckedUpdateManyWithoutAlmacenNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutAlmacenNestedInput
 }
 
 export type almacenCreateManyInput = {
@@ -386,11 +393,26 @@ export type almacenUpdateOneRequiredWithoutInventarioNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.almacenUpdateToOneWithWhereWithoutInventarioInput, Prisma.almacenUpdateWithoutInventarioInput>, Prisma.almacenUncheckedUpdateWithoutInventarioInput>
 }
 
+export type almacenCreateNestedOneWithoutOrden_compraInput = {
+  create?: Prisma.XOR<Prisma.almacenCreateWithoutOrden_compraInput, Prisma.almacenUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.almacenCreateOrConnectWithoutOrden_compraInput
+  connect?: Prisma.almacenWhereUniqueInput
+}
+
+export type almacenUpdateOneRequiredWithoutOrden_compraNestedInput = {
+  create?: Prisma.XOR<Prisma.almacenCreateWithoutOrden_compraInput, Prisma.almacenUncheckedCreateWithoutOrden_compraInput>
+  connectOrCreate?: Prisma.almacenCreateOrConnectWithoutOrden_compraInput
+  upsert?: Prisma.almacenUpsertWithoutOrden_compraInput
+  connect?: Prisma.almacenWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.almacenUpdateToOneWithWhereWithoutOrden_compraInput, Prisma.almacenUpdateWithoutOrden_compraInput>, Prisma.almacenUncheckedUpdateWithoutOrden_compraInput>
+}
+
 export type almacenCreateWithoutCompra_materialInput = {
   nombre_almacen: string
   ubicacion?: string | null
   descripcion?: string | null
   inventario?: Prisma.inventarioCreateNestedManyWithoutAlmacenInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutAlmacenInput
 }
 
 export type almacenUncheckedCreateWithoutCompra_materialInput = {
@@ -399,6 +421,7 @@ export type almacenUncheckedCreateWithoutCompra_materialInput = {
   ubicacion?: string | null
   descripcion?: string | null
   inventario?: Prisma.inventarioUncheckedCreateNestedManyWithoutAlmacenInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutAlmacenInput
 }
 
 export type almacenCreateOrConnectWithoutCompra_materialInput = {
@@ -422,6 +445,7 @@ export type almacenUpdateWithoutCompra_materialInput = {
   ubicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inventario?: Prisma.inventarioUpdateManyWithoutAlmacenNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutAlmacenNestedInput
 }
 
 export type almacenUncheckedUpdateWithoutCompra_materialInput = {
@@ -430,6 +454,7 @@ export type almacenUncheckedUpdateWithoutCompra_materialInput = {
   ubicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inventario?: Prisma.inventarioUncheckedUpdateManyWithoutAlmacenNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutAlmacenNestedInput
 }
 
 export type almacenCreateWithoutInventarioInput = {
@@ -437,6 +462,7 @@ export type almacenCreateWithoutInventarioInput = {
   ubicacion?: string | null
   descripcion?: string | null
   compra_material?: Prisma.compra_materialCreateNestedManyWithoutAlmacenInput
+  orden_compra?: Prisma.orden_compraCreateNestedManyWithoutAlmacenInput
 }
 
 export type almacenUncheckedCreateWithoutInventarioInput = {
@@ -445,6 +471,7 @@ export type almacenUncheckedCreateWithoutInventarioInput = {
   ubicacion?: string | null
   descripcion?: string | null
   compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutAlmacenInput
+  orden_compra?: Prisma.orden_compraUncheckedCreateNestedManyWithoutAlmacenInput
 }
 
 export type almacenCreateOrConnectWithoutInventarioInput = {
@@ -468,6 +495,7 @@ export type almacenUpdateWithoutInventarioInput = {
   ubicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   compra_material?: Prisma.compra_materialUpdateManyWithoutAlmacenNestedInput
+  orden_compra?: Prisma.orden_compraUpdateManyWithoutAlmacenNestedInput
 }
 
 export type almacenUncheckedUpdateWithoutInventarioInput = {
@@ -476,6 +504,57 @@ export type almacenUncheckedUpdateWithoutInventarioInput = {
   ubicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutAlmacenNestedInput
+  orden_compra?: Prisma.orden_compraUncheckedUpdateManyWithoutAlmacenNestedInput
+}
+
+export type almacenCreateWithoutOrden_compraInput = {
+  nombre_almacen: string
+  ubicacion?: string | null
+  descripcion?: string | null
+  compra_material?: Prisma.compra_materialCreateNestedManyWithoutAlmacenInput
+  inventario?: Prisma.inventarioCreateNestedManyWithoutAlmacenInput
+}
+
+export type almacenUncheckedCreateWithoutOrden_compraInput = {
+  id_almacen?: number
+  nombre_almacen: string
+  ubicacion?: string | null
+  descripcion?: string | null
+  compra_material?: Prisma.compra_materialUncheckedCreateNestedManyWithoutAlmacenInput
+  inventario?: Prisma.inventarioUncheckedCreateNestedManyWithoutAlmacenInput
+}
+
+export type almacenCreateOrConnectWithoutOrden_compraInput = {
+  where: Prisma.almacenWhereUniqueInput
+  create: Prisma.XOR<Prisma.almacenCreateWithoutOrden_compraInput, Prisma.almacenUncheckedCreateWithoutOrden_compraInput>
+}
+
+export type almacenUpsertWithoutOrden_compraInput = {
+  update: Prisma.XOR<Prisma.almacenUpdateWithoutOrden_compraInput, Prisma.almacenUncheckedUpdateWithoutOrden_compraInput>
+  create: Prisma.XOR<Prisma.almacenCreateWithoutOrden_compraInput, Prisma.almacenUncheckedCreateWithoutOrden_compraInput>
+  where?: Prisma.almacenWhereInput
+}
+
+export type almacenUpdateToOneWithWhereWithoutOrden_compraInput = {
+  where?: Prisma.almacenWhereInput
+  data: Prisma.XOR<Prisma.almacenUpdateWithoutOrden_compraInput, Prisma.almacenUncheckedUpdateWithoutOrden_compraInput>
+}
+
+export type almacenUpdateWithoutOrden_compraInput = {
+  nombre_almacen?: Prisma.StringFieldUpdateOperationsInput | string
+  ubicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  compra_material?: Prisma.compra_materialUpdateManyWithoutAlmacenNestedInput
+  inventario?: Prisma.inventarioUpdateManyWithoutAlmacenNestedInput
+}
+
+export type almacenUncheckedUpdateWithoutOrden_compraInput = {
+  id_almacen?: Prisma.IntFieldUpdateOperationsInput | number
+  nombre_almacen?: Prisma.StringFieldUpdateOperationsInput | string
+  ubicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  compra_material?: Prisma.compra_materialUncheckedUpdateManyWithoutAlmacenNestedInput
+  inventario?: Prisma.inventarioUncheckedUpdateManyWithoutAlmacenNestedInput
 }
 
 
@@ -486,11 +565,13 @@ export type almacenUncheckedUpdateWithoutInventarioInput = {
 export type AlmacenCountOutputType = {
   compra_material: number
   inventario: number
+  orden_compra: number
 }
 
 export type AlmacenCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   compra_material?: boolean | AlmacenCountOutputTypeCountCompra_materialArgs
   inventario?: boolean | AlmacenCountOutputTypeCountInventarioArgs
+  orden_compra?: boolean | AlmacenCountOutputTypeCountOrden_compraArgs
 }
 
 /**
@@ -517,6 +598,13 @@ export type AlmacenCountOutputTypeCountInventarioArgs<ExtArgs extends runtime.Ty
   where?: Prisma.inventarioWhereInput
 }
 
+/**
+ * AlmacenCountOutputType without action
+ */
+export type AlmacenCountOutputTypeCountOrden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.orden_compraWhereInput
+}
+
 
 export type almacenSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id_almacen?: boolean
@@ -525,6 +613,7 @@ export type almacenSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   descripcion?: boolean
   compra_material?: boolean | Prisma.almacen$compra_materialArgs<ExtArgs>
   inventario?: boolean | Prisma.almacen$inventarioArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.almacen$orden_compraArgs<ExtArgs>
   _count?: boolean | Prisma.AlmacenCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["almacen"]>
 
@@ -541,6 +630,7 @@ export type almacenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type almacenInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   compra_material?: boolean | Prisma.almacen$compra_materialArgs<ExtArgs>
   inventario?: boolean | Prisma.almacen$inventarioArgs<ExtArgs>
+  orden_compra?: boolean | Prisma.almacen$orden_compraArgs<ExtArgs>
   _count?: boolean | Prisma.AlmacenCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -549,6 +639,7 @@ export type $almacenPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     compra_material: Prisma.$compra_materialPayload<ExtArgs>[]
     inventario: Prisma.$inventarioPayload<ExtArgs>[]
+    orden_compra: Prisma.$orden_compraPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id_almacen: number
@@ -897,6 +988,7 @@ export interface Prisma__almacenClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   compra_material<T extends Prisma.almacen$compra_materialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.almacen$compra_materialArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$compra_materialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inventario<T extends Prisma.almacen$inventarioArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.almacen$inventarioArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$inventarioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orden_compra<T extends Prisma.almacen$orden_compraArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.almacen$orden_compraArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$orden_compraPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1322,6 +1414,30 @@ export type almacen$inventarioArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.InventarioScalarFieldEnum | Prisma.InventarioScalarFieldEnum[]
+}
+
+/**
+ * almacen.orden_compra
+ */
+export type almacen$orden_compraArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the orden_compra
+   */
+  select?: Prisma.orden_compraSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the orden_compra
+   */
+  omit?: Prisma.orden_compraOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.orden_compraInclude<ExtArgs> | null
+  where?: Prisma.orden_compraWhereInput
+  orderBy?: Prisma.orden_compraOrderByWithRelationInput | Prisma.orden_compraOrderByWithRelationInput[]
+  cursor?: Prisma.orden_compraWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Orden_compraScalarFieldEnum | Prisma.Orden_compraScalarFieldEnum[]
 }
 
 /**

@@ -14,7 +14,6 @@ export type AppAction =
   | "delete"
   | "manage"
   | "assign"
-  | "inventory"
   | "purchase"
   | "report";
 
@@ -47,7 +46,7 @@ export const allModules: ModuleItem[] = [
   {
     key: "materiales",
     title: "Materiales",
-    description: "Controlar materiales, inventario, almacenes, proveedores y compras.",
+    description: "Controlar materiales, inventario, proveedores, órdenes y compras.",
     href: "/admin/materiales",
   },
   {
@@ -109,7 +108,6 @@ export const roleActionPermissions: Record<
       "create",
       "edit",
       "delete",
-      "inventory",
       "purchase",
       "manage",
     ],
@@ -125,12 +123,12 @@ export const roleActionPermissions: Record<
   },
 
   Almacen: {
-    materiales: ["view", "create", "edit", "inventory"],
+    materiales: ["view", "create", "edit"],
     reportes: ["view"],
   },
 
   Almacén: {
-    materiales: ["view", "create", "edit", "inventory"],
+    materiales: ["view", "create", "edit"],
     reportes: ["view"],
   },
 
@@ -176,12 +174,12 @@ export const roleModuleDetails: Record<
         "Ver materiales",
         "Crear materiales",
         "Editar materiales",
-        "Controlar stock",
         "Consultar inventario",
         "Ver almacenes",
         "Crear proveedores",
         "Editar proveedores",
-        "Registrar compras de materiales",
+        "Emitir órdenes de compra",
+        "Recibir órdenes y registrar factura",
         "Ver compras realizadas",
       ],
       cannot: [],
@@ -199,7 +197,8 @@ export const roleModuleDetails: Record<
         "Ver proveedores",
         "Crear proveedores",
         "Editar proveedores",
-        "Registrar compras de materiales",
+        "Emitir órdenes de compra a proveedores",
+        "Recibir órdenes y registrar factura",
         "Seleccionar proveedor",
         "Seleccionar proyecto relacionado",
         "Seleccionar almacén destino",
@@ -208,8 +207,6 @@ export const roleModuleDetails: Record<
         "Ver compras realizadas",
       ],
       cannot: [
-        "No puede controlar stock directamente",
-        "No puede modificar inventario manualmente",
         "No puede crear usuarios",
         "No puede editar empleados",
         "No puede editar clientes",
@@ -265,7 +262,6 @@ export const roleModuleDetails: Record<
       cannot: [
         "No puede eliminar pagos",
         "No puede registrar compras",
-        "No puede modificar inventario",
       ],
     },
     reportes: {
@@ -294,7 +290,6 @@ export const roleModuleDetails: Record<
       ],
       cannot: [
         "No puede registrar compras",
-        "No puede controlar inventario",
       ],
     },
     reportes: {
@@ -387,15 +382,15 @@ export function getRoleSummary(roleName: string) {
     "Encargado de Obra":
       "Gestiona información operativa de proyectos, obra y materiales.",
     Almacen:
-      "Controla materiales, inventario, stock y almacenes.",
+      "Consulta inventario y administra la información de materiales.",
     Almacén:
-      "Controla materiales, inventario, stock y almacenes.",
+      "Consulta inventario y administra la información de materiales.",
     Contabilidad:
       "Gestiona pagos, clientes, proyectos y reportes financieros.",
     "Recursos Humanos":
       "Gestiona empleados, cargos y reportes del personal.",
     Compras:
-      "Gestiona proveedores, compras de materiales y reportes de compras.",
+      "Gestiona proveedores, órdenes de compra, recepciones y reportes.",
     Cliente:
       "Consulta únicamente sus proyectos y sus pagos.",
   };

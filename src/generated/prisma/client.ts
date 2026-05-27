@@ -97,6 +97,11 @@ export type cotizacion_cliente = Prisma.cotizacion_clienteModel
  */
 export type detalle_compra_material = Prisma.detalle_compra_materialModel
 /**
+ * Model detalle_orden_compra
+ * 
+ */
+export type detalle_orden_compra = Prisma.detalle_orden_compraModel
+/**
  * Model detalle_cotizacion_cliente
  * 
  */
@@ -156,6 +161,11 @@ export type proyecto = Prisma.proyectoModel
  * 
  */
 export type rol = Prisma.rolModel
+/**
+ * Model orden_compra
+ * 
+ */
+export type orden_compra = Prisma.orden_compraModel
 /**
  * Model rol_modulo
  * 

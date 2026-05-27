@@ -1,10 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "../../components/auth/LogoutButton";
 import { getCurrentUser } from "../../lib/auth/current-user";
 import {
+  AppAction,
   AppModule,
-  getModuleDetails,
+  canDo,
   getModulesByRole,
   getRoleSummary,
 } from "../../lib/auth/permissions";
@@ -39,15 +41,159 @@ function getTituloModulo(roleName: string, key: AppModule, title: string) {
   return title;
 }
 
-const moduleImages: Partial<Record<AppModule, string>> = {
-  clientes: "/images/clientes.jpg",
-  empleados: "/images/empleados.jpg",
-  proyectos: "/images/proyectos.jpg",
-  materiales: "/images/materiales.jpg",
-  pagos: "/images/pagos.jpg",
-  reportes: "/images/reportes.jpg",
-  usuarios: "/images/usuarios.jpg",
+type ModuleVisual = {
+  area: string;
+  image: string;
+  alt: string;
 };
+
+const moduleVisuals: Record<AppModule, ModuleVisual> = {
+  clientes: {
+    area: "Relaciones",
+    image: "/images/dashboard-clientes-card.webp",
+    alt: "Asesor de obra atendiendo a una cliente frente a planos.",
+  },
+  empleados: {
+    area: "Equipo",
+    image: "/images/dashboard-equipo-card.webp",
+    alt: "Equipo de construcción coordinando actividades en una obra.",
+  },
+  proyectos: {
+    area: "Obras",
+    image: "/images/dashboard-proyectos-card.webp",
+    alt: "Ingeniero supervisando la construcción de un edificio.",
+  },
+  materiales: {
+    area: "Abastecimiento",
+    image: "/images/dashboard-materiales-card.webp",
+    alt: "Responsable de almacén recibiendo materiales de construcción.",
+  },
+  pagos: {
+    area: "Finanzas",
+    image: "/images/dashboard-pagos-card.webp",
+    alt: "Profesional revisando pagos y documentos de construcción.",
+  },
+  reportes: {
+    area: "Indicadores",
+    image: "/images/dashboard-reportes-card.webp",
+    alt: "Equipo analizando reportes de avance de construcción.",
+  },
+  usuarios: {
+    area: "Accesos",
+    image: "/images/dashboard-usuarios-card.webp",
+    alt: "Administrador gestionando accesos del personal.",
+  },
+};
+
+const actionOrder: AppAction[] = [
+  "view",
+  "purchase",
+  "create",
+  "edit",
+  "assign",
+  "report",
+  "manage",
+  "delete",
+];
+
+const actionLabels: Record<AppAction, string> = {
+  view: "Consultar",
+  create: "Registrar",
+  edit: "Actualizar",
+  delete: "Eliminar",
+  manage: "Administrar",
+  assign: "Asignar",
+  purchase: "Orden y recepción",
+  report: "Generar reporte",
+};
+
+function getFeaturedActions(roleName: string, key: AppModule) {
+  const actions = actionOrder
+    .filter((action) => canDo(roleName, key, action))
+    .slice(0, 3)
+    .map((action) => actionLabels[action]);
+
+  return actions.length > 0 ? actions : ["Acceso disponible"];
+}
+
+type AccessCardProps = {
+  href: string;
+  title: string;
+  description: string;
+  visual: ModuleVisual;
+  actions: string[];
+};
+
+function AccessCard({
+  href,
+  title,
+  description,
+  visual,
+  actions,
+}: AccessCardProps) {
+  return (
+    <Link
+      href={href}
+      className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-blue-100 bg-white shadow-lg shadow-blue-100/70 transition duration-300 hover:-translate-y-1.5 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-200/70 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
+    >
+      <div className="relative h-56 shrink-0 overflow-hidden bg-blue-950">
+        <Image
+          src={visual.image}
+          alt={visual.alt}
+          fill
+          sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
+          className="object-cover transition duration-700 group-hover:scale-105"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-950 via-blue-950/35 to-transparent" />
+
+        <div className="absolute inset-x-0 bottom-0 p-6">
+          <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-50 backdrop-blur-sm">
+            {visual.area}
+          </span>
+
+          <h3 className="mt-3 text-3xl font-extrabold tracking-tight text-white">
+            {title}
+          </h3>
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-6">
+        <p className="text-sm font-medium leading-6 text-slate-600">
+          {description}
+        </p>
+
+        <p className="mt-5 text-[11px] font-extrabold uppercase tracking-[0.2em] text-blue-700">
+          Acciones destacadas
+        </p>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {actions.map((action) => (
+            <span
+              key={action}
+              className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-800"
+            >
+              {action}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-auto flex items-center justify-between pt-7">
+          <span className="text-sm font-extrabold text-blue-800 transition group-hover:text-blue-950">
+            Abrir módulo
+          </span>
+
+          <span
+            aria-hidden="true"
+            className="flex size-10 items-center justify-center rounded-full bg-blue-700 text-xl font-bold text-white shadow-lg shadow-blue-700/25 transition group-hover:bg-blue-950"
+          >
+            →
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 export default async function AdminPage() {
   const user = await getCurrentUser();
@@ -59,8 +205,8 @@ export default async function AdminPage() {
   const roleName = getRoleName(user);
   const modules = getModulesByRole(roleName);
   const roleSummary = getRoleSummary(roleName);
-
   const showLogsModule = roleName === "Administrador";
+  const visibleModules = modules.length + (showLogsModule ? 1 : 0);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
@@ -117,18 +263,40 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className="mt-10">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
-            Accesos del sistema
-          </p>
+        <div className="mt-10 overflow-hidden rounded-3xl border border-blue-100 bg-white p-6 shadow-xl shadow-blue-100/60 md:p-8">
+          <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+                Centro de operaciones
+              </p>
 
-          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-blue-950">
-            Módulos disponibles
-          </h2>
+              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-blue-950 md:text-4xl">
+                Elige una tarea para comenzar
+              </h2>
 
-          <p className="mt-2 text-base font-medium text-slate-600">
-            Todos los usuarios con rol {roleName} tienen estos mismos permisos.
-          </p>
+              <p className="mt-3 text-base font-medium leading-7 text-slate-600">
+                Explora las áreas disponibles para tu rol. Cada tarjeta
+                muestra acciones destacadas que puedes realizar dentro del
+                módulo.
+              </p>
+            </div>
+
+            <div className="grid shrink-0 grid-cols-2 gap-3">
+              <div className="min-w-32 rounded-2xl bg-blue-950 px-5 py-4 text-white">
+                <p className="text-3xl font-extrabold">{visibleModules}</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-wide text-blue-200">
+                  Accesos activos
+                </p>
+              </div>
+
+              <div className="min-w-32 rounded-2xl bg-sky-100 px-5 py-4 text-blue-950">
+                <p className="truncate text-lg font-extrabold">{roleName}</p>
+                <p className="mt-2 text-xs font-bold uppercase tracking-wide text-blue-700">
+                  Perfil actual
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {modules.length === 0 && !showLogsModule ? (
@@ -142,85 +310,30 @@ export default async function AdminPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {modules.map((module) => {
-              const details = getModuleDetails(roleName, module.key);
-              const imageUrl =
-                moduleImages[module.key] ?? "/images/login-construccion.jpg.png";
-
-              return (
-                <Link
-                  key={module.key}
-                  href={module.href}
-                  className="group overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-xl shadow-blue-100/70 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-200/80"
-                >
-                  <div
-                    className="h-40 bg-cover bg-center"
-                    style={{
-                      backgroundImage: `url('${imageUrl}')`,
-                    }}
-                  >
-                    <div className="flex h-full items-end bg-gradient-to-t from-blue-950/90 via-blue-900/45 to-transparent p-6">
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-200">
-                          Módulo
-                        </p>
-
-                        <h3 className="mt-1 text-2xl font-extrabold text-white">
-                          {getTituloModulo(roleName, module.key, module.title)}
-                        </h3>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-6">
-                    <p className="text-sm font-medium leading-6 text-slate-600">
-                      {module.description}
-                    </p>
-
-                    <p className="mt-5 inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-700/25 transition group-hover:bg-blue-900">
-                      Entrar →
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="mt-7 grid items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {modules.map((module) => (
+              <AccessCard
+                key={module.key}
+                href={module.href}
+                title={getTituloModulo(roleName, module.key, module.title)}
+                description={module.description}
+                visual={moduleVisuals[module.key]}
+                actions={getFeaturedActions(roleName, module.key)}
+              />
+            ))}
 
             {showLogsModule && (
-              <Link
+              <AccessCard
                 href="/admin/logs"
-                className="group overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-xl shadow-blue-100/70 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-200/80"
-              >
-                <div
-                  className="h-40 bg-cover bg-center"
-                  style={{
-                    backgroundImage: "url('/images/usuarios.jpg')",
-                  }}
-                >
-                  <div className="flex h-full items-end bg-gradient-to-t from-slate-950/95 via-blue-900/50 to-transparent p-6">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-200">
-                        Auditoría
-                      </p>
-
-                      <h3 className="mt-1 text-2xl font-extrabold text-white">
-                        Logs del sistema
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <p className="text-sm font-medium leading-6 text-slate-600">
-                    Ver ingresos, ediciones y acciones realizadas por los
-                    usuarios dentro del sistema.
-                  </p>
-
-                  <p className="mt-5 inline-flex rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-700/25 transition group-hover:bg-blue-900">
-                    Entrar →
-                  </p>
-                </div>
-              </Link>
+                title="Logs del sistema"
+                description="Consulta ingresos, ediciones y acciones realizadas por usuarios dentro del sistema."
+                visual={{
+                  area: "Auditoría",
+                  image: "/images/dashboard-auditoria-card.webp",
+                  alt: "Especialista supervisando auditoría y seguridad del sistema.",
+                }}
+                actions={["Consultar eventos", "Revisar actividad", "Supervisar"]}
+              />
             )}
           </div>
         )}
