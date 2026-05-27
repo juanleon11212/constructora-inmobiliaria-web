@@ -218,7 +218,7 @@ export default function LandingPage() {
                 Proyectos
               </a>
               <a href="#perfil-proyectos" className="rounded-full px-5 py-3 text-sm font-bold text-blue-50 transition hover:bg-white/15">
-                Fichas públicas
+                Nuestras obras
               </a>
               <a href="#servicios" className="rounded-full px-5 py-3 text-sm font-bold text-blue-50 transition hover:bg-white/15">
                 Servicios
@@ -242,7 +242,7 @@ export default function LandingPage() {
             Proyectos
           </a>
           <a href="#perfil-proyectos" className="whitespace-nowrap rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-blue-50">
-            Perfiles públicos
+            Nuestras obras
           </a>
           <a href="#servicios" className="whitespace-nowrap rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-blue-50">
             Servicios
@@ -268,7 +268,7 @@ export default function LandingPage() {
                 href="#perfil-proyectos"
                 className="inline-flex items-center gap-4 rounded-xl bg-[#0868f7] px-6 py-4 text-sm font-bold shadow-xl shadow-blue-950/20 transition hover:bg-blue-500"
               >
-                Ver proyectos públicos
+                Ver proyectos
                 <ArrowRightIcon />
               </a>
               <button
@@ -316,7 +316,7 @@ export default function LandingPage() {
                   onClick={() => setProfileProject(activeProject)}
                   className="inline-flex shrink-0 items-center justify-center gap-4 rounded-xl border border-blue-300/40 bg-blue-950/55 px-6 py-3 text-sm font-bold backdrop-blur transition hover:bg-blue-800"
                 >
-                  Ver ficha pública
+                  Ver detalles
                   <ArrowRightIcon />
                 </button>
               </div>
@@ -357,7 +357,7 @@ export default function LandingPage() {
               Proyectos destacados
             </p>
             <a href="#perfil-proyectos" className="flex items-center gap-2 text-xs font-bold text-blue-700">
-              Ver fichas públicas
+              Ver proyectos
               <ChevronRightIcon />
             </a>
           </div>
@@ -391,21 +391,21 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-2xl">
               <p className="text-xs font-extrabold uppercase tracking-[0.26em] text-blue-700">
-                Consulta abierta
+                Obras seleccionadas
               </p>
               <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-blue-950">
-                Conoce nuestros proyectos sin iniciar sesión
+                Conoce nuestros proyectos
               </h2>
               <p className="mt-3 text-sm font-medium leading-7 text-slate-600 sm:text-base">
-                Revisa ubicación, etapa, avance y características principales.
-                El acceso privado se utiliza únicamente para administrar la obra.
+                Revisa ubicación, etapa, avance y características principales
+                de algunas de nuestras obras.
               </p>
             </div>
             <Link
               href="/registro"
               className="inline-flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 px-5 py-3 text-sm font-extrabold text-blue-800 transition hover:bg-blue-100"
             >
-              Crear cuenta de cliente
+              Quiero conocer más
               <ArrowRightIcon />
             </Link>
           </div>
@@ -451,7 +451,7 @@ export default function LandingPage() {
                     onClick={() => setProfileProject(project)}
                     className="mt-5 inline-flex w-full items-center justify-center gap-3 rounded-xl bg-blue-700 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-blue-950"
                   >
-                    Ver perfil del proyecto
+                    Ver detalles
                     <ArrowRightIcon />
                   </button>
                 </div>
@@ -554,7 +554,7 @@ function PublicProjectProfile({
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#03102d]/90 p-3 backdrop-blur-md sm:p-8"
       role="dialog"
       aria-modal="true"
-      aria-label={`Perfil público de ${project.name}`}
+      aria-label={`Detalle de ${project.name}`}
     >
       <article className="relative grid w-full max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-2xl lg:grid-cols-[1.02fr_0.98fr]">
         <div className="relative min-h-[290px] bg-blue-950 lg:min-h-[630px]">
@@ -583,17 +583,17 @@ function PublicProjectProfile({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar perfil del proyecto"
+            aria-label="Cerrar detalle del proyecto"
             className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl font-bold text-blue-950 shadow-lg transition hover:bg-blue-50"
           >
             ×
           </button>
 
           <p className="text-xs font-extrabold uppercase tracking-[0.26em] text-blue-700">
-            Perfil público
+            Proyecto
           </p>
           <h3 className="mt-3 text-2xl font-extrabold">
-            Información del proyecto
+            Detalles de la obra
           </h3>
           <p className="mt-4 text-sm font-medium leading-7 text-slate-600">
             {project.summary}
@@ -643,7 +643,7 @@ function PublicProjectProfile({
               href="/registro"
               className="flex-1 rounded-xl bg-blue-700 px-5 py-3 text-center text-sm font-extrabold text-white transition hover:bg-blue-950"
             >
-              Registrarme como cliente
+              Quiero información
             </Link>
             <Link
               href="/login"

@@ -541,7 +541,7 @@ export default async function ProyectoDetallePage({
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="text-white drop-shadow">
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-sky-200">
-                Ficha completa de obra
+                Detalle del proyecto
               </p>
 
               <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-5xl">
@@ -549,7 +549,7 @@ export default async function ProyectoDetallePage({
               </h1>
 
               <p className="mt-3 text-sm font-medium text-blue-100">
-                Cliente: {clienteNombre} · Perfil: {roleName}
+                Cliente: {clienteNombre} · Rol: {roleName}
               </p>
             </div>
 
@@ -630,9 +630,7 @@ export default async function ProyectoDetallePage({
                     </p>
 
                     <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-sky-200">
-                      {media.coverImage
-                        ? "Fotografía principal registrada"
-                        : "Portada referencial del proyecto"}
+                      Imagen principal del proyecto
                     </p>
                   </div>
                 </div>

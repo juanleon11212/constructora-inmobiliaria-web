@@ -258,7 +258,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="text-white drop-shadow">
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-sky-200">
-                Portafolio de obras
+                Gestión de obras
               </p>
 
               <h1 className="mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl">
@@ -470,7 +470,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-blue-700">
-                Fichas de proyecto
+                Proyectos registrados
               </p>
               <h2 className="mt-2 text-2xl font-extrabold text-slate-950">
                 {search
@@ -481,7 +481,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
               <p className="mt-2 text-sm font-medium text-slate-600">
                 {search
                   ? `Buscando: "${search}"`
-                  : "Abre una ficha para consultar sus imágenes, avances e información completa."}
+                  : "Selecciona un proyecto para consultar imágenes, avances e información completa."}
               </p>
             </div>
 
@@ -533,9 +533,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
 
                     <div className="absolute bottom-5 left-5 right-5">
                       <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-blue-100">
-                        {media.coverImage
-                          ? "Fotografía del proyecto"
-                          : "Imagen referencial"}
+                        Imagen del proyecto
                       </p>
                       <h3 className="mt-2 text-2xl font-extrabold leading-tight text-white">
                         {proyecto.nombre_proyecto}
@@ -611,7 +609,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                         href={`/admin/proyectos/${proyecto.id_proyecto}`}
                         className="flex-1 rounded-xl bg-blue-700 px-4 py-3 text-center text-sm font-extrabold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-950"
                       >
-                        Ver ficha completa
+                        Ver detalles
                       </Link>
 
                       {canEditProject && (
