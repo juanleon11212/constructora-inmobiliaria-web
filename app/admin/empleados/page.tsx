@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
+import { canDo } from "../../../lib/auth/permissions";
 import {
   TableFilter,
   type FilterOption,
@@ -70,7 +71,7 @@ async function crearEmpleado(formData: FormData) {
   const user = await requireModule("empleados");
   const roleName = getRoleName(user);
 
-  if (roleName !== "Administrador") {
+  if (!canDo(roleName, "empleados", "create")) {
     redirect("/admin/empleados");
   }
 
@@ -120,7 +121,7 @@ async function editarEmpleado(formData: FormData) {
   const user = await requireModule("empleados");
   const roleName = getRoleName(user);
 
-  if (roleName !== "Administrador") {
+  if (!canDo(roleName, "empleados", "edit")) {
     redirect("/admin/empleados");
   }
 
@@ -212,6 +213,8 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
 
   const roleName = getRoleName(user);
   const isAdmin = roleName === "Administrador";
+  const canCreateEmployee = canDo(roleName, "empleados", "create");
+  const canEditEmployee = canDo(roleName, "empleados", "edit");
 
   const idEditar = Number(params?.editar);
 
@@ -311,7 +314,7 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
   });
 
   const empleadoEditar =
-    idEditar && isAdmin
+    idEditar && canEditEmployee
       ? await prisma.empleado.findUnique({
           where: {
             id_empleado: idEditar,
@@ -364,10 +367,10 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
           </div>
         )}
 
-        {isAdmin && !empleadoEditar && (
+        {canCreateEmployee && !empleadoEditar && (
           <section className={`mt-6 ${glassPanel}`}>
             <h2 className="text-2xl font-extrabold text-white drop-shadow">
-              Crear empleado
+              Contratar empleado
             </h2>
 
             <p className="mt-1 text-sm font-semibold text-white/90">
@@ -452,14 +455,14 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                   type="submit"
                   className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/40 transition hover:from-blue-950 hover:to-sky-700"
                 >
-                  Crear empleado
+                  Contratar empleado
                 </button>
               </div>
             </form>
           </section>
         )}
 
-        {isAdmin && empleadoEditar && (
+        {canEditEmployee && empleadoEditar && (
           <section className={`mt-6 ${glassPanel}`}>
             <div className="flex items-center justify-between gap-4">
               <div>
@@ -639,17 +642,19 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                   <td className={tableCellClass}>{empleado.estado}</td>
 
                   <td className={tableCellClass}>
-                    {isAdmin ? (
+                    {canEditEmployee || isAdmin ? (
                       <div className="flex flex-wrap gap-2">
-                        <Link
-                          href={`/admin/empleados?editar=${empleado.id_empleado}`}
-                          scroll={false}
-                          className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-extrabold text-white shadow transition hover:bg-blue-900"
-                        >
-                          Editar
-                        </Link>
+                        {canEditEmployee && (
+                          <Link
+                            href={`/admin/empleados?editar=${empleado.id_empleado}`}
+                            scroll={false}
+                            className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-extrabold text-white shadow transition hover:bg-blue-900"
+                          >
+                            Editar
+                          </Link>
+                        )}
 
-                        {empleado.estado !== "inactivo" && (
+                        {isAdmin && empleado.estado !== "inactivo" && (
                           <form action={eliminarEmpleado}>
                             <input
                               type="hidden"

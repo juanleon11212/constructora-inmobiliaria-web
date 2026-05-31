@@ -302,7 +302,8 @@ export const roleModuleDetails: Record<
     empleados: {
       can: [
         "Ver empleados",
-        "Crear empleados",
+        "Contratar empleados",
+        "Registrar nuevos empleados",
         "Editar empleados",
         "Cambiar estado de empleados",
       ],
@@ -379,7 +380,7 @@ export function getRoleSummary(roleName: string) {
   const summaries: Record<string, string> = {
     Administrador:
       "Tiene acceso completo al sistema y puede administrar todos los módulos.",
-    "Encargado de Obra":
+      "Encargado de Obra":
       "Gestiona información operativa de proyectos, obra y materiales.",
     Almacen:
       "Consulta inventario y administra la información de materiales.",
