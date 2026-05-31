@@ -14,10 +14,11 @@ export type AuthSession = {
 
 type SessionPayload = AuthSession & {
   createdAt: number;
+  expiresAt: number;
 };
 
 const SESSION_COOKIE = "constructora_session";
-const SERVER_STARTED_AT = Date.now();
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
 function getSecret() {
   return process.env.AUTH_SECRET ?? "dev-secret";
@@ -34,6 +35,7 @@ export function createSessionToken(payload: AuthSession) {
   const sessionPayload: SessionPayload = {
     ...payload,
     createdAt: Date.now(),
+    expiresAt: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
   };
 
   const data = Buffer.from(JSON.stringify(sessionPayload)).toString("base64url");
@@ -56,9 +58,9 @@ export function verifySessionToken(token?: string): AuthSession | null {
       Buffer.from(data, "base64url").toString("utf8")
     ) as SessionPayload;
 
-    if (!payload.createdAt) return null;
+    if (!payload.createdAt || !payload.expiresAt) return null;
 
-    if (payload.createdAt < SERVER_STARTED_AT) {
+    if (payload.expiresAt < Date.now()) {
       return null;
     }
 
@@ -80,11 +82,14 @@ export function verifySessionToken(token?: string): AuthSession | null {
 export async function setSessionCookie(payload: AuthSession) {
   const cookieStore = await cookies();
   const token = createSessionToken(payload);
+  const expires = new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000);
 
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
+    maxAge: SESSION_MAX_AGE_SECONDS,
+    expires,
     path: "/",
   });
 }
