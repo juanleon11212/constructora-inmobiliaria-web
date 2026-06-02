@@ -9,5 +9,23 @@
         "image": "/uploads/proyectos/30/avance-1779936401218-346e83f8-73eb-4473-b64b-bd9eb6f024c4.png"
       }
     ]
+  },
+  "32": {
+    "progress": [
+      {
+        "id": "fef34cf0-e27a-4085-9d67-8611fd053148",
+        "date": "2026-05-30",
+        "percentage": 100,
+        "note": "boni",
+        "image": "/uploads/proyectos/32/avance-1779942305419-596634a4-c1b6-46b0-a1ae-78ee12b96efe.png"
+      },
+      {
+        "id": "3eeadf19-98f0-4227-901b-55307cafb7ce",
+        "date": "2026-05-31",
+        "percentage": 100,
+        "note": "total",
+        "image": "/uploads/proyectos/32/avance-1779942207611-8bf8e34b-6876-4bf2-8071-2060dc1247c6.jpg"
+      }
+    ]
   }
 }
