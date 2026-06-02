@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import fs from "fs/promises";
+import path from "path";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
 import { canDo } from "../../../lib/auth/permissions";
@@ -102,6 +104,45 @@ const inputClass =
 const selectClass =
   "w-full rounded-xl border border-white/50 bg-white/80 px-4 py-3 text-sm font-bold text-slate-950 shadow-sm outline-none backdrop-blur focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-200";
 
+const hiddenProjectsPath = path.join(
+  process.cwd(),
+  "data",
+  "project-hidden.json"
+);
+
+async function getHiddenProjectIds() {
+  try {
+    const content = await fs.readFile(hiddenProjectsPath, "utf8");
+    const data = JSON.parse(content) as { hiddenProjectIds?: number[] };
+
+    if (!Array.isArray(data.hiddenProjectIds)) {
+      return [];
+    }
+
+    return data.hiddenProjectIds
+      .map((id) => Number(id))
+      .filter((id) => Number.isFinite(id) && id > 0);
+  } catch {
+    return [];
+  }
+}
+
+async function saveHiddenProjectId(id_proyecto: number) {
+  const hiddenProjectIds = await getHiddenProjectIds();
+
+  if (!hiddenProjectIds.includes(id_proyecto)) {
+    hiddenProjectIds.push(id_proyecto);
+  }
+
+  await fs.mkdir(path.dirname(hiddenProjectsPath), { recursive: true });
+
+  await fs.writeFile(
+    hiddenProjectsPath,
+    JSON.stringify({ hiddenProjectIds }, null, 2),
+    "utf8"
+  );
+}
+
 async function crearProyecto(formData: FormData) {
   "use server";
 
@@ -159,6 +200,28 @@ async function crearProyecto(formData: FormData) {
   redirect("/admin/proyectos");
 }
 
+async function eliminarProyecto(formData: FormData) {
+  "use server";
+
+  const user = await requireModule("proyectos");
+  const roleName = getRoleName(user);
+
+  if (!canDo(roleName, "proyectos", "edit")) {
+    redirect("/admin/proyectos");
+  }
+
+  const id_proyecto = Number(formData.get("id_proyecto"));
+
+  if (!Number.isFinite(id_proyecto) || id_proyecto <= 0) {
+    redirect("/admin/proyectos");
+  }
+
+  await saveHiddenProjectId(id_proyecto);
+
+  revalidatePath("/admin/proyectos");
+  redirect("/admin/proyectos");
+}
+
 export default async function ProyectosPage({ searchParams }: PageProps) {
   const user = await requireModule("proyectos");
   const params = await searchParams;
@@ -172,6 +235,8 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
 
   const canCreateProject = canDo(roleName, "proyectos", "create");
   const canEditProject = canDo(roleName, "proyectos", "edit");
+
+  const hiddenProjectIds = await getHiddenProjectIds();
 
   const baseWhere = isCliente
     ? {
@@ -202,7 +267,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
       }
     : baseWhere;
 
-  const [proyectos, clientes] = await Promise.all([
+  const [proyectosRaw, clientes] = await Promise.all([
     prisma.proyecto.findMany({
       where: proyectosWhere,
       orderBy: {
@@ -217,6 +282,10 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
     }),
   ]);
 
+  const proyectos = proyectosRaw.filter(
+    (proyecto) => !hiddenProjectIds.includes(proyecto.id_proyecto)
+  );
+
   const clienteMap = new Map(
     clientes.map((cliente) => [
       cliente.id_cliente,
@@ -225,21 +294,28 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
         `Cliente ${cliente.id_cliente}`,
     ])
   );
+
   const projectMedia = new Map(
     await Promise.all(
-      proyectos.map(async (proyecto) => [
-        proyecto.id_proyecto,
-        await getProjectMedia(proyecto.id_proyecto),
-      ] as const)
+      proyectos.map(
+        async (proyecto) =>
+          [
+            proyecto.id_proyecto,
+            await getProjectMedia(proyecto.id_proyecto),
+          ] as const
+      )
     )
   );
+
   const proyectosEnEjecucion = proyectos.filter(
     (proyecto) => proyecto.estado === "en_ejecucion"
   ).length;
+
   const proyectosTerminados = proyectos.filter(
     (proyecto) =>
       proyecto.estado === "terminado" || proyecto.estado === "finalizado"
   ).length;
+
   const avancesRegistrados = Array.from(projectMedia.values()).reduce(
     (total, media) => total + media.progress.length,
     0
@@ -319,9 +395,9 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 Limpiar vista
               </Link>
             )}
-           </div>
+          </div>
 
-           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { label: "Obras visibles", value: proyectos.length },
               { label: "En ejecución", value: proyectosEnEjecucion },
@@ -364,10 +440,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
               </p>
             </div>
 
-            <form
-              action={crearProyecto}
-              className="grid gap-4 md:grid-cols-2"
-            >
+            <form action={crearProyecto} className="grid gap-4 md:grid-cols-2">
               <input
                 name="nombre_proyecto"
                 placeholder="Nombre del proyecto *"
@@ -437,7 +510,8 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                   Imagen inicial del proyecto
                 </span>
                 <span className="mb-3 mt-1 block text-xs font-medium text-blue-100">
-                  Muestra cómo se encuentra la obra al registrarla. JPG, PNG o WEBP, máximo 5 MB.
+                  Muestra cómo se encuentra la obra al registrarla. JPG, PNG o
+                  WEBP, máximo 5 MB.
                 </span>
                 <input
                   type="file"
@@ -447,7 +521,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 />
               </label>
 
-              <div className="md:col-span-2 flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 md:col-span-2">
                 <button
                   type="submit"
                   className="rounded-xl bg-gradient-to-r from-blue-800 to-sky-600 px-6 py-3 text-sm font-extrabold text-white shadow-xl shadow-blue-950/30 transition hover:from-blue-950 hover:to-sky-700"
@@ -473,9 +547,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 Proyectos registrados
               </p>
               <h2 className="mt-2 text-2xl font-extrabold text-slate-950">
-                {search
-                  ? "Resultados de búsqueda"
-                  : "Obras registradas"}
+                {search ? "Resultados de búsqueda" : "Obras registradas"}
               </h2>
 
               <p className="mt-2 text-sm font-medium text-slate-600">
@@ -497,13 +569,16 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
               const clienteNombre =
                 clienteMap.get(proyecto.id_cliente) ??
                 `Cliente ${proyecto.id_cliente}`;
+
               const media = projectMedia.get(proyecto.id_proyecto) ?? {
                 progress: [],
               };
+
               const progressPercentage = getProgressPercentage(
                 media,
                 proyecto.estado
               );
+
               const imagenProyecto =
                 media.coverImage ?? getProyectoImagen(proyecto);
 
@@ -556,6 +631,7 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                           {clienteNombre}
                         </p>
                       </div>
+
                       <div className="rounded-xl bg-slate-50 px-4 py-3">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                           Ubicación
@@ -571,7 +647,9 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                         <p className="text-[10px] uppercase tracking-wider text-blue-700">
                           Inicio
                         </p>
-                        <p className="mt-1">{formatDate(proyecto.fecha_inicio)}</p>
+                        <p className="mt-1">
+                          {formatDate(proyecto.fecha_inicio)}
+                        </p>
                       </div>
 
                       <div className="rounded-xl border border-blue-100 bg-blue-50 px-3 py-3">
@@ -593,14 +671,17 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                           {progressPercentage}%
                         </p>
                       </div>
+
                       <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/20">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-sky-400 to-emerald-400"
                           style={{ width: `${progressPercentage}%` }}
                         />
                       </div>
+
                       <p className="mt-3 text-xs font-semibold text-blue-100">
-                        {media.progress.length} avances fotográficos registrados
+                        {media.progress.length} avances fotográficos
+                        registrados
                       </p>
                     </div>
 
@@ -613,12 +694,29 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                       </Link>
 
                       {canEditProject && (
-                        <Link
-                          href={`/admin/proyectos/${proyecto.id_proyecto}?modo=editar`}
-                          className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-center text-sm font-extrabold text-blue-900 transition hover:bg-blue-100"
-                        >
-                          Editar
-                        </Link>
+                        <>
+                          <Link
+                            href={`/admin/proyectos/${proyecto.id_proyecto}?modo=editar`}
+                            className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-center text-sm font-extrabold text-blue-900 transition hover:bg-blue-100"
+                          >
+                            Editar
+                          </Link>
+
+                          <form action={eliminarProyecto}>
+                            <input
+                              type="hidden"
+                              name="id_proyecto"
+                              value={proyecto.id_proyecto}
+                            />
+
+                            <button
+                              type="submit"
+                              className="rounded-xl bg-red-700 px-4 py-3 text-sm font-extrabold text-white shadow-lg shadow-red-900/20 transition hover:bg-red-900"
+                            >
+                              Eliminar
+                            </button>
+                          </form>
+                        </>
                       )}
                     </div>
                   </div>
