@@ -66,14 +66,72 @@ function getEstadoClass(estado: string | null | undefined) {
   return "bg-amber-100 text-amber-800";
 }
 
-function getProyectoImagen(proyecto: {
-  nombre_proyecto?: string | null;
-  descripcion?: string | null;
-  ubicacion?: string | null;
-}) {
-  const texto = `${proyecto.nombre_proyecto ?? ""} ${
-    proyecto.descripcion ?? ""
-  } ${proyecto.ubicacion ?? ""}`.toLowerCase();
+function normalizarTexto(texto: string) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+const imagenesPorProyecto: Record<string, string> = {
+  "umss": "/images/proyecto-umss.jpg.png",
+  "proyecto umss": "/images/proyecto-umss.jpg.png",
+
+  "edificio los angeles": "/images/edificio-los-angeles.jpg.png",
+  "proyecto b": "/images/proyecto-b.jpg.png",
+
+  "remodelacion hotel colonial":
+    "/images/remodelacion-hotel-colonial.jpg.png",
+
+  "parqueo subterraneo": "/images/parqueo-subterraneo.jpg.jpg",
+
+  "vivienda multifamiliar camacho":
+    "/images/vivienda-multifamiliar-camacho.jpg.png",
+
+  "galeria comercial 24 de septiembre":
+    "/images/galeria-comercial-24-septiembre.jpg.png",
+
+  "urbanizacion valle verde": "/images/urbanizacion-valle-verde.jpg.png",
+
+  "oficinas corporativas nova":
+    "/images/oficinas-corporativas-nova.jpg.jpg",
+
+  "puente vehicular rocha": "/images/puente-vehicular-rocha.jpg.png",
+
+  "planta industrial kawsay": "/images/planta-industrial-kawsay.jpg.jpg",
+
+  "mercado central norte": "/images/mercado-central-norte.jpg.png",
+
+  "condominio los pinos": "/images/condominio-los-pinos.jpg.jpg",
+  "codominio los pinos": "/images/condominio-los-pinos.jpg.jpg",
+};
+
+function getProyectoImagen(
+  proyecto: {
+    nombre_proyecto?: string | null;
+    descripcion?: string | null;
+    ubicacion?: string | null;
+  },
+  coverImage?: string | null
+) {
+  const nombreProyecto = normalizarTexto(proyecto.nombre_proyecto ?? "");
+
+  for (const [nombre, imagen] of Object.entries(imagenesPorProyecto)) {
+    if (nombreProyecto.includes(nombre)) {
+      return imagen;
+    }
+  }
+
+  if (coverImage) {
+    return coverImage;
+  }
+
+  const texto = normalizarTexto(
+    `${proyecto.nombre_proyecto ?? ""} ${proyecto.descripcion ?? ""} ${
+      proyecto.ubicacion ?? ""
+    }`
+  );
 
   if (
     texto.includes("vivienda") ||
@@ -579,8 +637,10 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                 proyecto.estado
               );
 
-              const imagenProyecto =
-                media.coverImage ?? getProyectoImagen(proyecto);
+              const imagenProyecto = getProyectoImagen(
+                proyecto,
+                media.coverImage
+              );
 
               return (
                 <article
