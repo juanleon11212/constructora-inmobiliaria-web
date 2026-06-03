@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
 import { canDo } from "../../../lib/auth/permissions";
+import { createAuditLog } from "../../../lib/audit-log";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -312,6 +313,17 @@ async function crearMaterial(formData: FormData) {
     },
   });
 
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "CREAR",
+    modulo: "Materiales",
+    sector: "Crear material",
+    descripcion: `Se creó el material ${nombre_material}.`,
+    registro_id: material.id_material,
+  });
+
   revalidatePath("/admin/materiales");
 
   redirect(
@@ -375,6 +387,17 @@ async function editarMaterial(formData: FormData) {
     },
   });
 
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "EDITAR",
+    modulo: "Materiales",
+    sector: "Editar material",
+    descripcion: `Se editó el material ${nombre_material} con ID ${id_material}.`,
+    registro_id: id_material,
+  });
+
   revalidatePath("/admin/materiales");
   redirect("/admin/materiales?lista=materiales");
 }
@@ -424,6 +447,17 @@ async function crearProveedor(formData: FormData) {
       correo: correo || null,
       direccion: direccion || null,
     },
+  });
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "CREAR",
+    modulo: "Materiales",
+    sector: "Crear proveedor",
+    descripcion: `Se creó el proveedor ${nombre_proveedor}.`,
+    registro_id: proveedor.id_proveedor,
   });
 
   revalidatePath("/admin/materiales");
@@ -487,6 +521,17 @@ async function editarProveedor(formData: FormData) {
       correo: correo || null,
       direccion: direccion || null,
     },
+  });
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "EDITAR",
+    modulo: "Materiales",
+    sector: "Editar proveedor",
+    descripcion: `Se editó el proveedor ${nombre_proveedor} con ID ${id_proveedor}.`,
+    registro_id: id_proveedor,
   });
 
   revalidatePath("/admin/materiales");
@@ -571,6 +616,17 @@ async function crearOrdenCompra(formData: FormData) {
     return nuevaOrden;
   });
 
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "CREAR",
+    modulo: "Materiales",
+    sector: "Crear orden de compra",
+    descripcion: `Se creó la orden de compra ${numero_orden}.`,
+    registro_id: orden.id_orden,
+  });
+
   revalidatePath("/admin/materiales");
   redirect(`/admin/materiales?lista=ordenes&paso=recepcion&id_orden=${orden.id_orden}`);
 }
@@ -609,7 +665,7 @@ async function recibirOrdenCompra(formData: FormData) {
     redirect(`/admin/materiales?paso=recepcion&lista=ordenes&id_orden=${id_orden}&error=factura-existente`);
   }
 
-  await prisma.$transaction(async (tx) => {
+  const compraRecibida = await prisma.$transaction(async (tx) => {
     const compra = await tx.compra_material.create({
       data: {
         numero_factura,
@@ -669,7 +725,33 @@ async function recibirOrdenCompra(formData: FormData) {
       where: { id_orden },
       data: { estado: "recibida" },
     });
+
+    return compra;
   });
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "FINALIZAR",
+    modulo: "Materiales",
+    sector: "Finalizar orden de compra",
+    descripcion: `Se recibió la orden con ID ${id_orden} y se registró la factura ${numero_factura}.`,
+    registro_id: id_orden,
+  });
+
+  if (estado_pago === "pagado") {
+    await createAuditLog({
+      id_usuario: user.id_usuario ?? null,
+      usuario: user.nombre_usuario ?? null,
+      rol: roleName,
+      accion: "PAGAR",
+      modulo: "Materiales",
+      sector: "Pagar compra de material",
+      descripcion: `Se registró como pagada la compra con factura ${numero_factura}.`,
+      registro_id: compraRecibida.id_compra,
+    });
+  }
 
   revalidatePath("/admin/materiales");
   redirect("/admin/materiales?lista=compras&paso=recepcion");

@@ -126,7 +126,7 @@ async function crearPago(formData: FormData) {
     id_usuario: user.id_usuario ?? null,
     usuario: user.nombre_usuario ?? null,
     rol: roleName,
-    accion: "CREAR",
+    accion: "PAGAR",
     modulo: "Pagos",
     sector: "Registrar pago",
     descripcion: `Se registró un pago de Bs. ${monto}.`,

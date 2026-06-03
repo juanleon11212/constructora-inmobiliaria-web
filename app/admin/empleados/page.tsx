@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "../../../lib/prisma";
 import { requireModule } from "../../../lib/auth/require-permission";
 import { canDo } from "../../../lib/auth/permissions";
+import { createAuditLog } from "../../../lib/audit-log";
 import {
   TableFilter,
   type FilterOption,
@@ -97,7 +98,7 @@ async function crearEmpleado(formData: FormData) {
     redirect("/admin/empleados?error=ci-existente");
   }
 
-  await prisma.empleado.create({
+  const empleadoCreado = await prisma.empleado.create({
     data: {
       nombres,
       apellidos,
@@ -109,6 +110,17 @@ async function crearEmpleado(formData: FormData) {
       estado,
       id_cargo,
     },
+  });
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "CREAR",
+    modulo: "Empleados",
+    sector: "Crear empleado",
+    descripcion: `Se creó el empleado ${nombres} ${apellidos}.`,
+    registro_id: empleadoCreado.id_empleado,
   });
 
   revalidatePath("/admin/empleados");
@@ -173,6 +185,17 @@ async function editarEmpleado(formData: FormData) {
     },
   });
 
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "EDITAR",
+    modulo: "Empleados",
+    sector: "Editar empleado",
+    descripcion: `Se editó el empleado ${nombres} ${apellidos} con ID ${id_empleado}.`,
+    registro_id: id_empleado,
+  });
+
   revalidatePath("/admin/empleados");
   redirect("/admin/empleados");
 }
@@ -201,6 +224,17 @@ async function eliminarEmpleado(formData: FormData) {
   await prisma.empleado.update({
     where: { id_empleado },
     data: { estado: "inactivo" },
+  });
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "ELIMINAR",
+    modulo: "Empleados",
+    sector: "Eliminar empleado",
+    descripcion: `Se eliminó/desactivó el empleado con ID ${id_empleado}.`,
+    registro_id: id_empleado,
   });
 
   revalidatePath("/admin/empleados");

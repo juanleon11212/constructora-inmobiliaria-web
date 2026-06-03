@@ -13,6 +13,7 @@ import {
   saveProjectCover,
   validateProjectImage,
 } from "../../../lib/project-media";
+import { createAuditLog } from "../../../lib/audit-log";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -254,6 +255,17 @@ async function crearProyecto(formData: FormData) {
     await saveProjectCover(createdProject.id_proyecto, coverImage);
   }
 
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "CREAR",
+    modulo: "Proyectos",
+    sector: "Crear proyecto",
+    descripcion: `Se creó el proyecto ${nombre_proyecto}.`,
+    registro_id: createdProject.id_proyecto,
+  });
+
   revalidatePath("/admin/proyectos");
   redirect("/admin/proyectos");
 }
@@ -275,6 +287,17 @@ async function eliminarProyecto(formData: FormData) {
   }
 
   await saveHiddenProjectId(id_proyecto);
+
+  await createAuditLog({
+    id_usuario: user.id_usuario ?? null,
+    usuario: user.nombre_usuario ?? null,
+    rol: roleName,
+    accion: "ELIMINAR",
+    modulo: "Proyectos",
+    sector: "Eliminar proyecto",
+    descripcion: `Se eliminó/ocultó el proyecto con ID ${id_proyecto}.`,
+    registro_id: id_proyecto,
+  });
 
   revalidatePath("/admin/proyectos");
   redirect("/admin/proyectos");

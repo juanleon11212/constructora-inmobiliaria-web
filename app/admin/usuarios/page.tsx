@@ -327,10 +327,10 @@ async function eliminarUsuario(formData: FormData) {
     id_usuario: user.id_usuario ?? null,
     usuario: user.nombre_usuario ?? null,
     rol: roleName,
-    accion: "DESACTIVAR",
+    accion: "ELIMINAR",
     modulo: "Usuarios",
-    sector: "Desactivar usuario",
-    descripcion: `Se desactivó el usuario con ID ${id_usuario}.`,
+    sector: "Eliminar usuario",
+    descripcion: `Se eliminó/desactivó el usuario con ID ${id_usuario}.`,
     registro_id: id_usuario,
   });
 

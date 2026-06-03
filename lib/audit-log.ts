@@ -7,6 +7,7 @@ type AuditAction =
   | "ELIMINAR"
   | "DESACTIVAR"
   | "FINALIZAR"
+  | "PAGAR"
   | "ERROR"
   | "PRUEBA";
 

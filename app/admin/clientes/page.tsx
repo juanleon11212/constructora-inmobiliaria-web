@@ -261,10 +261,10 @@ async function desactivarCliente(formData: FormData) {
     id_usuario: user.id_usuario ?? null,
     usuario: user.nombre_usuario ?? null,
     rol: roleName,
-    accion: "DESACTIVAR",
+    accion: "ELIMINAR",
     modulo: "Clientes",
-    sector: "Desactivar cliente",
-    descripcion: `Se desactivó el cliente con ID ${id_cliente}.`,
+    sector: "Eliminar cliente",
+    descripcion: `Se eliminó/desactivó el cliente con ID ${id_cliente}.`,
     registro_id: id_cliente,
   });
 
