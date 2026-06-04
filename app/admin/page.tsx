@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { ModuleCommandCenter } from "../../components/admin/ModuleCommandCenter";
 import { LogoutButton } from "../../components/auth/LogoutButton";
 import { getCurrentUser } from "../../lib/auth/current-user";
+import { prisma } from "../../lib/prisma";
 import {
   AppAction,
   AppModule,
@@ -130,9 +131,32 @@ export default async function AdminPage() {
   }
 
   const roleName = getRoleName(user);
+  const isCliente = roleName === "Cliente";
+  const idCliente = user.id_cliente ?? 0;
+
   const modules = getModulesByRole(roleName);
   const showLogsModule = roleName === "Administrador";
-  const visibleModules = modules.length + (showLogsModule ? 1 : 0);
+  // Fetch real project stats for client users
+  let clienteProyectoStats: { label: string; value: string }[] | undefined;
+  if (isCliente && idCliente > 0) {
+    const [total, enEjecucion, terminados] = await Promise.all([
+      prisma.proyecto.count({
+        where: { id_cliente: idCliente, estado: { not: "eliminado" } },
+      }),
+      prisma.proyecto.count({
+        where: { id_cliente: idCliente, estado: "en_ejecucion" },
+      }),
+      prisma.proyecto.count({
+        where: { id_cliente: idCliente, estado: "terminado" },
+      }),
+    ]);
+    clienteProyectoStats = [
+      { label: "Mis obras", value: String(total) },
+      { label: "En ejecución", value: String(enEjecucion) },
+      { label: "Finalizadas", value: String(terminados) },
+    ];
+  }
+
   const moduleCards = [
     ...modules.map((module) => {
       const details = getModuleDetails(roleName, module.key);
@@ -146,6 +170,10 @@ export default async function AdminPage() {
         actions: getFeaturedActions(roleName, module.key),
         canCount: details.can.length,
         cannotCount: details.cannot.length,
+        liveStats:
+          isCliente && module.key === "proyectos"
+            ? clienteProyectoStats
+            : undefined,
       };
     }),
     ...(showLogsModule
@@ -164,6 +192,7 @@ export default async function AdminPage() {
             actions: ["Consultar eventos", "Revisar actividad", "Supervisar"],
             canCount: 3,
             cannotCount: 0,
+            liveStats: undefined,
           },
         ]
       : []),
@@ -172,13 +201,13 @@ export default async function AdminPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
       <header className="border-b border-blue-900 bg-gradient-to-r from-blue-950 via-blue-900 to-sky-800 text-white shadow-lg shadow-blue-950/20">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
           <div>
-            <p className="text-sm font-semibold text-blue-100">
+            <p className="text-xs font-semibold text-blue-200 sm:text-sm">
               Panel del sistema
             </p>
 
-            <h1 className="text-2xl font-extrabold text-white">
+            <h1 className="text-lg font-extrabold text-white sm:text-2xl">
               Constructora e Inmobiliaria
             </h1>
           </div>
@@ -187,25 +216,25 @@ export default async function AdminPage() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-7xl px-6 py-8">
-        <div className="overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-xl shadow-blue-100/70">
-          <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-sky-700 px-6 py-8 text-white">
-            <p className="text-sm font-semibold text-blue-100">Bienvenido</p>
+      <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
+        <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-xl shadow-blue-100/70 sm:rounded-3xl">
+          <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-sky-700 px-4 py-6 text-white sm:px-6 sm:py-8">
+            <p className="text-xs font-semibold text-blue-200 sm:text-sm">Bienvenido</p>
 
-            <h2 className="mt-1 text-4xl font-extrabold tracking-tight text-white">
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-4xl">
               {user.nombre_mostrar}
             </h2>
 
-            <div className="mt-5 flex flex-wrap gap-3">
-              <span className="rounded-full bg-white/15 px-4 py-2 text-sm font-bold text-white backdrop-blur">
+            <div className="mt-4 flex flex-wrap gap-2 sm:mt-5 sm:gap-3">
+              <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
                 Rol: {roleName}
               </span>
 
-              <span className="rounded-full bg-sky-300/20 px-4 py-2 text-sm font-bold text-blue-50 backdrop-blur">
+              <span className="rounded-full bg-sky-300/20 px-3 py-1.5 text-xs font-bold text-blue-50 backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
                 Tipo: {user.tipo_cuenta === "cliente" ? "Cliente" : "Empresa"}
               </span>
 
-              <span className="rounded-full bg-white/15 px-4 py-2 text-sm font-bold text-white backdrop-blur">
+              <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
                 Usuario: {user.nombre_usuario}
               </span>
             </div>
@@ -225,7 +254,6 @@ export default async function AdminPage() {
         ) : (
           <ModuleCommandCenter
             modules={moduleCards}
-            visibleModules={visibleModules}
             roleName={roleName}
           />
         )}

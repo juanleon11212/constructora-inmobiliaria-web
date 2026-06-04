@@ -82,8 +82,6 @@ export const rolePermissions: Record<string, AppModule[]> = {
 
   "Encargado de Obra": ["proyectos", "materiales", "reportes"],
 
-  Almacen: ["materiales", "reportes"],
-
   Almacén: ["materiales", "reportes"],
 
   Contabilidad: ["clientes", "proyectos", "pagos", "reportes"],
@@ -119,11 +117,6 @@ export const roleActionPermissions: Record<
   "Encargado de Obra": {
     proyectos: ["view", "edit", "assign"],
     materiales: ["view"],
-    reportes: ["view"],
-  },
-
-  Almacen: {
-    materiales: ["view", "create", "edit"],
     reportes: ["view"],
   },
 
@@ -331,10 +324,16 @@ export const roleModuleDetails: Record<
   },
 };
 
+function normalizeRoleName(roleName: string): string {
+  const trimmed = roleName.trim();
+  if (trimmed === "Almacen") return "Almacén";
+  return trimmed;
+}
+
 export function getModulesByRole(roleName?: string | null) {
   if (!roleName) return [];
 
-  const cleanRoleName = roleName.trim();
+  const cleanRoleName = normalizeRoleName(roleName);
   const allowedModules = rolePermissions[cleanRoleName] ?? [];
 
   return allModules.filter((module) => allowedModules.includes(module.key));
@@ -346,7 +345,7 @@ export function canAccessModule(
 ) {
   if (!roleName) return false;
 
-  const cleanRoleName = roleName.trim();
+  const cleanRoleName = normalizeRoleName(roleName);
 
   return rolePermissions[cleanRoleName]?.includes(module) ?? false;
 }
@@ -358,7 +357,7 @@ export function canDo(
 ) {
   if (!roleName) return false;
 
-  const cleanRoleName = roleName.trim();
+  const cleanRoleName = normalizeRoleName(roleName);
 
   return (
     roleActionPermissions[cleanRoleName]?.[module]?.includes(action) ?? false
@@ -366,7 +365,7 @@ export function canDo(
 }
 
 export function getModuleDetails(roleName: string, module: AppModule) {
-  const cleanRoleName = roleName.trim();
+  const cleanRoleName = normalizeRoleName(roleName);
 
   return (
     roleModuleDetails[cleanRoleName]?.[module] ?? {
@@ -382,8 +381,6 @@ export function getRoleSummary(roleName: string) {
       "Tiene acceso completo al sistema y puede administrar todos los módulos.",
       "Encargado de Obra":
       "Gestiona información operativa de proyectos, obra y materiales.",
-    Almacen:
-      "Consulta inventario y administra la información de materiales.",
     Almacén:
       "Consulta inventario y administra la información de materiales.",
     Contabilidad:

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "../../../lib/prisma";
-import { requireModule } from "../../../lib/auth/require-permission";
+import { requireRole } from "../../../lib/auth/require-permission";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -53,7 +53,7 @@ function formatDateTime(value: Date | string | null | undefined) {
 }
 
 export default async function LogsPage({ searchParams }: PageProps) {
-  const user = await requireModule("usuarios");
+  const user = await requireRole(["Administrador"]);
   const roleName = getRoleName(user);
 
   const params = await searchParams;

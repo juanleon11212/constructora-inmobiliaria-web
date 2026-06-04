@@ -40,34 +40,6 @@ export async function POST(request: Request) {
     );
   }
   if (!isStrongEnoughPassword(contrasena)) {
-  return NextResponse.json(
-    { message: "La contraseña debe tener mínimo 6 caracteres." },
-    { status: 400 }
-  );
-}
-
-if (!isValidEmail(correo)) {
-  return NextResponse.json(
-    { message: "El correo no tiene un formato válido." },
-    { status: 400 }
-  );
-}
-
-if (!isOnlyNumbers(ci_nit)) {
-  return NextResponse.json(
-    { message: "El CI/NIT debe contener solo números." },
-    { status: 400 }
-  );
-}
-
-if (telefono && !isOnlyNumbers(telefono)) {
-  return NextResponse.json(
-    { message: "El teléfono debe contener solo números." },
-    { status: 400 }
-  );
-}
-
-  if (!isStrongEnoughPassword(contrasena)) {
     return NextResponse.json(
       { message: "La contraseña debe tener mínimo 6 caracteres." },
       { status: 400 }
@@ -140,7 +112,7 @@ const clienteCreado = await prisma.cliente.create({
     },
   });
   await createAuditLog({
-  id_usuario: clienteCreado.id_cliente,
+  id_usuario: null,
   usuario:
     clienteCreado.nombre_usuario ??
     clienteCreado.correo ??

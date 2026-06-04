@@ -18,71 +18,33 @@ type ModuleCard = {
   actions: string[];
   canCount: number;
   cannotCount: number;
+  liveStats?: { label: string; value: string }[];
 };
 
 type AreaGroup = {
   name: string;
   modules: ModuleCard[];
-  image: string;
   accent: string;
-  summary: string;
 };
 
 type ModuleCommandCenterProps = {
   modules: ModuleCard[];
-  visibleModules: number;
   roleName: string;
 };
 
-const areaCopy: Record<
-  string,
-  { summary: string; accent: string; fallbackImage: string }
-> = {
-  Relaciones: {
-    summary: "Clientes, seguimiento y comunicacion directa con personas clave.",
-    accent: "from-cyan-400 to-blue-500",
-    fallbackImage: "/images/clientes-fondo.jpg",
-  },
-  Obras: {
-    summary: "Proyectos, avances, entregas y control operativo de obra.",
-    accent: "from-amber-300 to-orange-500",
-    fallbackImage: "/images/proyectos-fondo.jpg",
-  },
-  Abastecimiento: {
-    summary: "Materiales, inventario, proveedores, compras y recepciones.",
-    accent: "from-emerald-300 to-teal-500",
-    fallbackImage: "/images/materiales-fondo.jpg",
-  },
-  Finanzas: {
-    summary: "Pagos, cobros, estados y movimientos financieros.",
-    accent: "from-sky-300 to-indigo-500",
-    fallbackImage: "/images/dashboard-pagos-card.webp",
-  },
-  Equipo: {
-    summary: "Empleados, cargos, asignaciones y gestion del personal.",
-    accent: "from-violet-300 to-fuchsia-500",
-    fallbackImage: "/images/empleados-fondo.jpg",
-  },
-  Indicadores: {
-    summary: "Reportes, metricas y lectura ejecutiva del sistema.",
-    accent: "from-lime-300 to-emerald-500",
-    fallbackImage: "/images/reportes-fondo.jpg",
-  },
-  Accesos: {
-    summary: "Usuarios, roles, permisos y seguridad interna.",
-    accent: "from-blue-300 to-slate-500",
-    fallbackImage: "/images/dashboard-usuarios-card.webp",
-  },
-  Auditoria: {
-    summary: "Eventos, ingresos y trazabilidad de acciones importantes.",
-    accent: "from-rose-300 to-red-500",
-    fallbackImage: "/images/dashboard-auditoria-card.webp",
-  },
+const areaCopy: Record<string, { accent: string }> = {
+  Relaciones:   { accent: "from-cyan-400 to-blue-500" },
+  Obras:        { accent: "from-amber-300 to-orange-500" },
+  Abastecimiento: { accent: "from-emerald-300 to-teal-500" },
+  Finanzas:     { accent: "from-sky-300 to-indigo-500" },
+  Equipo:       { accent: "from-violet-300 to-fuchsia-500" },
+  Indicadores:  { accent: "from-lime-300 to-emerald-500" },
+  Accesos:      { accent: "from-blue-300 to-slate-500" },
+  Auditoria:    { accent: "from-rose-300 to-red-500" },
 };
 
 export function ModuleCommandCenter({
   modules,
-  visibleModules,
   roleName,
 }: ModuleCommandCenterProps) {
   const areaGroups = useMemo(() => buildAreaGroups(modules), [modules]);
@@ -127,15 +89,6 @@ export function ModuleCommandCenter({
     setQuery("");
   }
 
-  function selectNextArea() {
-    const currentIndex = areaGroups.findIndex((area) => area.name === selectedArea?.name);
-    const nextArea = areaGroups[(currentIndex + 1) % areaGroups.length];
-
-    if (nextArea) {
-      selectArea(nextArea);
-    }
-  }
-
   return (
     <section className="relative mt-10 overflow-hidden rounded-[2rem] border border-white/50 bg-slate-950 text-white shadow-2xl shadow-blue-200/70">
       <Image
@@ -150,150 +103,100 @@ export function ModuleCommandCenter({
       <div className="absolute inset-x-0 top-0 h-px bg-white/40" />
 
       <div className="relative p-4 sm:p-6 lg:p-8">
-        <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
-          <aside className="space-y-3">
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-md">
-              <p className="text-xs font-extrabold uppercase tracking-[0.26em] text-sky-100">
-                Mapa de areas
-              </p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight">
-                Escoge una ruta de trabajo
-              </h2>
-              <div className="mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-extrabold text-blue-50">
-                <ShieldIcon />
-                <span className="truncate">{roleName}</span>
-              </div>
-            </div>
+        {/* Encabezado compacto siempre visible */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-4 backdrop-blur-md sm:px-5">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-sky-200">
+              Mapa de áreas
+            </p>
+            <h2 className="mt-0.5 text-lg font-extrabold tracking-tight sm:text-xl">
+              Escoge una ruta de trabajo
+            </h2>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-extrabold text-blue-50">
+            <ShieldIcon />
+            <span className="truncate">{roleName}</span>
+          </div>
+        </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-              {areaGroups.map((area) => (
-                <button
-                  key={area.name}
-                  type="button"
-                  onClick={() => selectArea(area)}
-                  className={`group relative min-h-28 overflow-hidden rounded-2xl border text-left shadow-lg transition duration-300 hover:-translate-y-1 ${
-                    area.name === selectedArea?.name
-                      ? "border-white/70 ring-4 ring-white/15"
-                      : "border-white/15 hover:border-white/45"
-                  }`}
-                >
-                  <Image
-                    src={area.image}
-                    alt=""
-                    fill
-                    sizes="300px"
-                    className="object-cover transition duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-transparent" />
-                  <div className="relative flex h-full min-h-28 items-end justify-between gap-4 p-4">
-                    <div>
-                      <span className={`mb-2 block h-1.5 w-12 rounded-full bg-gradient-to-r ${area.accent}`} />
-                      <p className="text-lg font-extrabold">{area.name}</p>
-                      <p className="text-xs font-bold text-blue-100">
-                        {area.modules.length} modulo{area.modules.length === 1 ? "" : "s"}
-                      </p>
-                    </div>
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition group-hover:bg-white group-hover:text-blue-950">
+        {/* Áreas: chips horizontales en móvil, lista vertical en xl */}
+        <div className="mb-5 flex gap-2 overflow-x-auto pb-1 xl:hidden">
+          {areaGroups.map((area) => {
+            const isActive = area.name === selectedArea?.name;
+            return (
+              <button
+                key={area.name}
+                type="button"
+                onClick={() => selectArea(area)}
+                className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold transition-all duration-200 ${
+                  isActive
+                    ? "border-white/40 bg-white/20 text-white shadow-md"
+                    : "border-white/15 bg-white/5 text-blue-200 hover:border-white/30 hover:bg-white/15"
+                }`}
+              >
+                <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-gradient-to-br ${area.accent} text-white`}>
+                  {getModuleIcon(area.modules[0]?.key ?? "")}
+                </span>
+                {area.name}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-6 xl:grid-cols-[260px_1fr]">
+          {/* Sidebar vertical — solo visible en xl */}
+          <aside className="hidden xl:block">
+            <div className="flex flex-col gap-1">
+              {areaGroups.map((area) => {
+                const isActive = area.name === selectedArea?.name;
+                return (
+                  <button
+                    key={area.name}
+                    type="button"
+                    onClick={() => selectArea(area)}
+                    className={`group flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-200 ${
+                      isActive
+                        ? "border-white/30 bg-white/15 shadow-md"
+                        : "border-transparent hover:border-white/15 hover:bg-white/10"
+                    }`}
+                  >
+                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${area.accent} text-white shadow-sm`}>
                       {getModuleIcon(area.modules[0]?.key ?? "")}
                     </span>
-                  </div>
-                </button>
-              ))}
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-bold leading-tight text-white">
+                        {area.name}
+                      </span>
+                      <span className="block text-xs text-blue-200/70">
+                        {area.modules.length} módulo{area.modules.length === 1 ? "" : "s"}
+                      </span>
+                    </span>
+                    {isActive && (
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-sky-300" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </aside>
 
-          <div className="space-y-6">
-            {selectedArea && selectedModule && (
-              <div className="grid overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 backdrop-blur-md lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="relative min-h-[360px] overflow-hidden">
-                  <Image
-                    key={selectedModule.visual.image}
-                    src={selectedModule.visual.image}
-                    alt={selectedModule.visual.alt}
-                    fill
-                    sizes="(min-width: 1024px) 45vw, 100vw"
-                    className="object-cover transition duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-6">
-                    <span className={`mb-4 block h-2 w-20 rounded-full bg-gradient-to-r ${selectedArea.accent}`} />
-                    <p className="text-sm font-bold uppercase tracking-[0.24em] text-blue-100">
-                      {selectedArea.name}
-                    </p>
-                    <h3 className="mt-2 text-4xl font-extrabold tracking-tight">
-                      {selectedModule.title}
-                    </h3>
-                    <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-blue-50">
-                      {selectedArea.summary}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col p-5 sm:p-7">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-sky-100">
-                        Area seleccionada
-                      </p>
-                      <h3 className="mt-2 text-2xl font-extrabold">
-                        {selectedArea.name}
-                      </h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={selectNextArea}
-                      className="inline-flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 text-sm font-bold transition hover:bg-white hover:text-blue-950"
-                    >
-                      Siguiente area
-                      <ArrowIcon />
-                    </button>
-                  </div>
-
-                  <p className="mt-5 text-sm font-medium leading-7 text-blue-50/85">
-                    {selectedModule.description}
-                  </p>
-
-                  <div className="mt-6 grid grid-cols-3 gap-3">
-                    <GlassStat value={visibleModules} label="Accesos" />
-                    <GlassStat value={selectedModule.canCount} label="Permisos" />
-                    <GlassStat value={selectedModule.actions.length} label="Atajos" />
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {selectedModule.actions.map((action) => (
-                      <Link
-                        key={action}
-                        href={selectedModule.href}
-                        className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white hover:text-blue-950"
-                      >
-                        {action}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="min-h-[520px] rounded-[1.75rem] border border-white/15 bg-white/95 p-4 text-blue-950 shadow-2xl shadow-slate-950/25 sm:p-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-blue-700">
-                    Vista de lectura
-                  </p>
-                  <h3 className="mt-1 text-2xl font-extrabold">
-                    {selectedArea?.name ?? "Area"}
-                  </h3>
-                </div>
-                <label className="relative block md:w-80">
-                  <span className="sr-only">Buscar modulo</span>
+          {/* Panel principal */}
+          <div>
+            <div className="rounded-[1.75rem] border border-white/15 bg-white/95 p-4 text-blue-950 shadow-2xl shadow-slate-950/25 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="text-xl font-extrabold sm:text-2xl">
+                  {selectedArea?.name ?? "Área"}
+                </h3>
+                <label className="relative block w-full sm:w-72">
+                  <span className="sr-only">Buscar módulo</span>
                   <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-blue-700">
                     <SearchIcon />
                   </span>
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Buscar modulo o accion..."
-                    className="h-12 w-full rounded-2xl border border-blue-100 bg-blue-50 px-12 text-sm font-bold text-blue-950 outline-none transition placeholder:text-blue-900/45 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                    placeholder="Buscar módulo o acción..."
+                    className="h-11 w-full rounded-2xl border border-blue-100 bg-blue-50 px-11 text-sm font-bold text-blue-950 outline-none transition placeholder:text-blue-900/45 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                   />
                 </label>
               </div>
@@ -302,25 +205,26 @@ export function ModuleCommandCenter({
                 <div className="mt-5 rounded-2xl bg-blue-50 p-5">
                   <h4 className="font-extrabold text-blue-950">Sin coincidencias</h4>
                   <p className="mt-1 text-sm text-slate-600">
-                    Prueba con otra palabra o cambia de area.
+                    Prueba con otra palabra o cambia de área.
                   </p>
                 </div>
               ) : (
-                <div className="mt-5 space-y-5">
-                  <div className="flex gap-3 overflow-x-auto pb-1">
+                <div className="mt-4 space-y-5">
+                  {/* Módulos: grilla en móvil, fila horizontal en pantallas grandes */}
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:overflow-x-auto lg:pb-1">
                     {visibleAreaModules.map((module, index) => (
                       <button
                         key={module.key}
                         type="button"
                         onClick={() => setActiveModuleKey(module.key)}
-                        className={`animate-module-rise flex min-w-[210px] items-center gap-3 rounded-2xl border px-4 py-3 text-left transition hover:-translate-y-0.5 ${
+                        className={`animate-module-rise flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition hover:-translate-y-0.5 lg:min-w-[200px] lg:shrink-0 ${
                           module.key === previewModule?.key
                             ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100"
                             : "border-blue-100 bg-white hover:bg-blue-50"
                         }`}
                         style={{ animationDelay: `${index * 60}ms` }}
                       >
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-white">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-white">
                           {getModuleIcon(module.key)}
                         </span>
                         <span className="min-w-0">
@@ -359,111 +263,66 @@ function ReadOnlyModulePreview({
   areaName: string;
 }) {
   const preview = getPreviewData(module);
+  const stats = module.liveStats ?? preview.stats;
 
   return (
     <article className="animate-module-rise overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-lg shadow-blue-100/60">
-      <div className="grid gap-0 xl:grid-cols-[0.88fr_1.12fr]">
-        <div className="relative min-h-[340px] overflow-hidden bg-blue-950">
-          <Image
-            src={module.visual.image}
-            alt={module.visual.alt}
-            fill
-            sizes="(min-width: 1280px) 420px, 100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-blue-950 via-blue-950/35 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-blue-100">
-              Solo lectura
-            </p>
-            <h4 className="mt-2 text-3xl font-extrabold">{module.title}</h4>
-            <p className="mt-3 text-sm font-medium leading-6 text-blue-50">
-              Esta informacion es una muestra. Para modificar registros debes
-              entrar al modulo completo.
-            </p>
-          </div>
+      <div className="border-b border-blue-100 bg-blue-950 px-5 py-4 sm:px-6 sm:py-5">
+        <h4 className="text-lg font-extrabold text-white sm:text-xl">
+          {module.title}
+        </h4>
+      </div>
+
+      <div className="p-4 sm:p-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {stats.map((stat) => (
+            <div key={stat.label} className="rounded-xl border border-blue-100 bg-blue-50 px-3 py-3 sm:px-4">
+              <p className="text-xl font-extrabold text-blue-950 sm:text-2xl">
+                {stat.value}
+              </p>
+              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600 sm:text-[11px]">
+                {stat.label}
+              </p>
+            </div>
+          ))}
         </div>
 
-        <div className="flex flex-col p-5 sm:p-6">
-          <div>
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600">
-                {areaName}
-              </p>
-              <h4 className="mt-1 text-2xl font-extrabold text-blue-950">
-                Resumen parcial de {module.title}
-              </h4>
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {preview.stats.map((stat) => (
-              <div key={stat.label} className="rounded-2xl bg-blue-50 px-4 py-3">
-                <p className="text-2xl font-extrabold text-blue-950">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-blue-700">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-5 overflow-hidden rounded-2xl border border-blue-100">
-            <table className="w-full min-w-[520px] border-collapse text-left text-sm">
-              <thead className="bg-blue-50 text-xs uppercase tracking-[0.16em] text-blue-700">
-                <tr>
-                  {preview.headers.map((header) => (
-                    <th key={header} className="px-4 py-3 font-extrabold">
-                      {header}
-                    </th>
+        <div className="mt-4 overflow-x-auto rounded-xl border border-blue-100">
+          <table className="w-full min-w-[360px] border-collapse text-left text-sm">
+            <thead className="bg-slate-50 text-xs uppercase tracking-[0.14em] text-slate-500">
+              <tr>
+                {preview.headers.map((header) => (
+                  <th key={header} className="px-3 py-3 font-extrabold sm:px-4">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-blue-50">
+              {preview.rows.map((row, rowIndex) => (
+                <tr key={rowIndex} className="hover:bg-blue-50/50">
+                  {row.map((cell, i) => (
+                    <td
+                      key={i}
+                      className={`px-3 py-3 text-sm sm:px-4 ${i === 0 ? "font-semibold text-blue-950" : "text-slate-500"}`}
+                    >
+                      {cell}
+                    </td>
                   ))}
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-blue-100">
-                {preview.rows.map((row) => (
-                  <tr key={row.join("-")} className="bg-white">
-                    {row.map((cell) => (
-                      <td key={cell} className="px-4 py-3 font-semibold text-slate-600">
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {preview.gallery.map((item) => (
-              <div
-                key={item.label}
-                className="relative min-h-28 overflow-hidden rounded-2xl bg-blue-950"
-              >
-                <Image
-                  src={item.image}
-                  alt=""
-                  fill
-                  sizes="220px"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-950/80 to-transparent" />
-                <p className="absolute bottom-3 left-3 right-3 text-xs font-extrabold uppercase tracking-wide text-white">
-                  {item.label}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 flex justify-end border-t border-blue-100 pt-5">
-            <Link
-              href={module.href}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-blue-950"
-            >
-              Entrar al modulo
-              <ArrowIcon />
-            </Link>
-          </div>
+        <div className="mt-4 flex justify-end border-t border-blue-100 pt-4">
+          <Link
+            href={module.href}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-blue-950 sm:w-auto"
+          >
+            Entrar al módulo
+            <ArrowIcon />
+          </Link>
         </div>
       </div>
     </article>
@@ -477,7 +336,6 @@ function getPreviewData(module: ModuleCard) {
       headers: string[];
       rows: string[][];
       stats: { label: string; value: string }[];
-      gallery: { image: string; label: string }[];
     }
   > = {
     clientes: {
@@ -492,11 +350,6 @@ function getPreviewData(module: ModuleCard) {
         { label: "Activos", value: "18" },
         { label: "Alertas", value: "3" },
       ],
-      gallery: [
-        { image: "/images/clientes.jpg", label: "Atencion" },
-        { image: "/images/clientes-fondo.jpg", label: "Relaciones" },
-        { image: "/images/dashboard-clientes-card.webp", label: "Seguimiento" },
-      ],
     },
     empleados: {
       headers: ["Empleado", "Cargo", "Estado"],
@@ -509,11 +362,6 @@ function getPreviewData(module: ModuleCard) {
         { label: "Personal", value: "36" },
         { label: "Asignados", value: "21" },
         { label: "Cargos", value: "8" },
-      ],
-      gallery: [
-        { image: "/images/empleados.jpg", label: "Equipo" },
-        { image: "/images/empleados-fondo.jpg", label: "Obra" },
-        { image: "/images/dashboard-equipo-card.webp", label: "Gestion" },
       ],
     },
     proyectos: {
@@ -528,28 +376,18 @@ function getPreviewData(module: ModuleCard) {
         { label: "Promedio", value: "54%" },
         { label: "Hitos", value: "12" },
       ],
-      gallery: [
-        { image: "/images/proyectos.jpg", label: "Planos" },
-        { image: "/images/proyectos-fondo.jpg", label: "Avance" },
-        { image: "/images/proyecto-edificio.jpg", label: "Edificio" },
-      ],
     },
     materiales: {
       headers: ["Material", "Stock", "Estado"],
       rows: [
         ["Cemento IP-30", "420 bolsas", "Suficiente"],
-        ["Acero corrugado", "86 barras", "Reposicion"],
-        ["Ceramica gris", "1,240 m2", "Disponible"],
+        ["Acero corrugado", "86 barras", "Reposición"],
+        ["Cerámica gris", "1,240 m²", "Disponible"],
       ],
       stats: [
-        { label: "Items", value: "128" },
+        { label: "Ítems", value: "128" },
         { label: "Bajo stock", value: "7" },
-        { label: "Ordenes", value: "14" },
-      ],
-      gallery: [
-        { image: "/images/materiales.jpg", label: "Materiales" },
-        { image: "/images/materiales-fondo.jpg", label: "Almacen" },
-        { image: "/images/dashboard-materiales-card.webp", label: "Recepcion" },
+        { label: "Órdenes", value: "14" },
       ],
     },
     pagos: {
@@ -561,13 +399,8 @@ function getPreviewData(module: ModuleCard) {
       ],
       stats: [
         { label: "Mes", value: "$24K" },
-        { label: "Pend.", value: "5" },
+        { label: "Pendientes", value: "5" },
         { label: "Pagados", value: "18" },
-      ],
-      gallery: [
-        { image: "/images/pagos.jpg", label: "Pagos" },
-        { image: "/images/dashboard-pagos-card.webp", label: "Finanzas" },
-        { image: "/images/reporte-pagos.jpg", label: "Resumen" },
       ],
     },
     reportes: {
@@ -575,17 +408,12 @@ function getPreviewData(module: ModuleCard) {
       rows: [
         ["Avance de obras", "Mayo", "Listo"],
         ["Materiales usados", "Semana 4", "Parcial"],
-        ["Pagos generales", "Mayo", "Revision"],
+        ["Pagos generales", "Mayo", "Revisión"],
       ],
       stats: [
         { label: "Reportes", value: "16" },
         { label: "Nuevos", value: "4" },
-        { label: "Areas", value: "6" },
-      ],
-      gallery: [
-        { image: "/images/reportes.jpg", label: "Reportes" },
-        { image: "/images/reportes-fondo.jpg", label: "Graficas" },
-        { image: "/images/dashboard-reportes-card.webp", label: "Analisis" },
+        { label: "Áreas", value: "6" },
       ],
     },
     usuarios: {
@@ -600,28 +428,18 @@ function getPreviewData(module: ModuleCard) {
         { label: "Roles", value: "7" },
         { label: "Activos", value: "9" },
       ],
-      gallery: [
-        { image: "/images/usuarios.jpg", label: "Usuarios" },
-        { image: "/images/dashboard-usuarios-card.webp", label: "Accesos" },
-        { image: "/images/dashboard-auditoria-card.webp", label: "Seguridad" },
-      ],
     },
     logs: {
       headers: ["Evento", "Usuario", "Fecha"],
       rows: [
-        ["Inicio de sesion", "admin", "Hoy"],
-        ["Actualizacion", "compras01", "Ayer"],
-        ["Consulta", "cliente.demo", "Semana"],
+        ["Inicio de sesión", "admin", "Hoy"],
+        ["Actualización", "compras01", "Ayer"],
+        ["Consulta", "cliente.demo", "Esta semana"],
       ],
       stats: [
         { label: "Eventos", value: "48" },
         { label: "Hoy", value: "6" },
         { label: "Alertas", value: "1" },
-      ],
-      gallery: [
-        { image: "/images/dashboard-auditoria-card.webp", label: "Auditoria" },
-        { image: "/images/dashboard-usuarios-card.webp", label: "Accesos" },
-        { image: "/images/dashboard-reportes-card.webp", label: "Revision" },
       ],
     },
   };
@@ -642,9 +460,7 @@ function buildAreaGroups(modules: ModuleCard[]) {
     return {
       name,
       modules: areaModules,
-      image: areaModules[0]?.visual.image ?? copy.fallbackImage,
       accent: copy.accent,
-      summary: copy.summary,
     };
   });
 }
@@ -653,16 +469,6 @@ function normalizeArea(area: string) {
   return area === "Auditoría" ? "Auditoria" : area;
 }
 
-function GlassStat({ value, label }: { value: string | number; label: string }) {
-  return (
-    <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
-      <p className="truncate text-2xl font-extrabold">{value}</p>
-      <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-blue-100">
-        {label}
-      </p>
-    </div>
-  );
-}
 
 function getModuleIcon(key: string) {
   const icons: Record<string, ReactNode> = {

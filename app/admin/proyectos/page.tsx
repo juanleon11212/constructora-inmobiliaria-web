@@ -286,6 +286,15 @@ async function eliminarProyecto(formData: FormData) {
     redirect("/admin/proyectos");
   }
 
+  const proyecto = await prisma.proyecto.findUnique({
+    where: { id_proyecto },
+    select: { estado: true, nombre_proyecto: true },
+  });
+
+  if (!proyecto || proyecto.estado !== "terminado") {
+    redirect("/admin/proyectos?error=no-terminado");
+  }
+
   await saveHiddenProjectId(id_proyecto);
 
   await createAuditLog({
@@ -295,7 +304,7 @@ async function eliminarProyecto(formData: FormData) {
     accion: "ELIMINAR",
     modulo: "Proyectos",
     sector: "Eliminar proyecto",
-    descripcion: `Se eliminó/ocultó el proyecto con ID ${id_proyecto}.`,
+    descripcion: `Se ocultó el proyecto finalizado "${proyecto.nombre_proyecto}" (ID ${id_proyecto}).`,
     registro_id: id_proyecto,
   });
 
@@ -363,9 +372,12 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
     }),
   ]);
 
-  const proyectos = proyectosRaw.filter(
-    (proyecto) => !hiddenProjectIds.includes(proyecto.id_proyecto)
-  );
+  // Clientes siempre ven sus propios proyectos aunque el admin los haya ocultado
+  const proyectos = isCliente
+    ? proyectosRaw
+    : proyectosRaw.filter(
+        (proyecto) => !hiddenProjectIds.includes(proyecto.id_proyecto)
+      );
 
   const clienteMap = new Map(
     clientes.map((cliente) => [
@@ -506,6 +518,8 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
               "Nombre, cliente, ubicación, fecha de inicio y fecha estimada son obligatorios."}
             {params.error === "imagen" &&
               "La imagen debe ser JPG, PNG o WEBP y no superar los 5 MB."}
+            {params.error === "no-terminado" &&
+              "Solo se pueden eliminar proyectos con estado Terminado."}
           </div>
         )}
 
@@ -785,20 +799,28 @@ export default async function ProyectosPage({ searchParams }: PageProps) {
                             Editar
                           </Link>
 
-                          <form action={eliminarProyecto}>
-                            <input
-                              type="hidden"
-                              name="id_proyecto"
-                              value={proyecto.id_proyecto}
-                            />
-
-                            <button
-                              type="submit"
-                              className="rounded-xl bg-red-700 px-4 py-3 text-sm font-extrabold text-white shadow-lg shadow-red-900/20 transition hover:bg-red-900"
+                          {proyecto.estado === "terminado" ? (
+                            <form action={eliminarProyecto}>
+                              <input
+                                type="hidden"
+                                name="id_proyecto"
+                                value={proyecto.id_proyecto}
+                              />
+                              <button
+                                type="submit"
+                                className="rounded-xl bg-red-700 px-4 py-3 text-sm font-extrabold text-white shadow-lg shadow-red-900/20 transition hover:bg-red-900"
+                              >
+                                Eliminar
+                              </button>
+                            </form>
+                          ) : (
+                            <span
+                              title="Solo se pueden eliminar proyectos terminados"
+                              className="cursor-not-allowed rounded-xl bg-slate-200 px-4 py-3 text-sm font-extrabold text-slate-400"
                             >
                               Eliminar
-                            </button>
-                          </form>
+                            </span>
+                          )}
                         </>
                       )}
                     </div>

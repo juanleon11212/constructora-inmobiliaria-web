@@ -17,3 +17,19 @@ export async function requireModule(module: AppModule) {
 
   return user;
 }
+
+export async function requireRole(allowedRoles: string[]) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const roleName = user.rol?.nombre_rol?.trim() ?? "";
+
+  if (!allowedRoles.includes(roleName)) {
+    redirect("/admin");
+  }
+
+  return user;
+}
