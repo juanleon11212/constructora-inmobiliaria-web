@@ -223,6 +223,8 @@ export default async function PagosPage({ searchParams }: PageProps) {
   const params = await searchParams;
 
   const roleName = getRoleName(user);
+  const isCliente = roleName === "Cliente";
+  const idClienteLogueado = user.id_cliente ?? 0;
 
   const canCreatePayment = canDo(roleName, "pagos", "create");
   const canEditPayment = canDo(roleName, "pagos", "edit");
@@ -244,8 +246,28 @@ export default async function PagosPage({ searchParams }: PageProps) {
     { value: "proyecto", label: "Proyecto", placeholder: "edificio" },
   ];
 
+  // Si es cliente, buscar primero sus proyectos para filtrar pagos relacionados
+  let idsProyectosCliente: number[] = [];
+  if (isCliente && idClienteLogueado > 0) {
+    const proyectosCliente = await prisma.proyecto.findMany({
+      where: { id_cliente: idClienteLogueado },
+      select: { id_proyecto: true },
+    });
+    idsProyectosCliente = proyectosCliente.map((p) => p.id_proyecto);
+  }
+
+  const pagosWhere = isCliente && idClienteLogueado > 0
+    ? {
+        OR: [
+          { id_cliente: idClienteLogueado },
+          { id_proyecto: { in: idsProyectosCliente } },
+        ],
+      }
+    : {};
+
   const [pagos, clientes, empleados, proveedores, proyectos] = await Promise.all([
     prisma.pago.findMany({
+      where: pagosWhere,
       orderBy: {
         id_pago: "desc",
       },
@@ -358,10 +380,14 @@ export default async function PagosPage({ searchParams }: PageProps) {
             <div className="text-white drop-shadow">
               <p className="text-sm font-bold text-blue-100">Módulo Pagos</p>
 
-              <h1 className="text-4xl font-extrabold tracking-tight">Pagos</h1>
+              <h1 className="text-4xl font-extrabold tracking-tight">
+                {isCliente ? "Mis pagos" : "Pagos"}
+              </h1>
 
               <p className="mt-1 text-sm font-medium text-blue-100">
-                Registro y control de pagos de clientes, empleados y proveedores.
+                {isCliente
+                  ? "Consulta los pagos registrados relacionados a ti y tus proyectos."
+                  : "Registro y control de pagos de clientes, empleados y proveedores."}
               </p>
             </div>
 
