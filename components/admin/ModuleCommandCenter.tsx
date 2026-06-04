@@ -103,8 +103,8 @@ export function ModuleCommandCenter({
       <div className="absolute inset-x-0 top-0 h-px bg-white/40" />
 
       <div className="relative p-4 sm:p-6 lg:p-8">
-        {/* Encabezado compacto siempre visible */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-4 backdrop-blur-md sm:px-5">
+        {/* Encabezado */}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-4 backdrop-blur-md sm:px-5">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-sky-200">
               Mapa de áreas
@@ -119,34 +119,10 @@ export function ModuleCommandCenter({
           </div>
         </div>
 
-        {/* Áreas: chips horizontales en móvil, lista vertical en xl */}
-        <div className="mb-5 flex gap-2 overflow-x-auto pb-1 xl:hidden">
-          {areaGroups.map((area) => {
-            const isActive = area.name === selectedArea?.name;
-            return (
-              <button
-                key={area.name}
-                type="button"
-                onClick={() => selectArea(area)}
-                className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold transition-all duration-200 ${
-                  isActive
-                    ? "border-white/40 bg-white/20 text-white shadow-md"
-                    : "border-white/15 bg-white/5 text-blue-200 hover:border-white/30 hover:bg-white/15"
-                }`}
-              >
-                <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-gradient-to-br ${area.accent} text-white`}>
-                  {getModuleIcon(area.modules[0]?.key ?? "")}
-                </span>
-                {area.name}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="grid gap-6 xl:grid-cols-[260px_1fr]">
-          {/* Sidebar vertical — solo visible en xl */}
-          <aside className="hidden xl:block">
-            <div className="flex flex-col gap-1">
+        <div className="grid gap-5 xl:grid-cols-[260px_1fr]">
+          {/* Áreas: grilla 2×N en móvil/tablet, lista vertical en xl */}
+          <aside>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 xl:flex xl:flex-col xl:gap-1">
               {areaGroups.map((area) => {
                 const isActive = area.name === selectedArea?.name;
                 return (
@@ -154,25 +130,25 @@ export function ModuleCommandCenter({
                     key={area.name}
                     type="button"
                     onClick={() => selectArea(area)}
-                    className={`group flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-200 ${
+                    className={`flex items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all duration-200 xl:px-4 ${
                       isActive
                         ? "border-white/30 bg-white/15 shadow-md"
-                        : "border-transparent hover:border-white/15 hover:bg-white/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
                     }`}
                   >
-                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${area.accent} text-white shadow-sm`}>
+                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${area.accent} text-white shadow-sm xl:h-9 xl:w-9`}>
                       {getModuleIcon(area.modules[0]?.key ?? "")}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-bold leading-tight text-white">
+                      <span className="block truncate text-xs font-bold leading-tight text-white sm:text-sm">
                         {area.name}
                       </span>
-                      <span className="block text-xs text-blue-200/70">
+                      <span className="block text-[10px] text-blue-200/60 xl:text-xs">
                         {area.modules.length} módulo{area.modules.length === 1 ? "" : "s"}
                       </span>
                     </span>
                     {isActive && (
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-sky-300" />
+                      <span className="hidden h-1.5 w-1.5 shrink-0 rounded-full bg-sky-300 xl:block" />
                     )}
                   </button>
                 );
@@ -210,14 +186,13 @@ export function ModuleCommandCenter({
                 </div>
               ) : (
                 <div className="mt-4 space-y-5">
-                  {/* Módulos: grilla en móvil, fila horizontal en pantallas grandes */}
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:overflow-x-auto lg:pb-1">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:flex xl:overflow-x-auto xl:pb-1">
                     {visibleAreaModules.map((module, index) => (
                       <button
                         key={module.key}
                         type="button"
                         onClick={() => setActiveModuleKey(module.key)}
-                        className={`animate-module-rise flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition hover:-translate-y-0.5 lg:min-w-[200px] lg:shrink-0 ${
+                        className={`animate-module-rise flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition hover:-translate-y-0.5 xl:min-w-[200px] xl:shrink-0 ${
                           module.key === previewModule?.key
                             ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100"
                             : "border-blue-100 bg-white hover:bg-blue-50"
