@@ -203,11 +203,11 @@ export default async function AdminPage() {
       _sum: { monto: true },
     });
 
-    const montoTotal = totalMonto._sum.monto ?? 0;
+    const montoTotal = Number(totalMonto._sum.monto ?? 0);
     const montoFormato =
       montoTotal >= 1000
-        ? `Bs. ${Math.round(Number(montoTotal) / 1000)}K`
-        : `Bs. ${Number(montoTotal).toFixed(0)}`;
+        ? `Bs. ${Math.round(montoTotal / 1000)}K`
+        : `Bs. ${montoTotal.toFixed(0)}`;
 
     clientePagoStats = [
       { label: "Total pagos", value: String(totalPagos) },
