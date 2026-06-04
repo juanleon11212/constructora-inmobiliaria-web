@@ -136,27 +136,27 @@ export default async function AdminPage() {
 
   const modules = getModulesByRole(roleName);
   const showLogsModule = roleName === "Administrador";
-  // Fetch real project stats and list for client users
+  // Fetch real data for client users
   let clienteProyectoStats: { label: string; value: string }[] | undefined;
   let clienteProyectoRows: { headers: string[]; rows: string[][] } | undefined;
-  if (isCliente && idCliente > 0) {
-    const proyectosCliente = await prisma.proyecto.findMany({
-      where: { id_cliente: idCliente, estado: { not: "eliminado" } },
-      select: {
-        nombre_proyecto: true,
-        estado: true,
-        fecha_fin_estimada: true,
-      },
-      orderBy: { id_proyecto: "desc" },
-      take: 5,
-    });
+  let clientePagoStats: { label: string; value: string }[] | undefined;
+  let clientePagoRows: { headers: string[]; rows: string[][] } | undefined;
 
+  if (isCliente && idCliente > 0) {
     const estadoLabel: Record<string, string> = {
       pendiente: "Pendiente",
       en_ejecucion: "En ejecución",
       terminado: "Terminado",
       cancelado: "Cancelado",
     };
+
+    // Proyectos reales
+    const proyectosCliente = await prisma.proyecto.findMany({
+      where: { id_cliente: idCliente, estado: { not: "eliminado" } },
+      select: { id_proyecto: true, nombre_proyecto: true, estado: true, fecha_fin_estimada: true },
+      orderBy: { id_proyecto: "desc" },
+      take: 5,
+    });
 
     const enEjecucion = proyectosCliente.filter((p) => p.estado === "en_ejecucion").length;
     const terminados = proyectosCliente.filter((p) => p.estado === "terminado").length;
@@ -166,19 +166,64 @@ export default async function AdminPage() {
       { label: "En ejecución", value: String(enEjecucion) },
       { label: "Finalizadas", value: String(terminados) },
     ];
-
     clienteProyectoRows = {
       headers: ["Proyecto", "Estado", "Entrega estimada"],
       rows: proyectosCliente.map((p) => [
         p.nombre_proyecto,
         estadoLabel[p.estado ?? ""] ?? p.estado ?? "-",
         p.fecha_fin_estimada
-          ? new Date(p.fecha_fin_estimada).toLocaleDateString("es-BO", {
-              month: "short",
-              year: "numeric",
-            })
+          ? new Date(p.fecha_fin_estimada).toLocaleDateString("es-BO", { month: "short", year: "numeric" })
           : "-",
       ]),
+    };
+
+    // Pagos reales del cliente (directos o por sus proyectos)
+    const idsProyectos = proyectosCliente.map((p) => p.id_proyecto);
+    const pagosCliente = await prisma.pago.findMany({
+      where: {
+        OR: [
+          { id_cliente: idCliente },
+          { id_proyecto: { in: idsProyectos } },
+        ],
+      },
+      orderBy: { id_pago: "desc" },
+      take: 3,
+    });
+
+    const totalPagos = await prisma.pago.count({
+      where: {
+        OR: [{ id_cliente: idCliente }, { id_proyecto: { in: idsProyectos } }],
+      },
+    });
+
+    const totalMonto = await prisma.pago.aggregate({
+      where: {
+        OR: [{ id_cliente: idCliente }, { id_proyecto: { in: idsProyectos } }],
+      },
+      _sum: { monto: true },
+    });
+
+    const montoTotal = totalMonto._sum.monto ?? 0;
+    const montoFormato =
+      montoTotal >= 1000
+        ? `Bs. ${Math.round(Number(montoTotal) / 1000)}K`
+        : `Bs. ${Number(montoTotal).toFixed(0)}`;
+
+    clientePagoStats = [
+      { label: "Total pagos", value: String(totalPagos) },
+      { label: "Recientes", value: String(pagosCliente.length) },
+      { label: "Monto total", value: montoFormato },
+    ];
+    clientePagoRows = {
+      headers: ["Descripción", "Monto", "Método"],
+      rows:
+        pagosCliente.length > 0
+          ? pagosCliente.map((p) => [
+              p.descripcion ?? p.tipo_pago ?? "-",
+              `Bs. ${Number(p.monto).toFixed(2)}`,
+              p.metodo_pago ?? "-",
+            ])
+          : [["Sin pagos registrados", "-", "-"]],
     };
   }
 
@@ -198,10 +243,14 @@ export default async function AdminPage() {
         liveStats:
           isCliente && module.key === "proyectos"
             ? clienteProyectoStats
+            : isCliente && module.key === "pagos"
+            ? clientePagoStats
             : undefined,
         liveRows:
           isCliente && module.key === "proyectos"
             ? clienteProyectoRows
+            : isCliente && module.key === "pagos"
+            ? clientePagoRows
             : undefined,
       };
     }),
