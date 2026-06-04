@@ -24,6 +24,15 @@ function getSecret() {
   return process.env.AUTH_SECRET ?? "dev-secret";
 }
 
+function shouldUseSecureCookie() {
+  const override = process.env.SESSION_COOKIE_SECURE?.toLowerCase();
+
+  if (override === "true") return true;
+  if (override === "false") return false;
+
+  return process.env.NODE_ENV === "production";
+}
+
 function sign(value: string) {
   return crypto
     .createHmac("sha256", getSecret())
@@ -87,7 +96,7 @@ export async function setSessionCookie(payload: AuthSession) {
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureCookie(),
     maxAge: SESSION_MAX_AGE_SECONDS,
     expires,
     path: "/",
