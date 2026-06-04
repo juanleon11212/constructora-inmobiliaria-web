@@ -19,6 +19,7 @@ type ModuleCard = {
   canCount: number;
   cannotCount: number;
   liveStats?: { label: string; value: string }[];
+  liveRows?: { headers: string[]; rows: string[][] };
 };
 
 type AreaGroup = {
@@ -239,6 +240,8 @@ function ReadOnlyModulePreview({
 }) {
   const preview = getPreviewData(module);
   const stats = module.liveStats ?? preview.stats;
+  const tableHeaders = module.liveRows?.headers ?? preview.headers;
+  const tableRows = module.liveRows?.rows ?? preview.rows;
 
   return (
     <article className="animate-module-rise overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-lg shadow-blue-100/60">
@@ -266,7 +269,7 @@ function ReadOnlyModulePreview({
           <table className="w-full min-w-[360px] border-collapse text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase tracking-[0.14em] text-slate-500">
               <tr>
-                {preview.headers.map((header) => (
+                {tableHeaders.map((header) => (
                   <th key={header} className="px-3 py-3 font-extrabold sm:px-4">
                     {header}
                   </th>
@@ -274,7 +277,7 @@ function ReadOnlyModulePreview({
               </tr>
             </thead>
             <tbody className="divide-y divide-blue-50">
-              {preview.rows.map((row, rowIndex) => (
+              {tableRows.map((row, rowIndex) => (
                 <tr key={rowIndex} className="hover:bg-blue-50/50">
                   {row.map((cell, i) => (
                     <td

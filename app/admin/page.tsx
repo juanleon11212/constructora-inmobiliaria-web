@@ -136,25 +136,50 @@ export default async function AdminPage() {
 
   const modules = getModulesByRole(roleName);
   const showLogsModule = roleName === "Administrador";
-  // Fetch real project stats for client users
+  // Fetch real project stats and list for client users
   let clienteProyectoStats: { label: string; value: string }[] | undefined;
+  let clienteProyectoRows: { headers: string[]; rows: string[][] } | undefined;
   if (isCliente && idCliente > 0) {
-    const [total, enEjecucion, terminados] = await Promise.all([
-      prisma.proyecto.count({
-        where: { id_cliente: idCliente, estado: { not: "eliminado" } },
-      }),
-      prisma.proyecto.count({
-        where: { id_cliente: idCliente, estado: "en_ejecucion" },
-      }),
-      prisma.proyecto.count({
-        where: { id_cliente: idCliente, estado: "terminado" },
-      }),
-    ]);
+    const proyectosCliente = await prisma.proyecto.findMany({
+      where: { id_cliente: idCliente, estado: { not: "eliminado" } },
+      select: {
+        nombre_proyecto: true,
+        estado: true,
+        fecha_fin_estimada: true,
+      },
+      orderBy: { id_proyecto: "desc" },
+      take: 5,
+    });
+
+    const estadoLabel: Record<string, string> = {
+      pendiente: "Pendiente",
+      en_ejecucion: "En ejecución",
+      terminado: "Terminado",
+      cancelado: "Cancelado",
+    };
+
+    const enEjecucion = proyectosCliente.filter((p) => p.estado === "en_ejecucion").length;
+    const terminados = proyectosCliente.filter((p) => p.estado === "terminado").length;
+
     clienteProyectoStats = [
-      { label: "Mis obras", value: String(total) },
+      { label: "Mis obras", value: String(proyectosCliente.length) },
       { label: "En ejecución", value: String(enEjecucion) },
       { label: "Finalizadas", value: String(terminados) },
     ];
+
+    clienteProyectoRows = {
+      headers: ["Proyecto", "Estado", "Entrega estimada"],
+      rows: proyectosCliente.map((p) => [
+        p.nombre_proyecto,
+        estadoLabel[p.estado ?? ""] ?? p.estado ?? "-",
+        p.fecha_fin_estimada
+          ? new Date(p.fecha_fin_estimada).toLocaleDateString("es-BO", {
+              month: "short",
+              year: "numeric",
+            })
+          : "-",
+      ]),
+    };
   }
 
   const moduleCards = [
@@ -173,6 +198,10 @@ export default async function AdminPage() {
         liveStats:
           isCliente && module.key === "proyectos"
             ? clienteProyectoStats
+            : undefined,
+        liveRows:
+          isCliente && module.key === "proyectos"
+            ? clienteProyectoRows
             : undefined,
       };
     }),
@@ -193,6 +222,7 @@ export default async function AdminPage() {
             canCount: 3,
             cannotCount: 0,
             liveStats: undefined,
+            liveRows: undefined,
           },
         ]
       : []),
